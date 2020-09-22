@@ -283,7 +283,7 @@ begin
     have hne2 : d ≠ 2,
     { rintro rfl,
       change nat.even _ at hdright,
-      simp [hparity, (dec_trivial : ¬ 2 = 0)] with parity_simps at hdright,
+      simp [hparity, two_ne_zero] with parity_simps at hdright,
       assumption },
     have : 2 < d := lt_of_le_of_ne (hdprime.two_le) hne2.symm,
     by_contra hne3,
@@ -703,6 +703,90 @@ lemma descent_gcd3 (a b c p q : ℕ)
       0 < b' ∧
         0 < c' ∧ a' * b' * c' < a * b * c ∧ a' ^ 3 + b' ^ 3 = c' ^ 3 :=
 begin
+  obtain ⟨hapos, hbpos, hcpos, h, habcoprime, haccoprime, hbccoprime⟩ := h,
+  -- 1.
+  have h3_dvd_p : 3 ∣ p,
+  { apply dvd_mul_cancel_prime _ (by norm_num) nat.prime_two nat.prime_three,
+    rw ← hgcd,
+    apply nat.gcd_dvd_left },
+  have h3_ndvd_q : ¬(3 ∣ q),
+  { intro H,
+    apply nat.prime.not_dvd_one nat.prime_three,
+    conv_rhs { rw ←hcoprime },
+    exact nat.dvd_gcd h3_dvd_p H },
+  -- 2.
+  obtain ⟨s, hs⟩ := h3_dvd_p,
+  have hspos : 0 < s,
+  { linarith },
+  have hps : 2 * p * (p ^ 2 + 3 * q ^ 2) = 3 ^ 2 * 2 * s * (3 * s ^ 2 + q ^ 2),
+  calc 2 * p * (p ^ 2 + 3 * q ^ 2)
+      = 2 * (3 * s) * ((3 * s) ^ 2 + 3 * q ^ 2) : by rw hs
+  ... = _ : by ring,
+  -- 3.
+  have hcoprime' : nat.coprime (3^2 * 2 * s) (3 * s ^ 2 + q ^ 2),
+  {
+    have : ¬(3 ∣ (3 * s ^ 2 + q ^ 2)),
+    { intro H,
+      apply h3_ndvd_q,
+      rw ←nat.dvd_add_iff_right (dvd_mul_right _ _) at H,
+      exact nat.prime.dvd_of_dvd_pow nat.prime_three H },
+
+    have : s.even ↔ ¬q.even,
+    { have : p.even ↔ s.even,
+      { simp [hs] with parity_simps },
+      rwa this at hodd },
+
+    have : ¬(2 ∣ (3 * s ^ 2 + q ^ 2)),
+    { change ¬(nat.even _),
+      simp [hs, two_ne_zero, this] with parity_simps },
+
+    have : nat.coprime s q,
+    { apply nat.coprime_of_dvd'',
+      intros k hkprime hkdvdleft hkdvdright,
+      have hkdvdp : k ∣ p,
+      { rw hs,
+        exact dvd_mul_of_dvd_right hkdvdleft 3 },
+      rw ←hcoprime,
+      exact nat.dvd_gcd hkdvdp hkdvdright },
+    
+    apply nat.coprime_of_dvd'',
+    intros k hkprime hkdvdleft hkdvdright,
+    rw ←this.gcd_eq_one,
+    have hkne2 : k ≠ 2,
+    { rintro rfl, contradiction },
+    have hkne3 : k ≠ 3,
+    { rintro rfl, contradiction },
+    have : k ∣ s,
+    { apply dvd_mul_cancel_prime _ ‹_› nat.prime_two hkprime,
+      apply dvd_mul_cancel_prime _ ‹_› nat.prime_three hkprime,
+      apply dvd_mul_cancel_prime _ ‹_› nat.prime_three hkprime,
+      convert hkdvdleft using 1,
+      ring },
+    have : k ∣ q,
+    {
+      have : k ∣ 3 * s ^ 2 := dvd_mul_of_dvd_right (dvd_pow this two_ne_zero) _,
+      rw ←nat.dvd_add_iff_right this at hkdvdright,
+      exact hkprime.dvd_of_dvd_pow hkdvdright },
+    exact nat.dvd_gcd ‹_› ‹_›,
+  },
+  -- 4.
+  obtain ⟨r, hr⟩ : ∃ r, 2 * p * (p ^ 2 + 3 * q ^ 2) = r ^ 3,
+  { rcases hcube with (_|_|_);
+    [use a, use b, use c];
+    exact hcube },
+  have : 0 < 3 ^ 2 * 2 * s,
+  { linarith },
+  have : 0 < 3 * s ^ 2 + q ^ 2,
+  { apply nat.add_pos_left,
+    apply nat.mul_pos (by norm_num : 0 < 3) (nat.pow_pos hspos _) },
+  have : ∃ u, 3 ^ 2 * 2 * s = u ^ 3,
+  { rw hps at hr,
+    exact nat.eq_pow_of_mul_eq_pow ‹_› ‹_› hcoprime' hr },
+  have : ∃ v, 3 * s ^ 2 + q ^ 2 = v ^ 3,
+  { rw [hps, mul_comm] at hr,
+    exact nat.eq_pow_of_mul_eq_pow ‹_› ‹_› hcoprime'.symm hr },
+
+  -- 5.
   sorry,
 end
 
