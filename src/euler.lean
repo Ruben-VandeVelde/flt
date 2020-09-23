@@ -718,7 +718,7 @@ begin
   obtain ⟨s, hs⟩ := h3_dvd_p,
   have hspos : 0 < s,
   { linarith },
-  have hps : 2 * p * (p ^ 2 + 3 * q ^ 2) = 3 ^ 2 * 2 * s * (3 * s ^ 2 + q ^ 2),
+  have hps : 2 * p * (p ^ 2 + 3 * q ^ 2) = 3 ^ 2 * 2 * s * (q ^ 2 + 3 * s ^ 2),
   calc 2 * p * (p ^ 2 + 3 * q ^ 2)
       = 2 * (3 * s) * ((3 * s) ^ 2 + 3 * q ^ 2) : by rw hs
   ... = _ : by ring,
@@ -737,16 +737,16 @@ begin
     { simp [hs] with parity_simps },
     rw this at hodd,
     tauto },
-  have hcoprime'' : nat.coprime (3^2 * 2 * s) (3 * s ^ 2 + q ^ 2),
+  have hcoprime'' : nat.coprime (3^2 * 2 * s) (q ^ 2 + 3 * s ^ 2),
   {
-    have : ¬(2 ∣ (3 * s ^ 2 + q ^ 2)),
+    have : ¬(2 ∣ (q ^ 2 + 3 * s ^ 2)),
     { change ¬(nat.even _),
       simp [hs, two_ne_zero, hodd'] with parity_simps },
 
-    have : ¬(3 ∣ (3 * s ^ 2 + q ^ 2)),
+    have : ¬(3 ∣ (q ^ 2 + 3 * s ^ 2)),
     { intro H,
       apply h3_ndvd_q,
-      rw ←nat.dvd_add_iff_right (dvd_mul_right _ _) at H,
+      rw ←nat.dvd_add_iff_left (dvd_mul_right _ _) at H,
       exact nat.prime.dvd_of_dvd_pow nat.prime_three H },
 
     apply nat.coprime_of_dvd'',
@@ -763,9 +763,8 @@ begin
       convert hkdvdleft using 1,
       ring },
     have : k ∣ q,
-    {
-      have : k ∣ 3 * s ^ 2 := dvd_mul_of_dvd_right (dvd_pow this two_ne_zero) _,
-      rw ←nat.dvd_add_iff_right this at hkdvdright,
+    { have : k ∣ 3 * s ^ 2 := dvd_mul_of_dvd_right (dvd_pow this two_ne_zero) _,
+      rw ←nat.dvd_add_iff_left this at hkdvdright,
       exact hkprime.dvd_of_dvd_pow hkdvdright },
     exact nat.dvd_gcd ‹_› ‹_›,
   },
@@ -776,13 +775,13 @@ begin
     exact hcube },
   have : 0 < 3 ^ 2 * 2 * s,
   { linarith },
-  have : 0 < 3 * s ^ 2 + q ^ 2,
-  { apply nat.add_pos_left,
+  have : 0 < q ^ 2 + 3 * s ^ 2,
+  { apply nat.add_pos_right,
     apply nat.mul_pos (by norm_num : 0 < 3) (nat.pow_pos hspos _) },
   have : ∃ u, 3 ^ 2 * 2 * s = u ^ 3,
   { rw hps at hr,
     exact nat.eq_pow_of_mul_eq_pow ‹_› ‹_› hcoprime'' hr },
-  have : ∃ v, 3 * s ^ 2 + q ^ 2 = v ^ 3,
+  have : ∃ v, q ^ 2 + 3 * s ^ 2 = v ^ 3,
   { rw [hps, mul_comm] at hr,
     exact nat.eq_pow_of_mul_eq_pow ‹_› ‹_› hcoprime''.symm hr },
 
@@ -792,7 +791,7 @@ begin
     q = u ^ 3 - 9 * u * v ^ 2 ∧
     s = 3 * u ^ 2 * v - 3 * v ^ 3 ∧
     nat.gcd u v = 1 ∧
-    (nat.even u ↔ ¬nat.even v) := obscure q s hq hspos hcoprime'.symm hodd _,
+    (nat.even u ↔ ¬nat.even v) := obscure q s hq hspos hcoprime'.symm hodd' this,
 
   sorry,
 end
