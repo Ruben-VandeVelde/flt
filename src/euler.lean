@@ -338,10 +338,7 @@ begin
   rw ←nat.pow_eq_mul_pow_sub _ H at hg,
   have hdvdp : 3 ∣ p,
   { suffices : 3 ∣ 2 * p,
-    { rw nat.prime.dvd_mul nat.prime_three at this,
-      cases this with G G,
-      { norm_num at G },
-      { exact G } },
+    { apply dvd_mul_cancel_prime this (by norm_num) nat.prime_two nat.prime_three },
     have : 3 ∣ g,
     { rw [hg, pow_two, mul_assoc],
       apply dvd_mul_right },
@@ -350,8 +347,7 @@ begin
   { have : 3 ^ 2 ∣ p ^ 2,
     { rwa nat.pow_dvd_pow_iff two_pos },
     suffices : 3 ∣ q ^ 2,
-    { apply nat.prime.dvd_of_dvd_pow nat.prime_three,
-      exact this },
+    { apply nat.prime.dvd_of_dvd_pow nat.prime_three this },
     suffices : 3 ^ 2 ∣ 3 * q ^ 2,
     { rwa [pow_two, nat.mul_dvd_mul_iff_left (by norm_num : 0 < 3)] at this },
     suffices : 3 ^ 2 ∣ p ^ 2 + 3 * q ^ 2,
@@ -456,18 +452,41 @@ gcd(a,b)=1 [since otherwise, any common factor would divide p and q].
   sorry,
 end
 
-lemma dvd_mul_cancel_prime {p n k : ℕ}
-  (h : k ∣ p * n)
-  (hne : k ≠ p)
-  (hp : nat.prime p)
-  (hk : nat.prime k) : k ∣ n :=
+lemma cube_of_coprime (a b c s : ℕ)
+  (ha : 0 < a)
+  (hb : 0 < b)
+  (hc : 0 < c)
+  (hcoprimeab : nat.coprime a b)
+  (hcoprimeac : nat.coprime a c)
+  (hcoprimebc : nat.coprime b c)
+  (hs : a * b * c = s ^ 3) :
+  ∃ A B C, 0 < A ∧ 0 < B ∧ 0 < C ∧ a = A ^ 3 ∧ b = B ^ 3 ∧ c = C ^ 3 :=
 begin
-  rw hk.dvd_mul at h,
-  cases h,
-  { exfalso,
-    rw nat.prime_dvd_prime_iff_eq hk hp at h,
-    contradiction },
-  { assumption },
+  obtain ⟨A, HA⟩ : ∃ A, a = A ^ 3,
+  { rw [mul_assoc] at hs,
+    apply nat.eq_pow_of_mul_eq_pow ha _ _ hs,
+    { exact nat.mul_pos hb hc },
+    { rw nat.coprime_mul_iff_right,
+      exact ⟨hcoprimeab, hcoprimeac⟩ } },
+  obtain ⟨B, HB⟩ : ∃ B, b = B ^ 3,
+  { rw [mul_comm a b, mul_assoc] at hs,
+    apply nat.eq_pow_of_mul_eq_pow hb _ _ hs,
+    { exact nat.mul_pos ha hc },
+    { rw nat.coprime_mul_iff_right,
+      exact ⟨hcoprimeab.symm, hcoprimebc⟩ } },
+  obtain ⟨C, HC⟩ : ∃ C, c = C ^ 3,
+  { rw [mul_comm] at hs,
+    apply nat.eq_pow_of_mul_eq_pow hc _ _ hs,
+    { exact nat.mul_pos ha hb },
+    { rw nat.coprime_mul_iff_right,
+      exact ⟨hcoprimeac.symm, hcoprimebc.symm⟩ } },
+  refine ⟨A, B, C, _, _, _, HA, HB, HC⟩,
+  all_goals {
+    rw [nat.pos_pow_iff 3 (by norm_num)],
+  },
+  { rwa [←HA] },
+  { rwa [←HB] },
+  { rwa [←HC] },
 end
 
 lemma descent_gcd1 (a b c p q : ℕ)
@@ -629,37 +648,18 @@ begin
     have : k ∣ nat.gcd u v := nat.dvd_gcd ‹_› ‹_›,
     rwa huvcoprime at this },
 
-  obtain ⟨A, HA⟩ : ∃ A, u - 3 * v = A ^ 3,
-  { obtain ⟨s, hs⟩ := hcubeleft,
-    rw [‹2 * p = _›, mul_comm (2 * u), mul_assoc] at hs,
-    apply nat.eq_pow_of_mul_eq_pow (nat.sub_pos_of_lt huv) _ _ hs,
-    { apply nat.mul_pos,
-      apply nat.mul_pos two_pos upos,
-      apply nat.add_pos_left upos },
-    { rw nat.coprime_mul_iff_right,
-      exact ⟨nat.coprime.symm ‹_›, ‹_›⟩ },
-  },
-  obtain ⟨B, HB⟩ : ∃ B, u + 3 * v = B ^ 3,
-  { obtain ⟨s, hs⟩ := hcubeleft,
-    rw [‹2 * p = _›, mul_comm _ (u + 3 * v)] at hs,
-    apply nat.eq_pow_of_mul_eq_pow (nat.add_pos_left upos _) _ _ hs,
-    { apply nat.mul_pos,
-      apply nat.mul_pos two_pos upos,
-      apply nat.sub_pos_of_lt huv },
-    { rw nat.coprime_mul_iff_right,
-      exact ⟨nat.coprime.symm ‹_›, nat.coprime.symm ‹_›⟩ },
-  },
-  obtain ⟨C, HC⟩ : ∃ C, 2 * u = C ^ 3,
-  { obtain ⟨s, hs⟩ := hcubeleft,
-    rw [‹2 * p = _›, mul_assoc] at hs,
-    have doubleupos : 0 < 2 * u := nat.mul_pos two_pos upos,
-    apply nat.eq_pow_of_mul_eq_pow doubleupos _ _ hs,
-    { apply nat.mul_pos,
-      apply nat.sub_pos_of_lt huv,
-      apply nat.add_pos_left upos },
-    { rw nat.coprime_mul_iff_right,
-      exact ⟨‹_›, ‹_›⟩ },
-  },
+  obtain ⟨s, hs⟩ := hcubeleft,
+  obtain ⟨C, A, B, HCpos, HApos, HBpos, HC, HA, HB⟩ : ∃ X Y Z,
+    0 < X ∧ 0 < Y ∧ 0 < Z ∧
+    2 * u = X ^ 3 ∧ u - 3 * v = Y ^ 3 ∧ u + 3 * v = Z ^ 3,
+  { apply cube_of_coprime,
+    { exact nat.mul_pos two_pos upos },
+    { exact nat.sub_pos_of_lt huv },
+    { exact nat.add_pos_left upos _ },
+    { exact hcoprime12 },
+    { exact hcoprime13 },
+    { exact hcoprime23 },
+    { rw [←‹2 * p = _›, hs] } },
 
   refine ⟨A, B, C, _, _, _, _, _⟩,
   { rw [nat.pos_pow_iff 3 (by norm_num), ←HA],
@@ -688,13 +688,6 @@ begin
     zify [le_of_lt huv],
     ring },
 end
-
-example
-  (n m k)
-  (h: 0 < n)
-  (g : m < k)
-  : m*n < k*n := (mul_lt_mul_right h).mpr g
-
 
 lemma descent_gcd3 (a b c p q : ℕ)
   (hp : 0 < p)
@@ -747,8 +740,7 @@ begin
     rw this at hodd,
     tauto },
   have hcoprime'' : nat.coprime (3^2 * 2 * s) (q ^ 2 + 3 * s ^ 2),
-  {
-    have : ¬(2 ∣ (q ^ 2 + 3 * s ^ 2)),
+  { have : ¬(2 ∣ (q ^ 2 + 3 * s ^ 2)),
     { change ¬(nat.even _),
       simp [hs, two_ne_zero, hodd'] with parity_simps },
 
@@ -787,10 +779,10 @@ begin
   have : 0 < q ^ 2 + 3 * s ^ 2,
   { apply nat.add_pos_right,
     apply nat.mul_pos (by norm_num : 0 < 3) (nat.pow_pos hspos _) },
-  have : ∃ u, 3 ^ 2 * 2 * s = u ^ 3,
+  have hcubeleft : ∃ e, 3 ^ 2 * 2 * s = e ^ 3,
   { rw hps at hr,
     exact nat.eq_pow_of_mul_eq_pow ‹_› ‹_› hcoprime'' hr },
-  have : ∃ v, q ^ 2 + 3 * s ^ 2 = v ^ 3,
+  have hcuberight : ∃ f, q ^ 2 + 3 * s ^ 2 = f ^ 3,
   { rw [hps, mul_comm] at hr,
     exact nat.eq_pow_of_mul_eq_pow ‹_› ‹_› hcoprime''.symm hr },
 
@@ -801,7 +793,8 @@ begin
     q = u ^ 3 - 9 * u * v ^ 2 ∧
     s = 3 * u ^ 2 * v - 3 * v ^ 3 ∧
     nat.gcd u v = 1 ∧
-    (nat.even u ↔ ¬nat.even v) := obscure q s hq hspos hcoprime'.symm hodd' this,
+    (nat.even u ↔ ¬nat.even v) := obscure q s hq hspos hcoprime'.symm hodd' hcuberight,
+  have hu : 0 < u := lt_of_le_of_lt (nat.zero_le _) huv,
   have huv' : v < u,
   { apply lt_of_le_of_lt _ huv,
     apply nat.le_mul_of_pos_left,
@@ -813,28 +806,110 @@ begin
     rw mul_lt_mul_right hv,
     rw ←nat.pow_lt2,
     exact huv' },
+  have huv''' : u - v ≤ u + v,
+  { transitivity u,
+    exact nat.sub_le u v,
+    exact nat.le.intro rfl },
   -- (6) From, this we can show that 2b, a-b, a+b are cubes
-  -- 7.
-  obtain ⟨A, HA⟩ : ∃ A, 2 * v = A ^ 3, sorry,
-  obtain ⟨B, HB⟩ : ∃ B, u - v = B ^ 3, sorry,
-  obtain ⟨C, HC⟩ : ∃ C, u + v = C ^ 3, sorry,
+  have haddodd : ¬(u + v).even,
+  { simp [huvodd] with parity_simps },
+  have hsubodd : ¬(u - v).even,
+  { simp [huvodd, le_of_lt huv'] with parity_simps },
 
-  refine ⟨A, B, C, _, _, _, _, _⟩,
-  { sorry },
-  { sorry },
-  { sorry },
+  have haddcoprime : nat.coprime (u + v) (2 * v),
+  { apply nat.coprime_of_dvd'',
+    intros k hkprime hkdvdleft hkdvdright,
+    have hkne2 : k ≠ 2,
+    { rintro rfl, contradiction },
+    have hkdvdright' : k ∣ v := dvd_mul_cancel_prime hkdvdright hkne2 nat.prime_two hkprime,
+    rw [←huvcoprime],
+    apply nat.dvd_gcd _ hkdvdright',
+    rw [←nat.add_sub_cancel u v],
+    exact nat.dvd_sub (le_add_left (le_refl _)) hkdvdleft hkdvdright' },
+  have hsubcoprime : nat.coprime (u - v) (2 * v),
+  { apply nat.coprime_of_dvd'',
+    intros k hkprime hkdvdleft hkdvdright,
+    have hkne2 : k ≠ 2,
+    { rintro rfl, contradiction },
+    have hkdvdright' : k ∣ v := dvd_mul_cancel_prime hkdvdright hkne2 nat.prime_two hkprime,
+    rw [←huvcoprime],
+    apply nat.dvd_gcd _ hkdvdright',
+    rw [←nat.sub_add_cancel (le_of_lt huv')],
+    exact nat.dvd_add hkdvdleft hkdvdright' },
+  have haddsubcoprime : nat.coprime (u + v) (u - v),
+  { apply nat.coprime_of_dvd'',
+    intros k hkprime hkdvdleft hkdvdright,
+    rw [←huvcoprime],
+    have hkne2 : k ≠ 2,
+    { rintro rfl,
+      exact haddodd hkdvdleft },
+    apply nat.dvd_gcd,
+    { apply dvd_mul_cancel_prime _ hkne2 nat.prime_two hkprime,
+      have : 2 * u = (u + v) + (u - v),
+      { zify [le_of_lt huv'], ring },
+      rw this,
+      exact dvd_add hkdvdleft hkdvdright },
+    { apply dvd_mul_cancel_prime _ hkne2 nat.prime_two hkprime,
+      have : 2 * v = (u + v) - (u - v),
+      { zify [le_of_lt huv', huv'''], ring },
+      rw this,
+      exact nat.dvd_sub huv''' hkdvdleft hkdvdright } },
+  /-
+(e) 32*2s is a cube [see #4 above] so 32*2s =32*2[3a2b - 3b3] = 33*2[a2b - b3] = 33(2b)(a+b)(a - b) is a cube.
+
+(f) But if 33(2b)(a+b)(a - b) is a cube, then (2b)(a+b)(a - b) is a cube.
+
+(g) But if (2b)(a+b)(a - b) is a cube and gcd(2b,a+b,a-b)=1 [by #6b,#6c,#6d], then by the Relatively Prime Divisor Lemma, 2b, a+b, and a-b are all cubes.
+-/
+--  have : ∃ s, 
+  -- 7.
+  obtain ⟨t, ht⟩ : ∃ t, 2 * v * (u - v) * (u + v) = t ^ 3,
+  {
+    obtain ⟨e, he⟩ := hcubeleft,
+    obtain ⟨f, hf⟩ := hcuberight,
+    have hxxx : 3 ^ 3 * (2 * (u ^ 2 * v - v ^ 3)) = e ^ 3,
+    { rw [←he, hq, mul_assoc 3, ←nat.mul_sub_left_distrib],
+      ring },
+    have : 3 ^ 3 ∣ e ^ 3,
+    {
+      rw ←hxxx,
+      apply dvd_mul_right,
+    },
+    have : (e / 3) ^ 3 = e ^ 3 / 3 ^ 3,
+    {
+      suggest,
+    },
+    use e / 3,
+    symmetry,
+    calc (e / 3) ^ 3
+        = e ^ 3 / 3 ^ 3 : this
+    ... = (3 ^ 3 * (2 * (u ^ 2 * v - v ^ 3))) / 3 ^ 3 : by rw hxxx
+    ... = ((2 * (u ^ 2 * v - v ^ 3)) * 3 ^ 3) / 3 ^ 3 : by rw mul_comm
+    ... = 2 * (u ^ 2 * v - v ^ 3) : nat.mul_div_cancel (3 ^ 3) (by norm_num),
+  },
+  obtain ⟨A, B, C, HApos, HBpos, HCpos, HA, HB, HC⟩ : ∃ X Y Z,
+    0 < X ∧ 0 < Y ∧ 0 < Z ∧
+    2 * v = X ^ 3 ∧ u - v = Y ^ 3 ∧ u + v = Z ^ 3,
+  { apply cube_of_coprime,
+    { exact nat.mul_pos two_pos hv },
+    { exact nat.sub_pos_of_lt huv' },
+    { exact nat.add_pos_left hu _ },
+    { exact hsubcoprime.symm },
+    { exact haddcoprime.symm },
+    { exact haddsubcoprime.symm },
+    { exact ht } },
+
+  refine ⟨A, B, C, HApos, HBpos, HCpos, _, _⟩,
 
   -- 9.
-  { -- C3 = a + b which is less than s = (3b)(a - b)(a + b) which is less than p = 3s which is
-    -- less than either x3 or z3 since either z3 = (2p)*(p2 + 3q2) or x3 = (2p) * (p2 + 3q2).
-    rw nat.pow_lt3,
+  { rw nat.pow_lt3,
     iterate 4 {rw mul_pow},
     calc A ^ 3 * B ^ 3 * C ^ 3
         = 2 * v * (u - v) * (u + v) : by rw [←HA, ←HB, ←HC]
     ... = 2 * (v * (u - v) * (u + v)) : by ring
-    ... ≤  3 * (v * (u - v) * (u + v)) : nat.mul_le_mul_right _ (by norm_num)
+    ... ≤ 3 * (v * (u - v) * (u + v)) : nat.mul_le_mul_right _ (by norm_num)
     ... = s : by {rw [hq], zify [le_of_lt huv', le_of_lt huv''], ring }
-    ... < 3 * s : by { linarith}
+    ... < 3 * s : by linarith
     ... = p : hs.symm
     ... < 2 * p : by linarith
     ... < _ : haaa, },

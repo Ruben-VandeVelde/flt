@@ -135,3 +135,17 @@ begin
   { convert a, simp only [subtype.coe_eta], },
   { exfalso, exact h_1 n.pos },
 end.
+
+lemma dvd_mul_cancel_prime {p n k : ℕ}
+  (h : k ∣ p * n)
+  (hne : k ≠ p)
+  (hp : nat.prime p)
+  (hk : nat.prime k) : k ∣ n :=
+begin
+  rw hk.dvd_mul at h,
+  cases h,
+  { exfalso,
+    rw nat.prime_dvd_prime_iff_eq hk hp at h,
+    contradiction },
+  { assumption },
+end
