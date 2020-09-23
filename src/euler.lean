@@ -379,6 +379,7 @@ lemma obscure
   (hparity : nat.even p ↔ ¬nat.even q)
   (hcube : ∃ r, p ^ 2 + 3 * q ^ 2 = r ^ 3) :
   ∃ a b,
+    0 < b ∧
     3 * b < a ∧
     p = a ^ 3 - 9 * a * b ^ 2 ∧
     q = 3 * a ^ 2 * b - 3 * b ^ 3 ∧
@@ -499,7 +500,8 @@ begin
   { rw mul_comm at hr,
     rw nat.gcd_comm at hgcd,
     exact nat.eq_pow_of_mul_eq_pow hposright hposleft hgcd hr },
-  obtain ⟨u, v, huv, hp, hq, huvcoprime, huvodd⟩ : ∃ u v,
+  obtain ⟨u, v, -, huv, hp, hq, huvcoprime, huvodd⟩ : ∃ u v,
+    0 < v ∧
     3 * v < u ∧
     p = u ^ 3 - 9 * u * v ^ 2 ∧
     q = 3 * u ^ 2 * v - 3 * v ^ 3 ∧
@@ -687,6 +689,13 @@ begin
     ring },
 end
 
+example
+  (n m k)
+  (h: 0 < n)
+  (g : m < k)
+  : m*n < k*n := (mul_lt_mul_right h).mpr g
+
+
 lemma descent_gcd3 (a b c p q : ℕ)
   (hp : 0 < p)
   (hq : 0 < q)
@@ -786,14 +795,55 @@ begin
     exact nat.eq_pow_of_mul_eq_pow ‹_› ‹_› hcoprime''.symm hr },
 
   -- 5.
-  obtain ⟨u, v, huv, hp, hq, huvcoprime, huvodd⟩ : ∃ u v,
+  obtain ⟨u, v, hv, huv, hp, hq, huvcoprime, huvodd⟩ : ∃ u v,
+    0 < v ∧
     3 * v < u ∧
     q = u ^ 3 - 9 * u * v ^ 2 ∧
     s = 3 * u ^ 2 * v - 3 * v ^ 3 ∧
     nat.gcd u v = 1 ∧
     (nat.even u ↔ ¬nat.even v) := obscure q s hq hspos hcoprime'.symm hodd' this,
+  have huv' : v < u,
+  { apply lt_of_le_of_lt _ huv,
+    apply nat.le_mul_of_pos_left,
+    norm_num },
+  have huv'' : 3 * v ^ 3 < 3 * u ^ 2 * v,
+  { rw [mul_assoc],
+    rw mul_lt_mul_left (by norm_num : 0 < 3),
+    rw [pow_succ, mul_comm],
+    rw mul_lt_mul_right hv,
+    rw ←nat.pow_lt2,
+    exact huv' },
+  -- (6) From, this we can show that 2b, a-b, a+b are cubes
+  -- 7.
+  obtain ⟨A, HA⟩ : ∃ A, 2 * v = A ^ 3, sorry,
+  obtain ⟨B, HB⟩ : ∃ B, u - v = B ^ 3, sorry,
+  obtain ⟨C, HC⟩ : ∃ C, u + v = C ^ 3, sorry,
 
-  sorry,
+  refine ⟨A, B, C, _, _, _, _, _⟩,
+  { sorry },
+  { sorry },
+  { sorry },
+
+  -- 9.
+  { -- C3 = a + b which is less than s = (3b)(a - b)(a + b) which is less than p = 3s which is
+    -- less than either x3 or z3 since either z3 = (2p)*(p2 + 3q2) or x3 = (2p) * (p2 + 3q2).
+    rw nat.pow_lt3,
+    iterate 4 {rw mul_pow},
+    calc A ^ 3 * B ^ 3 * C ^ 3
+        = 2 * v * (u - v) * (u + v) : by rw [←HA, ←HB, ←HC]
+    ... = 2 * (v * (u - v) * (u + v)) : by ring
+    ... ≤  3 * (v * (u - v) * (u + v)) : nat.mul_le_mul_right _ (by norm_num)
+    ... = s : by {rw [hq], zify [le_of_lt huv', le_of_lt huv''], ring }
+    ... < 3 * s : by { linarith}
+    ... = p : hs.symm
+    ... < 2 * p : by linarith
+    ... < _ : haaa, },
+
+  -- 8.
+  { calc A ^ 3 + B ^ 3
+        = 2 * v + (u - v) : by rw [HA, HB]
+    ... = u + v : by { zify [le_of_lt huv'], ring }
+    ... = C ^ 3 : HC },
 end
 
 lemma descent
