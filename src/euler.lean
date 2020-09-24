@@ -689,6 +689,16 @@ begin
     ring },
 end
 
+lemma div_pow (n m k : nat) (h : m ∣ n) (hpos : 0 < m) : (n / m) ^ k = (n ^ k) / (m ^ k) :=
+begin
+  obtain ⟨d, hd⟩ := h,
+  rw hd,
+  rw mul_comm,
+  rw mul_pow,
+  rw nat.mul_div_cancel _ hpos,
+  rw nat.mul_div_cancel _ (nat.pow_pos hpos k),
+end.
+
 lemma descent_gcd3 (a b c p q : ℕ)
   (hp : 0 < p)
   (hq : 0 < q)
@@ -799,18 +809,16 @@ begin
   { apply lt_of_le_of_lt _ huv,
     apply nat.le_mul_of_pos_left,
     norm_num },
-  have huv'' : 3 * v ^ 3 < 3 * u ^ 2 * v,
-  { rw [mul_assoc],
-    rw mul_lt_mul_left (by norm_num : 0 < 3),
-    rw [pow_succ, mul_comm],
-    rw mul_lt_mul_right hv,
-    rw ←nat.pow_lt2,
-    exact huv' },
-  have huv''' : u - v ≤ u + v,
+  have huv'' : v ^ 3 < u ^ 2 * v,
+  { rwa [pow_succ, mul_comm, mul_lt_mul_right hv, ←nat.pow_lt2] },
+  have huv''' : 3 * v ^ 3 < 3 * u ^ 2 * v,
+  { rwa [mul_assoc, mul_lt_mul_left (by norm_num : 0 < 3)] },
+  have huv'''' : u - v ≤ u + v,
   { transitivity u,
     exact nat.sub_le u v,
     exact nat.le.intro rfl },
-  -- (6) From, this we can show that 2b, a-b, a+b are cubes
+
+  -- 6.
   have haddodd : ¬(u + v).even,
   { simp [huvodd] with parity_simps },
   have hsubodd : ¬(u - v).even,
@@ -851,17 +859,10 @@ begin
       exact dvd_add hkdvdleft hkdvdright },
     { apply dvd_mul_cancel_prime _ hkne2 nat.prime_two hkprime,
       have : 2 * v = (u + v) - (u - v),
-      { zify [le_of_lt huv', huv'''], ring },
+      { zify [le_of_lt huv', huv''''], ring },
       rw this,
-      exact nat.dvd_sub huv''' hkdvdleft hkdvdright } },
-  /-
-(e) 32*2s is a cube [see #4 above] so 32*2s =32*2[3a2b - 3b3] = 33*2[a2b - b3] = 33(2b)(a+b)(a - b) is a cube.
+      exact nat.dvd_sub huv'''' hkdvdleft hkdvdright } },
 
-(f) But if 33(2b)(a+b)(a - b) is a cube, then (2b)(a+b)(a - b) is a cube.
-
-(g) But if (2b)(a+b)(a - b) is a cube and gcd(2b,a+b,a-b)=1 [by #6b,#6c,#6d], then by the Relatively Prime Divisor Lemma, 2b, a+b, and a-b are all cubes.
--/
---  have : ∃ s, 
   -- 7.
   obtain ⟨t, ht⟩ : ∃ t, 2 * v * (u - v) * (u + v) = t ^ 3,
   {
@@ -870,22 +871,19 @@ begin
     have hxxx : 3 ^ 3 * (2 * (u ^ 2 * v - v ^ 3)) = e ^ 3,
     { rw [←he, hq, mul_assoc 3, ←nat.mul_sub_left_distrib],
       ring },
-    have : 3 ^ 3 ∣ e ^ 3,
-    {
+    have : 3 ∣ e,
+    { rw ←nat.pow_dvd_pow_iff (by norm_num : 0 < 3),
       rw ←hxxx,
-      apply dvd_mul_right,
-    },
-    have : (e / 3) ^ 3 = e ^ 3 / 3 ^ 3,
-    {
-      suggest,
-    },
+      exact dvd_mul_right _ _ },
+    have : (e / 3) ^ 3 = e ^ 3 / 3 ^ 3 := div_pow _ _ _ this  (by norm_num : 0 < 3),
     use e / 3,
     symmetry,
     calc (e / 3) ^ 3
         = e ^ 3 / 3 ^ 3 : this
     ... = (3 ^ 3 * (2 * (u ^ 2 * v - v ^ 3))) / 3 ^ 3 : by rw hxxx
     ... = ((2 * (u ^ 2 * v - v ^ 3)) * 3 ^ 3) / 3 ^ 3 : by rw mul_comm
-    ... = 2 * (u ^ 2 * v - v ^ 3) : nat.mul_div_cancel (3 ^ 3) (by norm_num),
+    ... = 2 * (u ^ 2 * v - v ^ 3) : nat.mul_div_cancel _ (by norm_num : 0 < 3 ^ 3)
+    ... = 2 * v * (u - v) * (u + v) : by { zify [huv''.le, huv'.le], ring }
   },
   obtain ⟨A, B, C, HApos, HBpos, HCpos, HA, HB, HC⟩ : ∃ X Y Z,
     0 < X ∧ 0 < Y ∧ 0 < Z ∧
@@ -908,7 +906,7 @@ begin
         = 2 * v * (u - v) * (u + v) : by rw [←HA, ←HB, ←HC]
     ... = 2 * (v * (u - v) * (u + v)) : by ring
     ... ≤ 3 * (v * (u - v) * (u + v)) : nat.mul_le_mul_right _ (by norm_num)
-    ... = s : by {rw [hq], zify [le_of_lt huv', le_of_lt huv''], ring }
+    ... = s : by {rw [hq], zify [le_of_lt huv', le_of_lt huv'''], ring }
     ... < 3 * s : by linarith
     ... = p : hs.symm
     ... < 2 * p : by linarith
