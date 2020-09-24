@@ -398,58 +398,79 @@ begin
     refine dvd_pow (dvd_refl u) dec_trivial },
   obtain ⟨a, b, hab⟩ := factors p q u hcoprime hodd hfactor,
 
+  -- (4-7)
   have : (p ^ 2 + 3 * q ^ 2 : ℤ) = (a ^ 3 - 9 * a * b ^ 2) ^ 2 + 3 * (3 * a ^ 2 * b - 3 * b ^ 3) ^ 2,
   { zify at hu,
     zify at hab,
     rw [hu, hab],
     ring },
 
-  use [a, b],
-  refine ⟨_, _, _, _, _⟩,
-  { sorry },
-  { sorry },
-  { sorry },
-  { sorry },
+  have hb : 0 < b := sorry,
+  have hab : 3 * b < a := sorry,
+  have hp' : p = a ^ 3 - 9 * a * b ^ 2 := sorry,
+  have hq' : q = 3 * a ^ 2 * b - 3 * b ^ 3 := sorry,
+  have haaa : 9 * a * b ^ 2 ≤ a ^ 3,
+  { rw [pow_succ a, mul_comm 9, mul_assoc],
+    apply nat.mul_le_mul_left,
+    have : 9 * b ^ 2 = (3 * b) ^ 2,
+    { rw mul_pow, norm_num },
+    rw this,
+    exact nat.pow_le_pow_of_le_left (le_of_lt hab) _ },
+  have hbbb : 3 * b ^ 3 ≤ 3 * a ^ 2 * b,
+  { rw [mul_assoc],
+    apply nat.mul_le_mul_left,
+    rw [pow_succ'],
+    apply nat.mul_le_mul_right,
+    apply nat.pow_le_pow_of_le_left,
+    apply le_trans _ (le_of_lt hab),
+    apply nat.le_mul_of_pos_left,
+    norm_num },
 
-  -- (4)
-  have : (a ^ 2 + 3 * b ^ 2) ^ 3 = (a ^ 2 + 3 * b ^ 2) * ((a ^ 2 - 3 * b ^ 2) ^ 2 + 3 * (2 * a * b) ^ 2),
-  {
-    have : 3 * b ^ 2 ≤ a ^ 2, 
-    {sorry},
-    zify [this],
-    ring,
-  },
+  refine ⟨a, b, hb, hab, hp', hq', _, _⟩,
+  { apply nat.coprime_of_dvd'',
+    intros k hkprime hkdvdleft hkdvdright,
+    rw ←hcoprime,
+    apply nat.dvd_gcd,
+    { rw hp',
+      apply nat.dvd_sub haaa,
+      { exact dvd_pow hkdvdleft (by norm_num) },
+      { rw [mul_comm 9, mul_assoc],
+        exact dvd_mul_of_dvd_left hkdvdleft _ },
+    },
+    { rw hq',
+      apply nat.dvd_sub hbbb,
+      { exact dvd_mul_of_dvd_right hkdvdright _ },
+      { apply dvd_mul_of_dvd_right,
+        exact dvd_pow hkdvdright (by norm_num) },
+     } },
+
 /-
-(4) Now, (a2 + 3b2)3 = (a2 + 3b2)[(a2 - 3b2)2 + 3(2ab)2]
-
-    since (a2 + 3b2)2 = a4 + 6a2b2 + 9b4 =
-    = a4 + 12a2b2 - 6a2b2 + 9b4 =
-    (a2 - 3b2)2 + 3(2ab)2
-
-
-(5) And, (a2 + 3b2)[(a2 - 3b2)2 + 3(2ab)2] =
-[ a(a2 - 3b2) - 3b(2ab)]2 + 3[a(2ab)+b(a2-3b2)]2 [See here for the proof.]
-
-(6) And: [ a(a2 - 3b2) - 3b(2ab)]2 + 3[a(2ab)+b(a2-3b2)]2 =
-= [a3 - 3ab2 - 6ab2]2 + 3(2a2b + a2b - 3b3)2 =
-=[a3 -9ab2]2 + 3(3a2b - 3b3)2.
-
-
-(7) Which combined with step (1) gives us:
-p2 + 3q2 = [a3 -9ab2]2 + 3(3a2b - 3b3)2
-
 (8) Which means that we could define a,b such that:
 p = a3 -9ab2.
 q = 3a2b - 3b3.
 gcd(a,b)=1 [since otherwise, any common factor would divide p and q].
-
-(9) We also know that a,b have opposite parities since:
-
-(a) If a,b are both odd, then, p is even since p = odd - odd and q is even since q = odd - odd which is impossible since p,q have opposite parities.
-
-(b) If a,b are both even, then p is even since p = even - even and q is even since q = even - even which is impossible.
 -/
-  sorry,
+  -- (9)
+  {
+    by_cases haparity : a.even; by_cases hbparity : b.even,
+    { exfalso,
+      have : nat.even p,
+      { rw hp',
+        simp [haaa, haparity, hbparity, (by norm_num : 3 ≠ 0)] with parity_simps },
+      have : nat.even q,
+      { rw hq',
+        simp [hbbb, haparity, hbparity, (by norm_num : 3 ≠ 0)] with parity_simps },
+      tauto },
+    { tauto },
+    { tauto },
+    { exfalso,
+      have : nat.even p,
+      { rw hp',
+        simp [haaa, haparity, hbparity, (by norm_num : 3 ≠ 0)] with parity_simps },
+      have : nat.even q,
+      { rw hq',
+        simp [hbbb, haparity, hbparity, (by norm_num : 3 ≠ 0)] with parity_simps },
+      tauto } }
 end
 
 lemma cube_of_coprime (a b c s : ℕ)
