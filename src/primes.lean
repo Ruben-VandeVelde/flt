@@ -149,3 +149,106 @@ begin
     contradiction },
   { assumption },
 end
+
+lemma nat.pow_lt2 (a b : ℕ) : a < b ↔ a ^ 2 < b ^ 2 := begin
+  rw [pow_two, pow_two],
+  split,
+  { intro h',
+    apply nat.mul_lt_mul'; linarith,
+  },
+  { contrapose!,
+    intro h',
+    apply nat.mul_le_mul h' h',
+  }
+
+end
+lemma nat.pow_lt3 (a b : ℕ) : a < b ↔ a ^ 3 < b ^ 3 := begin
+  rw pow_succ a,
+  rw pow_succ b,
+  split,
+  { intro h,
+    have := (nat.pow_lt2 a b).mp h,
+    apply nat.mul_lt_mul'; linarith,
+  },
+  {
+    contrapose!,
+    intro h',
+    apply nat.mul_le_mul h',
+    cases lt_or_eq_of_le h',
+    { apply le_of_lt,
+      rw ←nat.pow_lt2 b a,
+      exact h },
+    { subst h },
+  }
+
+end
+
+lemma nat.even_pow' {m n : nat} (h : n ≠ 0) : nat.even (m^n) ↔ nat.even m :=
+begin
+  rw [nat.even_pow], tauto,
+end
+
+lemma nat.coprime_of_dvd'' {m n : ℕ} (H : ∀ k, nat.prime k → k ∣ m → k ∣ n → k ∣ 1) :
+  nat.coprime m n :=
+begin
+  cases nat.eq_zero_or_pos (nat.gcd m n) with g0 g1,
+  { rw [nat.eq_zero_of_gcd_eq_zero_left g0, nat.eq_zero_of_gcd_eq_zero_right g0] at H,
+    have := (H 2 dec_trivial (dvd_zero _) (dvd_zero _)),
+    rw nat.dvd_one at this,
+    norm_num at this,    
+  },
+  apply nat.coprime_of_dvd',
+  intros d hdleft hdright,
+  rw nat.dvd_one,
+  by_contra h,
+  have : d ≠ 0,
+  { rintro rfl,
+    rw zero_dvd_iff at *,
+    rw [hdleft, hdright] at g1,
+    rw [nat.gcd_zero_right] at g1,
+    exact irrefl 0 g1,
+  },
+  have : 2 ≤ d,
+  { rcases d with (_|_|_),
+    { simp at this, contradiction },
+    { simp at h, contradiction },
+    { change 2 ≤ d + 2,
+      rw [le_add_iff_nonneg_left],
+      exact zero_le d },
+  },
+  obtain ⟨p, hp, hpdvd⟩ := nat.exists_prime_and_dvd this,
+  have := H p hp (dvd_trans hpdvd hdleft) (dvd_trans hpdvd hdright),
+  rw nat.dvd_one at this,
+  have := nat.prime.ne_one hp,
+  contradiction,
+end
+
+lemma gcd_eq_of_dvd
+  (p q g : ℕ)
+  (hp' : g ∣ p) (hq' : g ∣ q)
+  (h : ∀ x, x ∣ p → x ∣ q → x ∣ g)
+  : nat.gcd p q = g :=
+begin
+  apply nat.dvd_antisymm,
+  { apply h,
+    exact nat.gcd_dvd_left p q,
+    exact nat.gcd_dvd_right p q},
+  exact nat.dvd_gcd hp' hq',
+end
+
+lemma dvd_of_dvd_add (a b c : nat) : a ∣ b + c → a ∣ b → a ∣ c :=
+begin
+  intros H G,
+  rw [←nat.add_sub_cancel c b, add_comm],
+  exact nat.dvd_sub (nat.le.intro rfl) H G,
+end
+
+lemma nat.pos_pow_iff {b : ℕ} (n : ℕ) (h : 0 < n) : 0 < b ↔ 0 < b ^ n :=
+begin
+  split,
+  apply nat.pos_pow_of_pos,
+  rw [nat.pos_iff_ne_zero, nat.pos_iff_ne_zero],
+  contrapose!,
+  rintro rfl,
+  apply nat.zero_pow h,
+end
