@@ -5,7 +5,7 @@ import data.pnat.basic
 import algebra.euclidean_domain
 import tactic
 import .primes
-
+example (a b c : int) (h : a + b = c) : a = c - b := eq_sub_of_add_eq h
 def flt_coprime
   (a b c n : ℕ) :=
   0 < a ∧ 0 < b ∧ 0 < c ∧ 
@@ -104,7 +104,7 @@ end
 
 example (p n : nat) (h : p < n + 1) : p ≤ n := nat.lt_succ_iff.mp h
 example (p n : nat) (h0 : p ≤ n) (h1 : n ≤ p) : n = p := le_antisymm h1 h0
-
+example (a b : nat) (h : a + b = 0 + b) : a = 0 := (add_left_inj b).mp h
 --open euclidean_domain
 --example (n : nat) : 2 ≠ n ^ 2 := by suggest
 
@@ -166,14 +166,6 @@ begin
 
 Case II: x is even
 
-(1) Then z,y are odd since they are coprime to x.
-
-(2) z+y, z-y are both even.
-
-(3) There exists p,q such that 2p = (z - y), 2q = (z + y)
-
-(4) And z = (1/2)[(z - y) + (z + y)] = (1/2)(2p + 2q) = p + q, y = (1/2)[(z + y) - (z - y)] = (1/2)(2q - 2p) = q-p
-
 (5) p,q have opposite parity since z,y are odd.
 
 (6) gcd(p,q)= 1 [Same argument as Case I]
@@ -192,11 +184,82 @@ QED
     cases this,
     {
       rcases this with ⟨ha, hb, hc⟩,
-      have : (c + b).even,
+      obtain ⟨p, hp⟩ : int.even (c - b),
       { simp [hb, hc] with parity_simps},
-      have : int.even (c - b),
+      obtain ⟨q, hq⟩ : int.even (c + b),
       { simp [hb, hc] with parity_simps},
-      sorry,
+      have hadd : p + q = c,
+      { apply int.eq_of_mul_eq_mul_right two_ne_zero,
+        rw [mul_comm, mul_add, ←hp, ←hq],
+        ring },
+      have hsub : q - p = b,
+      { apply int.eq_of_mul_eq_mul_right two_ne_zero,
+        rw [mul_comm, mul_sub, ←hp, ←hq],
+        ring },
+      have : 0 < q,
+      { apply pos_of_mul_pos_left,
+        { rw ←hq,
+          norm_cast,
+          apply nat.add_pos_left hcpos },
+        { norm_num } },
+
+      have : p ≠ 0,
+      { have : c ≠ b,
+        { rintro rfl,
+          rw nat.coprime_self at hbccoprime,
+          subst hbccoprime,
+          norm_num at h,
+          rw [←zero_add 1, add_left_inj 1] at h,
+          exact ne_of_gt hapos (pow_eq_zero h) },
+        rintro rfl,
+        rw mul_zero at hp,
+        rw sub_eq_zero at hp,
+        norm_cast at hp },
+
+      refine ⟨p.nat_abs, q.nat_abs, _, _, _, _, _⟩,
+      { rw nat.pos_iff_ne_zero,
+        rw ne.def, -- XXX need int.nat_abs_ne_zero
+        rw int.nat_abs_eq_zero,
+        assumption, },
+      { rw nat.pos_iff_ne_zero,
+        rw ne.def, -- XXX need int.nat_abs_ne_zero
+        rw int.nat_abs_eq_zero,
+        apply ne_of_gt,
+        assumption, },
+      { rw [←nat.dvd_one, ←hbccoprime.gcd_eq_one],
+        apply nat.dvd_gcd; rw ←int.coe_nat_dvd,
+        { rw ← hsub,
+          apply dvd_sub; rw int.coe_nat_dvd_left,
+          { apply nat.gcd_dvd_right },
+          { apply nat.gcd_dvd_left } },
+        { rw ← hadd,
+          apply dvd_add; rw int.coe_nat_dvd_left,
+          { apply nat.gcd_dvd_left },
+          { apply nat.gcd_dvd_right } } },
+      { have : ¬int.even (p + q),
+        { rwa [hadd, int.even_coe_nat] },
+        simp with parity_simps at this,
+        simp [int.nat_abs.even],
+        tauto },
+      { left,
+        zify,
+        zify at h,
+        rw eq_sub_of_add_eq h,
+        rw [←hadd, ←hsub],
+        ring,
+        rw ←‹p = _›,
+        have : (a : ℤ) ^ 3 + b ^ 3 = 2 * p * (p ^2 + 3 * q ^ 2), -- (a + b)(a ^ 2 - a * b + b ^ 2), --
+        {
+          rw [←hadd, ←hsub],
+          ring,
+        },
+        rw this,
+        have : q ^ 2 = q.nat_abs ^ 2,
+        {
+          rw [pow_two, pow_two],
+          exact (int.nat_abs_mul_self' q).symm,
+        },
+        rw this, },
     },   
     {
       sorry,
@@ -206,7 +269,7 @@ QED
     rcases this with ⟨ha, hb, hc⟩,
     obtain ⟨p, hp⟩ : int.even (a + b),
     { simp [ha, hb] with parity_simps},
-    obtain ⟨q, hq⟩: int.even (a - b),
+    obtain ⟨q, hq⟩ : int.even (a - b),
     { simp [ha, hb] with parity_simps},
     have hadd : p + q = a,
     { apply int.eq_of_mul_eq_mul_right two_ne_zero,
