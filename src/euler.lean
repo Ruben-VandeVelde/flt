@@ -4,6 +4,7 @@ import data.nat.gcd
 import data.pnat.basic
 import algebra.euclidean_domain
 import tactic
+import data.nat.modeq
 import .primes
 example (a b c : int) (h : a + b = c) : a = c - b := eq_sub_of_add_eq h
 def flt_coprime
@@ -594,12 +595,190 @@ begin
   apply nat.not_coprime_of_dvd_of_dvd (by norm_num : 1 < 3) hdvdp hdvdq hcoprime,
 end
 
-lemma factors
+--example (n m : nat) : n < m → n + 1 ≤ m := by library_search
+
+lemma two_mul_add_one_iff_not_odd (n : ℕ) : ¬n.even ↔ ∃ m, n = 2 * m + 1 :=
+begin
+  split; intro h,
+  { have hn : 1 ≤ n,
+    { apply nat.succ_le_of_lt,
+      rw nat.pos_iff_ne_zero,
+      rintro rfl,
+      exact h nat.even_zero },
+    rw ←nat.even_succ at h,
+    change (n + 1).even at h,
+    obtain ⟨m, hm⟩ := h,
+    have hmpos : 0 < m,
+    { rw nat.pos_iff_ne_zero,
+      rintro rfl,
+      rw [mul_zero] at hm,
+      exact nat.succ_ne_zero n hm },
+    use m - 1,
+    rw [nat.mul_sub_left_distrib, mul_one, ←hm],
+    norm_num,
+    rw nat.sub_add_cancel hn },
+  { obtain ⟨m, hm⟩ := h,
+    rw hm,
+    apply nat.two_not_dvd_two_mul_add_one }
+end
+
+lemma mod_four_of_odd {n : nat} (hodd: ¬n.even) : ∃ m, n = 4 * m - 1 ∨ n = 4 * m + 1 :=
+begin
+  rw two_mul_add_one_iff_not_odd at hodd,
+  obtain ⟨m, hm⟩ := hodd,
+  by_cases m.even,
+  { obtain ⟨k, hk⟩ := h,
+    use k,
+    right,
+    rw [hm, hk, ←mul_assoc],
+    norm_num },
+  { rw two_mul_add_one_iff_not_odd at h,
+    obtain ⟨k, hk⟩ := h,
+    use k + 1,
+    left,
+    rw [hm, hk],
+    ring }
+end
+
+lemma mod_four_of_odd' {n : nat} (hodd: ¬n.even) : ∃ m, n = 4 * m + 3 ∨ n = 4 * m + 1 :=
+begin
+  rw two_mul_add_one_iff_not_odd at hodd,
+  obtain ⟨m, hm⟩ := hodd,
+  by_cases m.even,
+  { obtain ⟨k, hk⟩ := h,
+    use k,
+    right,
+    rw [hm, hk, ←mul_assoc],
+    norm_num },
+  { rw two_mul_add_one_iff_not_odd at h,
+    obtain ⟨k, hk⟩ := h,
+    use k,
+    left,
+    rw [hm, hk],
+    ring, }
+end
+
+
+lemma factors2
+  (a b : ℕ)
+  (heven : (a ^ 2 + 3 * b ^ 2).even) :
+  ∃ c d, a ^ 2 + 3 * b ^ 2 = 4 * (c ^ 2 + 3 * d ^ 2) :=
+begin
+  have hparity : a.even ↔ b.even,
+  { simp [two_ne_zero] with parity_simps at heven, assumption },
+
+  by_cases h : a.even,
+  {
+    obtain ⟨d, hd⟩ := hparity.mp h,
+    obtain ⟨c, hc⟩ := h,
+    use [c, d],
+    rw [hc, hd],
+    ring },
+  { have : ¬b.even,
+    { rwa ←hparity },
+
+    obtain ⟨m, hm⟩ := mod_four_of_odd' h,
+    zify at hm,
+    obtain ⟨n, hn⟩ := mod_four_of_odd' this,
+    zify at hn,
+    have h4 : (4 : ℤ) ∣ a + b ∨ (4 : ℤ) ∣ a - b,
+    {
+      cases hm; cases hn; rw [hm, hn],
+      any_goals
+      { right,
+        rw [add_sub_add_right_eq_sub, ←mul_sub_left_distrib],
+        apply dvd_mul_right },
+      all_goals
+      { left,
+        rw add_assoc,
+        apply dvd_add (dvd_mul_right _ _),
+        rw [add_comm, add_assoc],
+        apply dvd_add (dvd_mul_right _ _),
+        apply dvd_refl } },
+    have h4coe : (4 : ℤ) = ((4 : ℕ) : ℤ),
+    { refl },
+    cases h4,
+    { obtain ⟨v, hv⟩ := h4,
+      obtain ⟨u, hu⟩ : (4 : ℤ) ∣ a - 3 * b,
+      { have : (a - 3 * b : ℤ) = a + b - 4 * b,
+        { ring },
+        rw this,
+        apply dvd_sub ⟨v, hv⟩ (dvd_mul_right _ _) },
+      use [u.nat_abs, v.nat_abs],
+      apply nat.eq_of_mul_eq_mul_left (by norm_num : 0 < 4),
+      zify,
+      rw [int.nat_abs_pow_two u, int.nat_abs_pow_two v],
+      calc (4 * (a ^ 2 + 3 * b ^ 2) : ℤ)
+          = (a - 3 * b) ^ 2 + 3 * (a + b) ^ 2 : by ring
+      ... = (4 * u) ^ 2 + 3 * (4 * v) ^ 2 : by rw [hu, hv]
+      ... = 4 * (4 * (u ^ 2 + 3 * v ^ 2)) : by ring },
+    { obtain ⟨v, hv⟩ := h4,
+      obtain ⟨u, hu⟩ : (4 : ℤ) ∣ a + 3 * b,
+      { have : (a + 3 * b : ℤ) = a - b + 4 * b,
+        { ring },
+        rw this,
+        apply dvd_add ⟨v, hv⟩ (dvd_mul_right _ _) },
+      use [u.nat_abs, v.nat_abs],
+      apply nat.eq_of_mul_eq_mul_left (by norm_num : 0 < 4),
+      zify,
+      rw [int.nat_abs_pow_two u, int.nat_abs_pow_two v],
+      calc (4 * (a ^ 2 + 3 * b ^ 2) : ℤ)
+          = (a + 3 * b) ^ 2 + 3 * (a - b) ^ 2 : by ring
+      ... = (4 * u) ^ 2 + 3 * (4 * v) ^ 2 : by rw [hu, hv]
+      ... = 4 * (4 * (u ^ 2 + 3 * v ^ 2)) : by ring }
+  }
+end
+
+lemma factors'
   (a b f : ℕ)
+  (hodd : ¬f.even)
   (hcoprime : nat.gcd a b = 1)
-  (hodd : ¬nat.even f)
-  (hfactor : f ∣ (a ^ 2 + 3 * b ^ 2)) :
-  ∃ c d, f = c ^ 2 + 3 * d ^ 2 := sorry
+  (hfactor : f ∣ (a ^ 2 + 3 * b ^ 2))
+  (hnotform : ¬∃p q, f = p ^ 2 + 3 * q ^ 2)
+  :
+  ∃ F f',
+    f * F = a ^2 + 3 * b ^2 ∧
+    f' ∣ F ∧
+    ¬∃p q, f' = p ^ 2 + 3 * q ^ 2 :=
+begin
+  obtain ⟨g, hg⟩ := hfactor,
+  apply of_not_not, -- XXX
+  by_contra H,
+  push_neg at H,
+  set g' := g.factors,
+  sorry,
+
+end
+/-
+(4) In this series, we can replace all instances of 2 with instances of 4.
+
+    (a) We know that if 2 divides a2 + 3b2, then 4 divides it. [See here for proof]
+    (b) We know that f is odd so each instance of 4 necessarily divides g
+
+
+(5) Now we can divide all instances of 4 from g and from a2 + 3b2 and still have a result in the form of p2 + 3q2. [See here for proof]
+
+(6) Likewise, we can divide all odd primes from g since we are assuming that all odd factors take the form p2 + 3q2. [The proof is found here.]
+
+(7) But then this leaves f = p2 + 3q2 which is a contradiction.
+
+(8) Therefore, we reject our assumption.
+-/
+
+lemma factors
+  (a b x : ℕ)
+  (hcoprime : nat.gcd a b = 1)
+  (hodd : ¬nat.even x)
+  (hfactor : x ∣ (a ^ 2 + 3 * b ^ 2)) :
+  ∃ c d, x = c ^ 2 + 3 * d ^ 2 :=
+begin
+  by_cases x = 1,
+  { subst h,
+    refine ⟨1, 0, _⟩,
+    ring },
+  obtain ⟨f, hf⟩ := hfactor,
+  sorry
+end
 
 lemma obscure
   (p q : ℕ)
