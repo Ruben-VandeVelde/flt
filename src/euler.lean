@@ -107,7 +107,7 @@ example (p n : nat) (h0 : p ≤ n) (h1 : n ≤ p) : n = p := le_antisymm h1 h0
 example (a b : nat) (h : a + b = 0 + b) : a = 0 := (add_left_inj b).mp h
 --open euclidean_domain
 --example (n : nat) : 2 ≠ n ^ 2 := by suggest
-
+example (a b : nat) : a ^2 < b ^2 ↔  a < b := (nat.pow_lt2 a b).symm
 @[parity_simps]
 lemma int.nat_abs.even (p : ℤ ) : p.nat_abs.even ↔ p.even := by {
   exact int.coe_nat_dvd_left.symm,
@@ -158,29 +158,6 @@ begin
   },
   cases this,
   {
-  /-
-
-(3) We also know that at least one of them is even since if x and y are odd, then z must be even.
-
-(4) So, we now divide this proof up into Case I: z is even and Case II: x is even. Since x,y are symmetrical, Case II will also cover the case where y is even.
-
-Case II: x is even
-
-(5) p,q have opposite parity since z,y are odd.
-
-(6) gcd(p,q)= 1 [Same argument as Case I]
-
-(7) p,q are positive [Same argument as Case I]
-
-(8) 2p*(p2 + 3q2) is a cube.
-
-x3 = z3 - y3 =
-= (z - y)(z2 + zy + y2) =
-= [q + p - (q - p)][(q+p)2 + (q+p)(q-p) + (q-p)2] =
-= 2p*(p2 + 3q2)
-
-QED 
--/
     cases this,
     {
       rcases this with ⟨ha, hb, hc⟩,
@@ -209,12 +186,27 @@ QED
           rw nat.coprime_self at hbccoprime,
           subst hbccoprime,
           norm_num at h,
-          rw [←zero_add 1, add_left_inj 1] at h,
+          conv_rhs at h { rw [←zero_add 1] },
+          rw [add_left_inj 1] at h,
           exact ne_of_gt hapos (pow_eq_zero h) },
         rintro rfl,
         rw mul_zero at hp,
         rw sub_eq_zero at hp,
         norm_cast at hp },
+
+      have : 0 < p,
+      { apply pos_of_mul_pos_left,
+        { rw ←hp,
+          rw sub_pos,
+          norm_cast,
+          rw nat.pow_lt3,
+          rw ←h,
+          apply nat.lt_add_of_pos_left,
+          apply nat.pow_pos,
+          exact hapos },
+        { norm_num }
+        
+      },
 
       refine ⟨p.nat_abs, q.nat_abs, _, _, _, _, _⟩,
       { rw nat.pos_iff_ne_zero,
@@ -246,23 +238,116 @@ QED
         zify at h,
         rw eq_sub_of_add_eq h,
         rw [←hadd, ←hsub],
-        ring,
-        rw ←‹p = _›,
-        have : (a : ℤ) ^ 3 + b ^ 3 = 2 * p * (p ^2 + 3 * q ^ 2), -- (a + b)(a ^ 2 - a * b + b ^ 2), --
-        {
-          rw [←hadd, ←hsub],
-          ring,
-        },
-        rw this,
-        have : q ^ 2 = q.nat_abs ^ 2,
-        {
-          rw [pow_two, pow_two],
-          exact (int.nat_abs_mul_self' q).symm,
-        },
-        rw this, },
+        have : p = p.nat_abs,
+        { rw ←int.abs_eq_nat_abs, --XXX shorten
+          symmetry,
+          apply abs_of_nonneg,
+          apply le_of_lt,
+          assumption },
+        rw ←this,
+        have : q = q.nat_abs,
+        { rw ←int.abs_eq_nat_abs, --XXX shorten
+          symmetry,
+          apply abs_of_nonneg,
+          apply le_of_lt,
+          assumption },
+        rw ←this,
+        ring },
     },   
     {
-      sorry,
+      rcases this with ⟨ha, hb, hc⟩,
+      obtain ⟨p, hp⟩ : int.even (c - a),
+      { simp [ha, hc] with parity_simps},
+      obtain ⟨q, hq⟩ : int.even (c + a),
+      { simp [ha, hc] with parity_simps},
+      have hadd : p + q = c,
+      { apply int.eq_of_mul_eq_mul_right two_ne_zero,
+        rw [mul_comm, mul_add, ←hp, ←hq],
+        ring },
+      have hsub : q - p = a,
+      { apply int.eq_of_mul_eq_mul_right two_ne_zero,
+        rw [mul_comm, mul_sub, ←hp, ←hq],
+        ring },
+      have : 0 < q,
+      { apply pos_of_mul_pos_left,
+        { rw ←hq,
+          norm_cast,
+          apply nat.add_pos_left hcpos },
+        { norm_num } },
+
+      have : p ≠ 0,
+      { have : c ≠ a,
+        { rintro rfl,
+          rw nat.coprime_self at haccoprime,
+          subst haccoprime,
+          norm_num at h,
+          conv_rhs at h { rw [←add_zero 1] },
+          rw [add_right_inj 1] at h,
+          exact ne_of_gt hbpos (pow_eq_zero h) },
+        rintro rfl,
+        rw mul_zero at hp,
+        rw sub_eq_zero at hp,
+        norm_cast at hp },
+
+      have : 0 < p,
+      { apply pos_of_mul_pos_left,
+        { rw ←hp,
+          rw sub_pos,
+          norm_cast,
+          rw nat.pow_lt3,
+          rw ←h,
+          apply nat.lt_add_of_pos_right,
+          apply nat.pow_pos,
+          exact hbpos },
+        { norm_num }
+        
+      },
+
+      refine ⟨p.nat_abs, q.nat_abs, _, _, _, _, _⟩,
+      { rw nat.pos_iff_ne_zero,
+        rw ne.def, -- XXX need int.nat_abs_ne_zero
+        rw int.nat_abs_eq_zero,
+        assumption, },
+      { rw nat.pos_iff_ne_zero,
+        rw ne.def, -- XXX need int.nat_abs_ne_zero
+        rw int.nat_abs_eq_zero,
+        apply ne_of_gt,
+        assumption, },
+      { rw [←nat.dvd_one, ←haccoprime.gcd_eq_one],
+        apply nat.dvd_gcd; rw ←int.coe_nat_dvd,
+        { rw ← hsub,
+          apply dvd_sub; rw int.coe_nat_dvd_left,
+          { apply nat.gcd_dvd_right },
+          { apply nat.gcd_dvd_left } },
+        { rw ← hadd,
+          apply dvd_add; rw int.coe_nat_dvd_left,
+          { apply nat.gcd_dvd_left },
+          { apply nat.gcd_dvd_right } } },
+      { have : ¬int.even (p + q),
+        { rwa [hadd, int.even_coe_nat] },
+        simp with parity_simps at this,
+        simp [int.nat_abs.even],
+        tauto },
+      { right, left,
+        zify,
+        zify at h,
+        rw eq_sub_of_add_eq' h,
+        rw [←hadd, ←hsub],
+        have : p = p.nat_abs,
+        { rw ←int.abs_eq_nat_abs, --XXX shorten
+          symmetry,
+          apply abs_of_nonneg,
+          apply le_of_lt,
+          assumption },
+        rw ←this,
+        have : q = q.nat_abs,
+        { rw ←int.abs_eq_nat_abs, --XXX shorten
+          symmetry,
+          apply abs_of_nonneg,
+          apply le_of_lt,
+          assumption },
+        rw ←this,
+        ring },
     },   
   },
   {
