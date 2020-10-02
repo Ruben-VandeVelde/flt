@@ -208,32 +208,7 @@ end
 
 lemma coprime_of_dvd'_prime {m n : ℕ} (H : ∀ k, prime k → k ∣ m → k ∣ n → k ∣ 1) :
   coprime m n :=
-begin
-  cases eq_zero_or_pos (gcd m n) with g0 g1,
-  { rw [eq_zero_of_gcd_eq_zero_left g0, eq_zero_of_gcd_eq_zero_right g0] at H,
-    have := (H 2 prime_two (dvd_zero _) (dvd_zero _)),
-    rw nat.dvd_one at this,
-    norm_num at this },
-  apply coprime_of_dvd,
-  intros d hdl hdleft hdright,
-  apply not_le_of_gt hdl,
-  apply le_of_dvd zero_lt_one,
-  by_contra h,
-  have : 2 ≤ d,
-  { rcases d with (_|_|_),
-    { exfalso,
-      rw zero_dvd_iff at hdleft hdright,
-      rw [hdleft, hdright, gcd_zero_right] at g1,
-      exact irrefl 0 g1 },
-    { exfalso, apply h, refl },
-    { change 2 ≤ d + 2,
-      rw [le_add_iff_nonneg_left],
-      exact zero_le d },
-  },
-  obtain ⟨p, hp, hpdvd⟩ := exists_prime_and_dvd this,
-  apply hp.not_dvd_one,
-  exact H p hp (dvd_trans hpdvd hdleft) (dvd_trans hpdvd hdright),
-end
+coprime_of_dvd_prime $ λk kp km kn, not_le_of_gt kp.one_lt $ le_of_dvd zero_lt_one $ H k kp km kn
 
 end nat
 
