@@ -188,40 +188,54 @@ begin
   rw [nat.even_pow], tauto,
 end
 
-lemma nat.coprime_of_dvd'' {m n : ℕ} (H : ∀ k, nat.prime k → k ∣ m → k ∣ n → k ∣ 1) :
-  nat.coprime m n :=
+namespace nat
+
+theorem coprime_of_dvd_prime {m n : ℕ} (H : ∀ k, prime k → k ∣ m → ¬ k ∣ n) : coprime m n :=
 begin
-  cases nat.eq_zero_or_pos (nat.gcd m n) with g0 g1,
-  { rw [nat.eq_zero_of_gcd_eq_zero_left g0, nat.eq_zero_of_gcd_eq_zero_right g0] at H,
-    have := (H 2 dec_trivial (dvd_zero _) (dvd_zero _)),
+  cases eq_zero_or_pos (gcd m n) with g0 g1,
+  { rw [eq_zero_of_gcd_eq_zero_left g0, eq_zero_of_gcd_eq_zero_right g0] at H,
+    exfalso,
+    exact H 2 prime_two (dvd_zero _) (dvd_zero _) },
+  apply eq.symm,
+  change 1 ≤ _ at g1,
+  apply (lt_or_eq_of_le g1).resolve_left,
+  intro g2,
+  obtain ⟨p, hp, hpdvd⟩ := exists_prime_and_dvd g2,
+  apply H p hp; apply dvd_trans hpdvd,
+  exact gcd_dvd_left _ _,
+  exact gcd_dvd_right _ _
+end
+
+lemma coprime_of_dvd'_prime {m n : ℕ} (H : ∀ k, prime k → k ∣ m → k ∣ n → k ∣ 1) :
+  coprime m n :=
+begin
+  cases eq_zero_or_pos (gcd m n) with g0 g1,
+  { rw [eq_zero_of_gcd_eq_zero_left g0, eq_zero_of_gcd_eq_zero_right g0] at H,
+    have := (H 2 prime_two (dvd_zero _) (dvd_zero _)),
     rw nat.dvd_one at this,
-    norm_num at this,    
-  },
-  apply nat.coprime_of_dvd',
-  intros d hdleft hdright,
-  rw nat.dvd_one,
+    norm_num at this },
+  apply coprime_of_dvd,
+  intros d hdl hdleft hdright,
+  apply not_le_of_gt hdl,
+  apply le_of_dvd zero_lt_one,
   by_contra h,
-  have : d ≠ 0,
-  { rintro rfl,
-    rw zero_dvd_iff at *,
-    rw [hdleft, hdright] at g1,
-    rw [nat.gcd_zero_right] at g1,
-    exact irrefl 0 g1,
-  },
   have : 2 ≤ d,
   { rcases d with (_|_|_),
-    { simp at this, contradiction },
-    { simp at h, contradiction },
+    { exfalso,
+      rw zero_dvd_iff at hdleft hdright,
+      rw [hdleft, hdright, gcd_zero_right] at g1,
+      exact irrefl 0 g1 },
+    { exfalso, apply h, refl },
     { change 2 ≤ d + 2,
       rw [le_add_iff_nonneg_left],
       exact zero_le d },
   },
-  obtain ⟨p, hp, hpdvd⟩ := nat.exists_prime_and_dvd this,
-  have := H p hp (dvd_trans hpdvd hdleft) (dvd_trans hpdvd hdright),
-  rw nat.dvd_one at this,
-  have := nat.prime.ne_one hp,
-  contradiction,
+  obtain ⟨p, hp, hpdvd⟩ := exists_prime_and_dvd this,
+  apply hp.not_dvd_one,
+  exact H p hp (dvd_trans hpdvd hdleft) (dvd_trans hpdvd hdright),
 end
+
+end nat
 
 lemma gcd_eq_of_dvd
   (p q g : ℕ)
@@ -252,3 +266,9 @@ begin
   rintro rfl,
   apply nat.zero_pow h,
 end
+/-
+theorem not_coprime_of_dvd_gcd {m n d : ℕ} (dgt1 : 1 < d) (H : d ∣ nat.gcd m n) :
+  ¬ nat.coprime m n :=
+λ (co : nat.gcd m n = 1),
+not_lt_of_ge (nat.le_of_dvd zero_lt_one $ by rw ←co; exact H) dgt1
+-/

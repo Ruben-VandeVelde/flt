@@ -113,11 +113,10 @@ example (a b : nat) : a ^2 < b ^2 ↔  a < b := (nat.pow_lt2 a b).symm
 lemma int.nat_abs.even (p : ℤ ) : p.nat_abs.even ↔ p.even := by {
   exact int.coe_nat_dvd_left.symm,
 }
-example (q : int) : q ^ 2 = q.nat_abs ^ 2 := by
+lemma int.nat_abs_pow_two' (q : int) : q ^ 2 = q.nat_abs ^ 2 := by
       {
-        
-        rw [pow_two, pow_two],
-        exact (int.nat_abs_mul_self' q).symm,
+        symmetry,
+        apply int.nat_abs_pow_two,
       }
 
 
@@ -536,7 +535,7 @@ begin
           exact hne2 H.symm } },
       { assumption } },
     have : p = d * H,
-    { rw [←nat.mul_right_inj two_pos, hP, hH],
+    { rw [←nat.mul_right_inj zero_lt_two, hP, hH],
       ring },
     have : 3 * q ^ 2 = d * (Q - d * H ^ 2),
     { calc 3 * q ^ 2
@@ -561,7 +560,7 @@ begin
   have hg : g = 3 ^ k,
   { apply eq_pow,
    { apply nat.gcd_pos_of_pos_left,
-     apply nat.mul_pos two_pos hp },
+     apply nat.mul_pos zero_lt_two hp },
     intros d hdprime hddvdg,
     apply basic _ hdprime,
     exact dvd_trans hddvdg (nat.gcd_dvd_left _ _),
@@ -579,7 +578,7 @@ begin
     exact dvd_trans this (nat.gcd_dvd_left _ _) }, 
   have hdvdq : 3 ∣ q,
   { have : 3 ^ 2 ∣ p ^ 2,
-    { rwa nat.pow_dvd_pow_iff two_pos },
+    { rwa nat.pow_dvd_pow_iff zero_lt_two },
     suffices : 3 ∣ q ^ 2,
     { apply nat.prime.dvd_of_dvd_pow nat.prime_three this },
     suffices : 3 ^ 2 ∣ 3 * q ^ 2,
@@ -660,7 +659,7 @@ end
 
 
 lemma factors2
-  (a b : ℕ)
+  {a b : ℕ}
   (heven : (a ^ 2 + 3 * b ^ 2).even) :
   ∃ c d, a ^ 2 + 3 * b ^ 2 = 4 * (c ^ 2 + 3 * d ^ 2) :=
 begin
@@ -729,24 +728,155 @@ begin
   }
 end
 
+lemma factors2'
+  {a : ℕ}
+  (hpos : 0 < a)
+  (heven : 2 ∣ a) :
+  ∃ k l : ℕ, a = 2 ^ k * l ∧ ¬(2 ∣ l) :=
+begin
+  revert hpos heven,
+  apply nat.strong_induction_on a,
+  intros a' IH hpos heven,
+  obtain ⟨b, hb⟩ := heven,
+  have hbpos : 0 < b,
+  { rw nat.pos_iff_ne_zero,
+    rintro rfl,
+    rw mul_zero at hb,
+    subst hb,
+    exact lt_irrefl _ hpos },
+  have hsmaller : b < a',
+  { rw [hb, lt_mul_iff_one_lt_left hbpos],
+    norm_num },
+  by_cases H : b.even,
+  { obtain ⟨k', l', heqb, hnotdvd⟩ := IH b hsmaller hbpos H,
+    refine ⟨k' + 1, l', _, hnotdvd⟩,
+    rw [hb, heqb, pow_succ, mul_assoc] },
+  { refine ⟨1, b, _, H⟩,
+    rwa pow_one }
+end
+
+lemma nat.split_factors
+  {a b : ℕ}
+  (a_pos : 0 < a)
+  (one_lt_b : 1 < b) :
+  ∃ k l : ℕ, a = b ^ k * l ∧ ¬(b ∣ l) :=
+begin
+  by_cases hdvd : b ∣ a,
+  { revert a_pos hdvd,
+    apply nat.strong_induction_on a,
+    intros a' IH a'_pos hdvd,
+    obtain ⟨c, hc⟩ := hdvd,
+    have c_pos : 0 < c,
+    { rw nat.pos_iff_ne_zero,
+      rintro rfl,
+      rw mul_zero at hc,
+      subst hc,
+      exact lt_irrefl _ a'_pos },
+    have hsmaller : c < a',
+    { rw [hc, lt_mul_iff_one_lt_left c_pos],
+      exact one_lt_b },
+    by_cases H : b ∣ c,
+    { obtain ⟨k', l', heqb, hnotdvd⟩ := IH c hsmaller c_pos H,
+      refine ⟨k' + 1, l', _, hnotdvd⟩,
+      rw [hc, heqb, pow_succ, mul_assoc] },
+    { refine ⟨1, c, _, H⟩,
+      rwa pow_one } },
+  { refine ⟨0, a, _, hdvd⟩,
+    rwa [pow_zero, one_mul] }
+end
+
+example (f g k : ℕ) (hodd : ¬f.even)
+  (hdvd : 2 ^ k ∣ f * g) :
+  2 ^ k ∣ g :=
+begin
+  apply nat.coprime.dvd_of_dvd_mul_left _ hdvd,
+  apply nat.coprime.symm,
+  exact nat.prime.coprime_pow_of_not_dvd nat.prime_two hodd
+end
+
+/-
+h0: nat.prime p → P p
+IH: ∀ a : list ℕ,
+  (∀ el ∈ a, nat.prime el) →
+  P a.tail.prod →
+  P a.prod
+         
+-/
+
+lemma induction_factors {p : nat → Prop} (n : nat) (pos : 0 < n)
+  (b : p 1)
+  (h : ∀ k, (∀ m, m < k → p m) → p k)
+  : p n := sorry
+
 lemma factors'
-  (a b f : ℕ)
+  (a b f g : ℕ)
   (hodd : ¬f.even)
   (hcoprime : nat.gcd a b = 1)
-  (hfactor : f ∣ (a ^ 2 + 3 * b ^ 2))
+  (hfactor : f * g = (a ^ 2 + 3 * b ^ 2))
   (hnotform : ¬∃p q, f = p ^ 2 + 3 * q ^ 2)
   :
-  ∃ F f',
-    f * F = a ^2 + 3 * b ^2 ∧
-    f' ∣ F ∧
+  ∃ f',
+    f' ∣ g ∧
+    ¬f'.even ∧
     ¬∃p q, f' = p ^ 2 + 3 * q ^ 2 :=
 begin
-  obtain ⟨g, hg⟩ := hfactor,
-  apply of_not_not, -- XXX
-  by_contra H,
-  push_neg at H,
-  set g' := g.factors,
-  sorry,
+  contrapose! hnotform,
+  have hgpos : 0 < g := sorry, 
+  obtain ⟨k, l, heq, hdvd⟩ := nat.split_factors hgpos one_lt_two,
+  have : 2 ∣ a ^ 2 + 3 * b ^ 2 → 2 ^ 2 ∣ g,
+  {
+    intro h,
+    obtain ⟨c, d, hcd⟩ := factors2 h,
+    apply @nat.coprime.dvd_of_dvd_mul_left f _ (2 ^ 2) _ _,
+    { apply nat.coprime.symm,
+      exact nat.prime.coprime_pow_of_not_dvd nat.prime_two hodd },
+    { rw [hfactor, hcd],
+      exact dvd_mul_right _ _ },
+  },
+  have : ∃ c d, g = 2 ^ k * (c ^ 2 + 3 * d ^ 2) ∧ ¬(c ^ 2 + 3 * d ^ 2).even,
+  {
+    by_cases H : 2 ∣ a ^ 2 + 3 * b ^ 2,
+    { sorry },
+    { have : k = 0,
+      {
+        rw ←hfactor at H,
+        rw nat.prime.dvd_mul nat.prime_two at H,
+        push_neg at H,
+        obtain ⟨-, Hg⟩ := H,
+        contrapose! Hg with k_ne_zero,
+        rw heq,
+        apply dvd_mul_of_dvd_left,
+        exact dvd_pow (dvd_refl _) k_ne_zero },
+      refine ⟨a, b, _, H⟩,
+      convert heq,
+      rw ←hfactor,
+      sorry,
+    }
+
+  },
+  obtain ⟨g', prod_factors⟩ : ∃ g' : list ℕ, g'.prod = g := ⟨g.factors, nat.prod_factors hgpos ⟩,
+  induction g',
+  { rw [list.prod_nil] at prod_factors,
+    rw [←prod_factors, mul_one] at hfactor,
+    exact ⟨a, b, hfactor⟩ },
+  {
+
+    sorry,
+  },
+/-
+  have : 2 ∣ a ^ 2 + 3 * b ^ 2 → ∃ c d, g = 2 ^ 2 * (c ^ 2 + 3 * d ^ 2),
+  {
+    intro h,
+    obtain ⟨c, d, hcd⟩ := factors2 h,
+    use [c, d],
+    apply @nat.coprime.dvd_of_dvd_mul_left f _ (2 ^ 2) _ _,
+    { apply nat.coprime.symm,
+      exact nat.prime.coprime_pow_of_not_dvd nat.prime_two hodd },
+    { rw [←hg, hcd],
+      exact dvd_mul_right _ _ },
+  },
+-/
+  all_goals { sorry },
 
 end
 /-
@@ -765,6 +895,54 @@ end
 (8) Therefore, we reject our assumption.
 -/
 
+example (a b : ℤ ) (h : a ≤ b) : 0 ≤ b - a := sub_nonneg.mpr h
+example (a : ℤ ) (h : 0 ≤ a) : abs a = a := abs_of_nonneg h
+
+lemma factor_div (a x : ℕ)
+  (hodd : ¬x.even)
+  (h0' : 0 < x) :
+  ∃ (m : ℕ) (c : ℤ), c + ↑m * ↑x = ↑a ∧ 2 * c.nat_abs < x :=
+begin
+    set c : ℤ := a % x with hc,
+    have : c < x,
+    { rw hc,
+      exact int.mod_lt_of_pos a (int.coe_nat_lt.mpr h0') },
+    by_cases H : 2 * c.nat_abs < x,
+    {
+      refine ⟨a/x, c, _, H⟩,
+      rw hc,
+      norm_cast,
+      rw mul_comm,
+      exact nat.mod_add_div a x },
+    { push_neg at H,
+      set c' : ℤ := c - x with hc',
+      refine ⟨a / x + 1, c', _, _⟩,
+      { rw [←int.coe_nat_mul, add_mul, one_mul],
+        push_cast,
+        rw hc',
+        conv_rhs { rw ←nat.mod_add_div a x },
+        ring },
+      { rw hc',
+        rw ←int.nat_abs_neg,
+        rw neg_sub,
+        zify,
+        rw ←int.abs_eq_nat_abs,
+        rw abs_of_nonneg _,
+        { rw mul_sub,
+          rw sub_lt_iff_lt_add,
+          rw two_mul,
+          rw add_lt_add_iff_left,
+          rw hc, norm_cast,
+          apply lt_of_le_of_ne,
+          { convert H, },
+          { contrapose! hodd with heqtwomul,
+            exact ⟨_, heqtwomul⟩ } },
+        rw sub_nonneg,
+        exact le_of_lt this,
+      } },
+end
+
+
 lemma factors
   (a b x : ℕ)
   (hcoprime : nat.gcd a b = 1)
@@ -772,14 +950,196 @@ lemma factors
   (hfactor : x ∣ (a ^ 2 + 3 * b ^ 2)) :
   ∃ c d, x = c ^ 2 + 3 * d ^ 2 :=
 begin
+  revert x,
+  intro x',
+  apply nat.strong_induction_on x' _,
+  intros x IH hodd hfactor,
   by_cases x = 1,
   { subst h,
     refine ⟨1, 0, _⟩,
     ring },
   obtain ⟨f, hf⟩ := hfactor,
-  sorry
+  have h0' : 0 < x,
+  {   rw nat.pos_iff_ne_zero,
+      rintro rfl,
+      exact hodd nat.even_zero },
+
+  have h0 : 1 < x,
+  { apply lt_of_le_of_ne _ _,
+    { apply nat.succ_le_of_lt,
+      exact h0' },
+    { symmetry,
+      exact h } },
+
+  obtain ⟨m, c, ha, hc⟩ := factor_div a x hodd h0',
+  obtain ⟨n, d, hb, hd⟩ := factor_div b x hodd h0',
+
+  set e : ℤ := m ^ 2 * x + 2 * m * c + 3 * n ^ 2 * x + 6 * n * d with he,
+
+  have h1 : (a ^ 2 + 3 * b ^ 2 : ℤ) = x * e + c ^ 2 + 3 * d ^ 2,
+  { rw [he, ←ha, ←hb],
+    ring },
+
+  have h2 : (x : ℤ) ∣ c ^ 2 + 3 * d ^ 2,
+  { have : c ^ 2 + 3 * d ^ 2 = x * e + c ^ 2 + 3 * d ^ 2 - x * e,
+    { ring },
+    rw this,
+    apply dvd_sub,
+    { rw ←h1,
+      norm_cast,
+      rw hf,
+      exact dvd_mul_right _ _ },
+    { exact dvd_mul_right _ _ }
+  },
+
+  obtain ⟨y, hy⟩ : x ∣ c.nat_abs ^ 2 + 3 * d.nat_abs ^ 2,
+  { rw ←int.coe_nat_dvd,
+    push_cast,
+    rw [int.nat_abs_pow_two c, int.nat_abs_pow_two d],
+    exact h2 },
+
+  have h3 : y < x,
+  {
+    rw ←mul_lt_mul_left h0',
+    rw ←mul_lt_mul_left (by norm_num : 0 < 4),
+    calc 4 * (x * y)
+        = 4 * (c.nat_abs ^ 2 + 3 * d.nat_abs ^ 2) : by rw hy
+    ... = (2 * c.nat_abs) ^ 2 + 3 * (2 * d.nat_abs) ^ 2 : by ring
+    ... < x ^ 2 + 3 * x ^ 2 : add_lt_add _ _
+    ... = 4 * (x * x) : by ring,
+    { exact nat.pow_lt_pow_of_lt_left hc zero_lt_two },
+    { rw mul_lt_mul_left (by norm_num : 0 < 3),
+      exact nat.pow_lt_pow_of_lt_left hd zero_lt_two },
+  },
+
+  have h4 : c ^ 2 + 3 * d ^ 2 ≠ 0,
+  { contrapose! hcoprime with H,
+    have hposleft := pow_two_nonneg c,
+    have hposright := mul_nonneg (by norm_num : (0 : ℤ) ≤ 3) (pow_two_nonneg d),
+    rw add_eq_zero_iff_eq_zero_of_nonneg hposleft hposright at H,
+    obtain ⟨Hc, Hd⟩ := H,
+    have Hc' := pow_eq_zero Hc,
+    rw [mul_eq_zero, eq_false_intro (by norm_num : (3 : ℤ) ≠ 0), false_or] at Hd,
+    have Hd' := pow_eq_zero Hd,
+    subst Hc',
+    subst Hd',
+    norm_num at ha hb,
+    norm_cast at ha hb,
+    apply nat.not_coprime_of_dvd_of_dvd h0,
+    { rw ←ha, exact dvd_mul_left _ _ },
+    { rw ←hb, exact dvd_mul_left _ _ } },
+
+  set g := nat.gcd c.nat_abs d.nat_abs with hg,
+  have hgpos : 0 < g,
+  { rw hg,
+    suffices H : 0 < c.nat_abs ∨ 0 < d.nat_abs,
+    { cases H,
+      { exact nat.gcd_pos_of_pos_left _ H },
+      { exact nat.gcd_pos_of_pos_right _ H } },
+
+    contrapose! h4 with H,
+    obtain ⟨H1, H2⟩ := H,
+    rw [nat.le_zero_iff, int.nat_abs_eq_zero] at H1 H2,
+    subst H1,
+    subst H2,
+    norm_num },
+  obtain ⟨C, D, HCDcoprime, HC, HD⟩ := nat.exists_coprime hgpos,
+  rw ←hg at HC HD,
+  have h5 : x * y = (C ^ 2 + 3 * D ^ 2) * g ^ 2,
+  { rw [←hy, HC, HD],
+    ring },
+  obtain ⟨z, hz⟩ : g ^ 2 ∣ y,
+  { have : g ^ 2 ∣ x * y,
+    { rw h5, exact dvd_mul_left _ _ },
+    apply nat.coprime.dvd_of_dvd_mul_left _ this,
+    apply nat.coprime_of_dvd'',
+    rintros p hpprime hpdvdleft ⟨X, hX⟩,
+    obtain ⟨G, hG⟩ := hpprime.dvd_of_dvd_pow hpdvdleft,
+    rw ←hcoprime,
+    apply nat.dvd_gcd,
+    { rw [←int.coe_nat_dvd, ←ha],
+      apply dvd_add,
+      { rw [int.coe_nat_dvd_left, HC, hG],
+        apply dvd_mul_of_dvd_right,
+        exact dvd_mul_right _ _ },
+      { apply dvd_mul_of_dvd_right,
+        rw [int.coe_nat_dvd, hX],
+        exact dvd_mul_right _ _ } },
+    { rw [←int.coe_nat_dvd, ←hb],
+      apply dvd_add,
+      { rw [int.coe_nat_dvd_left, HD, hG],
+        apply dvd_mul_of_dvd_right,
+        exact dvd_mul_right _ _ },
+      { apply dvd_mul_of_dvd_right,
+        rw [int.coe_nat_dvd, hX],
+        exact dvd_mul_right _ _ } } },
+
+  have h6 : x * z = C ^ 2 + 3 * D ^ 2,
+  { apply nat.eq_of_mul_eq_mul_right (pow_pos hgpos 2),
+    rw [←h5, hz],
+    ring },
+
+  contrapose! IH,
+  have h6' : z ∣ C ^ 2 + 3 * D ^ 2 := h6 ▸ dvd_mul_left z x,
+  have h6'' : x ∣ C ^ 2 + 3 * D ^ 2 := h6 ▸ dvd_mul_right x z,
+
+  have h7 : C ^ 2 + 3 * D ^ 2 ≠ 0,
+  { contrapose! hcoprime with H,
+    have Hc := nat.eq_zero_of_add_eq_zero_right H,
+    have Hc' := pow_eq_zero Hc,
+    have Hd := nat.eq_zero_of_add_eq_zero_left H,
+    rw [mul_eq_zero, eq_false_intro (by norm_num : 3 ≠ 0), false_or] at Hd,
+    have Hd' := pow_eq_zero Hd,
+    subst Hc',
+    subst Hd',
+    rw [zero_mul, int.nat_abs_eq_zero] at HC HD,
+    subst HC,
+    subst HD,
+    norm_num at h4 },
+  have h8 : z ≠ 0,
+  { rintro rfl,
+    rw ←h6 at h7,
+    norm_num at h7,
+    exact h7 },
+
+  have := factors' C D x z hodd HCDcoprime h6 _,
+  obtain ⟨w, hwdvd, hwodd, hnform⟩ := this,
+  refine ⟨w, _, _, _, _⟩,
+  { calc w
+        ≤ z : nat.le_of_dvd (nat.pos_of_ne_zero h8) hwdvd
+    ... ≤ y : by { rw hz, exact nat.le_mul_of_pos_left (pow_pos hgpos 2) }
+    ... < x : h3 },
+  { intro H,
+    have hdvd1 : z.even := dvd_trans H hwdvd,
+    have hdvd2 : z ∣ y,
+    { rw hz,
+      exact dvd_mul_left _ _ },
+    have hdvd2 : y.even := dvd_trans hdvd1 hdvd2,
+    sorry },
+  { apply dvd_trans hwdvd,
+    apply dvd_trans h6',
+    rw ←h6,
+    rw hf,
+    sorry },
+  { push_neg at hnform,
+    exact hnform },
+
+  push_neg,
+  exact IH,
 end
 
+example (a b c : nat) (h : a ∣ b) (g : b ∣ c) : a ∣ c :=dvd.trans h g
+example (a b : nat) (h : a+b=0) : a=0 := nat.eq_zero_of_add_eq_zero_right h
+example (a b : nat) (h : 0 < a) : b ≤ a * b := nat.le_mul_of_pos_left h
+example (P Q : Prop) (h : ¬P) : (P ∨ Q) ↔ Q := by tauto
+
+example (a b c d : nat) (h : 0 < a) (h' : a * c < a * d) : c < d := begin
+  rw ←mul_lt_mul_left _,
+  apply h',
+  apply h,
+--  refine ( _).mp _,
+
+end
 lemma obscure
   (p q : ℕ)
   (hp : 0 < p) (hq : 0 < q)
@@ -945,7 +1305,7 @@ begin
   { rcases hcube with (_|_|_);
     [use a, use b, use c];
     exact hcube },
-  have hposleft : 0 < 2 * p := nat.mul_pos two_pos hp,
+  have hposleft : 0 < 2 * p := nat.mul_pos zero_lt_two hp,
   have hposright : 0 < p ^ 2 + 3 * q ^ 2 := nat.add_pos_left (nat.pos_pow_of_pos 2 hp) _,
   have hcubeleft : ∃ s, 2 * p = s ^ 3 := nat.eq_pow_of_mul_eq_pow hposleft hposright hgcd hr,
   have hcuberight : ∃ t, p ^ 2 + 3 * q ^ 2 = t ^ 3,
@@ -1086,7 +1446,7 @@ begin
     0 < X ∧ 0 < Y ∧ 0 < Z ∧
     2 * u = X ^ 3 ∧ u - 3 * v = Y ^ 3 ∧ u + 3 * v = Z ^ 3,
   { apply cube_of_coprime,
-    { exact nat.mul_pos two_pos upos },
+    { exact nat.mul_pos zero_lt_two upos },
     { exact nat.sub_pos_of_lt huv },
     { exact nat.add_pos_left upos _ },
     { exact hcoprime12 },
@@ -1322,7 +1682,7 @@ begin
     0 < X ∧ 0 < Y ∧ 0 < Z ∧
     2 * v = X ^ 3 ∧ u - v = Y ^ 3 ∧ u + v = Z ^ 3,
   { apply cube_of_coprime,
-    { exact nat.mul_pos two_pos hv },
+    { exact nat.mul_pos zero_lt_two hv },
     { exact nat.sub_pos_of_lt huv' },
     { exact nat.add_pos_left hu _ },
     { exact hsubcoprime.symm },
