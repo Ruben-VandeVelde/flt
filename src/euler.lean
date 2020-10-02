@@ -173,7 +173,7 @@ begin
       { apply int.eq_of_mul_eq_mul_right two_ne_zero,
         rw [mul_comm, mul_sub, ←hp, ←hq],
         ring },
-      have : 0 < q,
+      have hqpos : 0 < q,
       { apply pos_of_mul_pos_left,
         { rw ←hq,
           norm_cast,
@@ -194,7 +194,7 @@ begin
         rw sub_eq_zero at hp,
         norm_cast at hp },
 
-      have : 0 < p,
+      have hppos : 0 < p,
       { apply pos_of_mul_pos_left,
         { rw ←hp,
           rw sub_pos,
@@ -210,12 +210,10 @@ begin
 
       refine ⟨p.nat_abs, q.nat_abs, _, _, _, _, _⟩,
       { rw nat.pos_iff_ne_zero,
-        rw ne.def, -- XXX need int.nat_abs_ne_zero
-        rw int.nat_abs_eq_zero,
+        rw int.nat_abs_ne_zero,
         assumption, },
       { rw nat.pos_iff_ne_zero,
-        rw ne.def, -- XXX need int.nat_abs_ne_zero
-        rw int.nat_abs_eq_zero,
+        rw int.nat_abs_ne_zero,
         apply ne_of_gt,
         assumption, },
       { rw [←nat.dvd_one, ←hbccoprime.gcd_eq_one],
@@ -239,18 +237,12 @@ begin
         rw eq_sub_of_add_eq h,
         rw [←hadd, ←hsub],
         have : p = p.nat_abs,
-        { rw ←int.abs_eq_nat_abs, --XXX shorten
-          symmetry,
-          apply abs_of_nonneg,
-          apply le_of_lt,
-          assumption },
+        { lift p to ℕ using hppos.le,
+          rw [int.nat_abs_of_nat] },
         rw ←this,
         have : q = q.nat_abs,
-        { rw ←int.abs_eq_nat_abs, --XXX shorten
-          symmetry,
-          apply abs_of_nonneg,
-          apply le_of_lt,
-          assumption },
+        { lift q to ℕ using hqpos.le,
+          rw [int.nat_abs_of_nat] },
         rw ←this,
         ring },
     },   
@@ -268,7 +260,7 @@ begin
       { apply int.eq_of_mul_eq_mul_right two_ne_zero,
         rw [mul_comm, mul_sub, ←hp, ←hq],
         ring },
-      have : 0 < q,
+      have hqpos : 0 < q,
       { apply pos_of_mul_pos_left,
         { rw ←hq,
           norm_cast,
@@ -285,11 +277,10 @@ begin
           rw [add_right_inj 1] at h,
           exact ne_of_gt hbpos (pow_eq_zero h) },
         rintro rfl,
-        rw mul_zero at hp,
-        rw sub_eq_zero at hp,
-        norm_cast at hp },
+        apply this,
+        rwa [mul_zero, sub_eq_zero, int.coe_nat_inj'] at hp },
 
-      have : 0 < p,
+      have hppos : 0 < p,
       { apply pos_of_mul_pos_left,
         { rw ←hp,
           rw sub_pos,
@@ -305,12 +296,10 @@ begin
 
       refine ⟨p.nat_abs, q.nat_abs, _, _, _, _, _⟩,
       { rw nat.pos_iff_ne_zero,
-        rw ne.def, -- XXX need int.nat_abs_ne_zero
-        rw int.nat_abs_eq_zero,
+        rw int.nat_abs_ne_zero,
         assumption, },
       { rw nat.pos_iff_ne_zero,
-        rw ne.def, -- XXX need int.nat_abs_ne_zero
-        rw int.nat_abs_eq_zero,
+        rw int.nat_abs_ne_zero,
         apply ne_of_gt,
         assumption, },
       { rw [←nat.dvd_one, ←haccoprime.gcd_eq_one],
@@ -334,18 +323,12 @@ begin
         rw eq_sub_of_add_eq' h,
         rw [←hadd, ←hsub],
         have : p = p.nat_abs,
-        { rw ←int.abs_eq_nat_abs, --XXX shorten
-          symmetry,
-          apply abs_of_nonneg,
-          apply le_of_lt,
-          assumption },
+        { lift p to ℕ using hppos.le,
+          rw [int.nat_abs_of_nat] },
         rw ←this,
         have : q = q.nat_abs,
-        { rw ←int.abs_eq_nat_abs, --XXX shorten
-          symmetry,
-          apply abs_of_nonneg,
-          apply le_of_lt,
-          assumption },
+        { lift q to ℕ using hqpos.le,
+          rw [int.nat_abs_of_nat] },
         rw ←this,
         ring },
     },   
@@ -942,6 +925,25 @@ begin
       } },
 end
 
+lemma int.sq_plus_three_sq_eq_zero_iff {a b : ℤ} : a ^ 2 + 3 * b ^ 2 = 0 ↔ a = 0 ∧ b = 0 :=
+begin
+  split,
+  { intro h,
+    have hposleft := pow_two_nonneg a,
+    have hposright := mul_nonneg (by norm_num : (0 : ℤ) ≤ 3) (pow_two_nonneg b),
+    obtain ⟨ha, hb⟩ := (add_eq_zero_iff_eq_zero_of_nonneg hposleft hposright).mp h,
+    split,
+    { exact pow_eq_zero ha },
+    { rw [mul_eq_zero, eq_false_intro (by norm_num : (3 : ℤ) ≠ 0), false_or] at hb,
+      exact pow_eq_zero hb } },
+  { rintro ⟨rfl, rfl⟩, norm_num }
+end
+
+lemma nat.sq_plus_three_sq_eq_zero_iff {a b : ℕ} : a ^ 2 + 3 * b ^ 2 = 0 ↔ a = 0 ∧ b = 0 :=
+begin
+  zify,
+  exact int.sq_plus_three_sq_eq_zero_iff
+end
 
 lemma factors
   (a b x : ℕ)
@@ -1014,15 +1016,7 @@ begin
 
   have h4 : c ^ 2 + 3 * d ^ 2 ≠ 0,
   { contrapose! hcoprime with H,
-    have hposleft := pow_two_nonneg c,
-    have hposright := mul_nonneg (by norm_num : (0 : ℤ) ≤ 3) (pow_two_nonneg d),
-    rw add_eq_zero_iff_eq_zero_of_nonneg hposleft hposright at H,
-    obtain ⟨Hc, Hd⟩ := H,
-    have Hc' := pow_eq_zero Hc,
-    rw [mul_eq_zero, eq_false_intro (by norm_num : (3 : ℤ) ≠ 0), false_or] at Hd,
-    have Hd' := pow_eq_zero Hd,
-    subst Hc',
-    subst Hd',
+    obtain ⟨rfl, rfl⟩ := int.sq_plus_three_sq_eq_zero_iff.mp H,
     norm_num at ha hb,
     norm_cast at ha hb,
     apply nat.not_coprime_of_dvd_of_dvd h0,
@@ -1085,13 +1079,7 @@ begin
 
   have h7 : C ^ 2 + 3 * D ^ 2 ≠ 0,
   { contrapose! hcoprime with H,
-    have Hc := nat.eq_zero_of_add_eq_zero_right H,
-    have Hc' := pow_eq_zero Hc,
-    have Hd := nat.eq_zero_of_add_eq_zero_left H,
-    rw [mul_eq_zero, eq_false_intro (by norm_num : 3 ≠ 0), false_or] at Hd,
-    have Hd' := pow_eq_zero Hd,
-    subst Hc',
-    subst Hd',
+    obtain ⟨rfl, rfl⟩ := nat.sq_plus_three_sq_eq_zero_iff.mp H,
     rw [zero_mul, int.nat_abs_eq_zero] at HC HD,
     subst HC,
     subst HD,

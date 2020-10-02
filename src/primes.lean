@@ -202,12 +202,11 @@ begin
   intro g2,
   obtain ⟨p, hp, hpdvd⟩ := exists_prime_and_dvd g2,
   apply H p hp; apply dvd_trans hpdvd,
-  exact gcd_dvd_left _ _,
-  exact gcd_dvd_right _ _
+  { exact gcd_dvd_left _ _ },
+  { exact gcd_dvd_right _ _ }
 end
 
-lemma coprime_of_dvd'_prime {m n : ℕ} (H : ∀ k, prime k → k ∣ m → k ∣ n → k ∣ 1) :
-  coprime m n :=
+lemma coprime_of_dvd'' {m n : ℕ} (H : ∀ k, prime k → k ∣ m → k ∣ n → k ∣ 1) : coprime m n :=
 coprime_of_dvd_prime $ λk kp km kn, not_le_of_gt kp.one_lt $ le_of_dvd zero_lt_one $ H k kp km kn
 
 end nat
@@ -247,3 +246,5 @@ theorem not_coprime_of_dvd_gcd {m n d : ℕ} (dgt1 : 1 < d) (H : d ∣ nat.gcd m
 λ (co : nat.gcd m n = 1),
 not_lt_of_ge (nat.le_of_dvd zero_lt_one $ by rw ←co; exact H) dgt1
 -/
+
+theorem int.nat_abs_ne_zero {a : ℤ} : a.nat_abs ≠ 0 ↔ a ≠ 0 := not_congr int.nat_abs_eq_zero
