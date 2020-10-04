@@ -1060,6 +1060,7 @@ begin
       { apply dvd_mul_of_dvd_right,
         rw [int.coe_nat_dvd, hX],
         exact dvd_mul_right _ _ } } },
+  have hzdvd' : z ∣ x := sorry,
 
   have h6 : x * z = C ^ 2 + 3 * D ^ 2,
   { apply nat.eq_of_mul_eq_mul_right (pow_pos hgpos 2),
@@ -1085,23 +1086,16 @@ begin
 
   have := factors' C D x z hodd HCDcoprime h6 _,
   obtain ⟨w, hwdvd, hwodd, hnform⟩ := this,
+  have hwdvd' := dvd_trans hwdvd hzdvd',
   refine ⟨w, _, _, _, _⟩,
   { calc w
         ≤ z : nat.le_of_dvd (nat.pos_of_ne_zero h8) hwdvd
     ... ≤ y : by { rw hz, exact nat.le_mul_of_pos_left (pow_pos hgpos 2) }
     ... < x : h3 },
-  { intro H,
-    have hdvd1 : z.even := dvd_trans H hwdvd,
-    have hdvd2 : z ∣ y,
-    { rw hz,
-      exact dvd_mul_left _ _ },
-    have hdvd2 : y.even := dvd_trans hdvd1 hdvd2,
-    sorry },
-  { apply dvd_trans hwdvd,
-    apply dvd_trans h6',
-    rw ←h6,
-    rw hf,
-    sorry },
+  { contrapose! hodd with H,
+    exact dvd_trans H hwdvd' },
+  { rw hf,
+    exact dvd_mul_of_dvd_left hwdvd' _ },
   { push_neg at hnform,
     exact hnform },
 
