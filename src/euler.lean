@@ -731,6 +731,48 @@ begin
     rwa pow_one }
 end
 
+lemma factors2''
+  {a b : ℕ}
+  (hnontrivial : a ^ 2 + 3 * b ^ 2 ≠ 0)
+  (heven : (a ^ 2 + 3 * b ^ 2).even) :
+  ∃ c d k : ℕ,
+    a ^ 2 + 3 * b ^ 2 = 4 ^ k * (c ^ 2 + 3 * d ^ 2) ∧
+    ¬(c ^ 2 + 3 * d ^ 2).even :=
+begin
+  suffices : ∀ s a b : ℕ,
+    s = a ^ 2 + 3 * b ^ 2 →
+    s ≠ 0 →
+    s.even →
+    ∃ c d k : ℕ, s = 4 ^ k * (c ^ 2 + 3 * d ^ 2) ∧ ¬(c ^ 2 + 3 * d ^ 2).even,
+  {
+    exact this ( a ^ 2 + 3 * b ^ 2 ) a b rfl hnontrivial heven,
+  },
+  intro s',
+  apply nat.strong_induction_on s',
+  rintros s IH a b rfl hnontrivial heven,
+  obtain ⟨c, d, hcd⟩ := factors2 heven,
+  by_cases H : 2 ∣ (c ^ 2 + 3 * d ^ 2),
+  { have : (c ^ 2 + 3 * d ^ 2) < (a ^ 2 + 3 * b ^ 2),
+    { rw ←mul_lt_mul_left (by norm_num : 0 < 4),
+      rw ←hcd,
+      suffices : 1 * (a ^ 2 + 3 * b ^ 2) < 4 * (a ^ 2 + 3 * b ^ 2),
+      { rwa nat.one_mul  at this, },
+      refine nat.mul_lt_mul _ _ _,
+      { norm_num },
+      { refl },
+      { rwa nat.pos_iff_ne_zero } },
+    
+    obtain ⟨c', d', k', hcd', heven'⟩ := IH (c ^ 2 + 3 * d ^ 2) this c d rfl _ H,
+    refine ⟨c', d', k' + 1, _, heven'⟩,
+    { rw [hcd, hcd', ←mul_assoc, (pow_succ 4)] },
+    { rintro HH,
+      rw [HH, mul_zero] at hcd,
+      exact hnontrivial hcd } },
+  { refine ⟨c, d, 1, _, H⟩,
+    rw pow_one,
+    exact hcd }
+end
+
 lemma nat.split_factors
   {a b : ℕ}
   (a_pos : 0 < a)
@@ -784,6 +826,26 @@ lemma induction_factors {p : nat → Prop} (n : nat) (pos : 0 < n)
   (h : ∀ k, (∀ m, m < k → p m) → p k)
   : p n := sorry
 
+lemma int.sq_plus_three_sq_eq_zero_iff {a b : ℤ} : a ^ 2 + 3 * b ^ 2 = 0 ↔ a = 0 ∧ b = 0 :=
+begin
+  split,
+  { intro h,
+    have hposleft := pow_two_nonneg a,
+    have hposright := mul_nonneg (by norm_num : (0 : ℤ) ≤ 3) (pow_two_nonneg b),
+    obtain ⟨ha, hb⟩ := (add_eq_zero_iff_eq_zero_of_nonneg hposleft hposright).mp h,
+    split,
+    { exact pow_eq_zero ha },
+    { rw [mul_eq_zero, eq_false_intro (by norm_num : (3 : ℤ) ≠ 0), false_or] at hb,
+      exact pow_eq_zero hb } },
+  { rintro ⟨rfl, rfl⟩, norm_num }
+end
+
+lemma nat.sq_plus_three_sq_eq_zero_iff {a b : ℕ} : a ^ 2 + 3 * b ^ 2 = 0 ↔ a = 0 ∧ b = 0 :=
+begin
+  zify,
+  exact int.sq_plus_three_sq_eq_zero_iff
+end
+
 lemma factors'
   (a b f g : ℕ)
   (hodd : ¬f.even)
@@ -797,8 +859,20 @@ lemma factors'
     ¬∃p q, f' = p ^ 2 + 3 * q ^ 2 :=
 begin
   contrapose! hnotform,
-  have hgpos : 0 < g := sorry, 
+  have hgpos : 0 < g,
+  { rw nat.pos_iff_ne_zero,
+    rintro rfl,
+    rw [mul_zero] at hfactor,
+    obtain ⟨rfl, rfl⟩ := nat.sq_plus_three_sq_eq_zero_iff.mp hfactor.symm,
+    rw [nat.gcd_zero_right] at hcoprime,
+    exact zero_ne_one hcoprime },
+  revert g,
+  intro g',
+  apply g'.strong_induction_on _,
+  intros g IH hfactor hnotform hgpos,
   obtain ⟨k, l, heq, hdvd⟩ := nat.split_factors hgpos one_lt_two,
+  subst heq,
+/-
   have : 2 ∣ a ^ 2 + 3 * b ^ 2 → 2 ^ 2 ∣ g,
   {
     intro h,
@@ -809,11 +883,13 @@ begin
     { rw [hfactor, hcd],
       exact dvd_mul_right _ _ },
   },
-  have : ∃ c d, g = 2 ^ k * (c ^ 2 + 3 * d ^ 2) ∧ ¬(c ^ 2 + 3 * d ^ 2).even,
+-/
+  have : ∃ c d, l = (c ^ 2 + 3 * d ^ 2) ∧ ¬(c ^ 2 + 3 * d ^ 2).even,
   {
-    by_cases H : 2 ∣ a ^ 2 + 3 * b ^ 2,
-    { sorry },
-    { have : k = 0,
+    induction k,
+--      by_cases H : 2 ∣ a ^ 2 + 3 * b ^ 2,
+--    { obtain ⟨x, hx⟩ := this H,
+    { /-have : k = 0,
       {
         rw ←hfactor at H,
         rw nat.prime.dvd_mul nat.prime_two at H,
@@ -822,12 +898,30 @@ begin
         contrapose! Hg with k_ne_zero,
         rw heq,
         apply dvd_mul_of_dvd_left,
-        exact dvd_pow (dvd_refl _) k_ne_zero },
-      refine ⟨a, b, _, H⟩,
-      convert heq,
-      rw ←hfactor,
-      sorry,
-    }
+        exact dvd_pow (dvd_refl _) k_ne_zero },-/
+      
+      simp only [one_mul, nat.pow_zero] at *,
+--      obtain ⟨c, d, hcd⟩ := hnotform g (dvd_refl g) hdvd,
+      obtain ⟨c, d, hcd⟩ := hnotform l (dvd_refl l) hdvd,
+      refine ⟨c, d, hcd, _⟩,
+      { rw ←hcd, exact hdvd }
+    },
+    {
+      have : (a ^ 2 + 3 * b ^ 2).even,
+      { rw ←hfactor,
+        rw nat.succ_eq_add_one, -- XXX add to simp set?
+        simp with parity_simps },
+      obtain ⟨c, d, hcd⟩ := factors2 this,
+      have := k_ih _ _ _ _,
+      {exact this},
+      { intros,
+        sorry,
+
+      },
+      {sorry},
+      {sorry},
+      {sorry},
+    },
 
   },
   obtain ⟨g', prod_factors⟩ : ∃ g' : list ℕ, g'.prod = g := ⟨g.factors, nat.prod_factors hgpos ⟩,
@@ -918,26 +1012,6 @@ begin
       } },
 end
 
-lemma int.sq_plus_three_sq_eq_zero_iff {a b : ℤ} : a ^ 2 + 3 * b ^ 2 = 0 ↔ a = 0 ∧ b = 0 :=
-begin
-  split,
-  { intro h,
-    have hposleft := pow_two_nonneg a,
-    have hposright := mul_nonneg (by norm_num : (0 : ℤ) ≤ 3) (pow_two_nonneg b),
-    obtain ⟨ha, hb⟩ := (add_eq_zero_iff_eq_zero_of_nonneg hposleft hposright).mp h,
-    split,
-    { exact pow_eq_zero ha },
-    { rw [mul_eq_zero, eq_false_intro (by norm_num : (3 : ℤ) ≠ 0), false_or] at hb,
-      exact pow_eq_zero hb } },
-  { rintro ⟨rfl, rfl⟩, norm_num }
-end
-
-lemma nat.sq_plus_three_sq_eq_zero_iff {a b : ℕ} : a ^ 2 + 3 * b ^ 2 = 0 ↔ a = 0 ∧ b = 0 :=
-begin
-  zify,
-  exact int.sq_plus_three_sq_eq_zero_iff
-end
-
 lemma factors
   (a b x : ℕ)
   (hcoprime : nat.gcd a b = 1)
@@ -946,7 +1020,7 @@ lemma factors
   ∃ c d, x = c ^ 2 + 3 * d ^ 2 :=
 begin
   revert x,
-  intro x',
+  intros x',
   apply nat.strong_induction_on x' _,
   intros x IH hodd hfactor,
   by_cases x = 1,
@@ -1060,12 +1134,15 @@ begin
       { apply dvd_mul_of_dvd_right,
         rw [int.coe_nat_dvd, hX],
         exact dvd_mul_right _ _ } } },
-  have hzdvd' : z ∣ x := sorry,
 
   have h6 : x * z = C ^ 2 + 3 * D ^ 2,
   { apply nat.eq_of_mul_eq_mul_right (pow_pos hgpos 2),
     rw [←h5, hz],
     ring },
+
+  have hzdvd' : z ∣ x,
+  { 
+    sorry },
 
   contrapose! IH,
   have h6' : z ∣ C ^ 2 + 3 * D ^ 2 := h6 ▸ dvd_mul_left z x,
