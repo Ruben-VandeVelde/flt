@@ -110,15 +110,7 @@ example (a b : nat) (h : a + b = 0 + b) : a = 0 := (add_left_inj b).mp h
 --example (n : nat) : 2 ≠ n ^ 2 := by suggest
 example (a b : nat) : a ^2 < b ^2 ↔  a < b := (nat.pow_lt2 a b).symm
 @[parity_simps]
-lemma int.nat_abs.even (p : ℤ ) : p.nat_abs.even ↔ p.even := by {
-  exact int.coe_nat_dvd_left.symm,
-}
-lemma int.nat_abs_pow_two' (q : int) : q ^ 2 = q.nat_abs ^ 2 := by
-      {
-        symmetry,
-        apply int.nat_abs_pow_two,
-      }
-
+lemma int.nat_abs.even (p : ℤ ) : p.nat_abs.even ↔ p.even := int.coe_nat_dvd_left.symm
 
 lemma descent1 (a b c : ℕ)
   (h : flt_coprime a b c 3) :
@@ -228,8 +220,7 @@ begin
           { apply nat.gcd_dvd_right } } },
       { have : ¬int.even (p + q),
         { rwa [hadd, int.even_coe_nat] },
-        simp with parity_simps at this,
-        simp [int.nat_abs.even],
+        simp with parity_simps at this ⊢,
         tauto },
       { left,
         zify,
@@ -314,8 +305,7 @@ begin
           { apply nat.gcd_dvd_right } } },
       { have : ¬int.even (p + q),
         { rwa [hadd, int.even_coe_nat] },
-        simp with parity_simps at this,
-        simp [int.nat_abs.even],
+        simp with parity_simps at this ⊢,
         tauto },
       { right, left,
         zify,
@@ -401,19 +391,16 @@ begin
       norm_cast at hq },
     refine ⟨p.nat_abs, q.nat_abs, _, _, _, _, _⟩,
     { rw nat.pos_iff_ne_zero,
-      rw ne.def, -- XXX need int.nat_abs_ne_zero
-      rw int.nat_abs_eq_zero,
+      rw int.nat_abs_ne_zero,
       apply ne_of_gt,
       assumption, },
     { rw nat.pos_iff_ne_zero,
-      rw ne.def, -- XXX need int.nat_abs_ne_zero
-      rw int.nat_abs_eq_zero,
+      rw int.nat_abs_ne_zero,
       assumption, },
     { assumption },
     { have : ¬int.even (p + q),
       { rwa [hadd, int.even_coe_nat] },
-      simp with parity_simps at this,
-      simp [int.nat_abs.even],
+        simp with parity_simps at this ⊢,
       tauto },
     { right, right,
       rw  ←h,
@@ -578,15 +565,43 @@ begin
 end
 
 --example (n m : nat) : n < m → n + 1 ≤ m := by library_search
+example (m n k : int) (h : m % n = k) : n ∣ m - k := int.dvd_sub_of_mod_eq h
+--example (a b c n : nat) : a % n + b % n = c % n
+lemma nat.dvd_sub_of_mod_eq {a b c : ℕ} (h : a % b = c) : b ∣ a - c :=
+begin
+  have : c ≤ a,
+  { rw ←h, exact nat.mod_le a b },
+  rw ←int.coe_nat_dvd,
+  rw int.coe_nat_sub this,
+  apply int.dvd_sub_of_mod_eq,
+  rw ←int.coe_nat_mod, rw h,
+end
+
+theorem nat.one_le_of_not_even {n : ℕ} (h : ¬n.even) : 1 ≤ n :=
+begin
+  apply nat.succ_le_of_lt,
+  rw nat.pos_iff_ne_zero,
+  rintro rfl,
+  exact h nat.even_zero
+end
+
+
+lemma two_mul_add_one_of_not_odd (n : ℕ) : ¬n.even → ∃ m, n = 2 * m + 1 :=
+begin
+  intro h,
+  have : 1 ≤ n := nat.one_le_of_not_even h,
+  rw nat.not_even_iff at h,
+  obtain ⟨m, hm⟩ := nat.dvd_sub_of_mod_eq h,
+  use m,
+  rw  ←hm,
+  rw nat.sub_add_cancel this,
+end
+
 
 lemma two_mul_add_one_iff_not_odd (n : ℕ) : ¬n.even ↔ ∃ m, n = 2 * m + 1 :=
 begin
   split; intro h,
-  { have hn : 1 ≤ n,
-    { apply nat.succ_le_of_lt,
-      rw nat.pos_iff_ne_zero,
-      rintro rfl,
-      exact h nat.even_zero },
+  { have hn : 1 ≤ n := nat.one_le_of_not_even h,
     rw ←nat.even_succ at h,
     change (n + 1).even at h,
     obtain ⟨m, hm⟩ := h,
