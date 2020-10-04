@@ -585,35 +585,14 @@ begin
   exact h nat.even_zero
 end
 
-
-lemma two_mul_add_one_of_not_odd (n : ℕ) : ¬n.even → ∃ m, n = 2 * m + 1 :=
-begin
-  intro h,
-  have : 1 ≤ n := nat.one_le_of_not_even h,
-  rw nat.not_even_iff at h,
-  obtain ⟨m, hm⟩ := nat.dvd_sub_of_mod_eq h,
-  use m,
-  rw  ←hm,
-  rw nat.sub_add_cancel this,
-end
-
-
 lemma two_mul_add_one_iff_not_odd (n : ℕ) : ¬n.even ↔ ∃ m, n = 2 * m + 1 :=
 begin
   split; intro h,
   { have hn : 1 ≤ n := nat.one_le_of_not_even h,
-    rw ←nat.even_succ at h,
-    change (n + 1).even at h,
-    obtain ⟨m, hm⟩ := h,
-    have hmpos : 0 < m,
-    { rw nat.pos_iff_ne_zero,
-      rintro rfl,
-      rw [mul_zero] at hm,
-      exact nat.succ_ne_zero n hm },
-    use m - 1,
-    rw [nat.mul_sub_left_distrib, mul_one, ←hm],
-    norm_num,
-    rw nat.sub_add_cancel hn },
+    rw nat.not_even_iff at h,
+    obtain ⟨m, hm⟩ := nat.dvd_sub_of_mod_eq h,
+    use m,
+    rw [←hm, nat.sub_add_cancel hn] },
   { obtain ⟨m, hm⟩ := h,
     rw hm,
     apply nat.two_not_dvd_two_mul_add_one }
