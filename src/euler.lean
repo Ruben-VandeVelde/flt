@@ -571,8 +571,7 @@ lemma nat.dvd_sub_of_mod_eq {a b c : ℕ} (h : a % b = c) : b ∣ a - c :=
 begin
   have : c ≤ a,
   { rw ←h, exact nat.mod_le a b },
-  rw ←int.coe_nat_dvd,
-  rw int.coe_nat_sub this,
+  rw [←int.coe_nat_dvd, int.coe_nat_sub this],
   apply int.dvd_sub_of_mod_eq,
   rw ←int.coe_nat_mod, rw h,
 end
