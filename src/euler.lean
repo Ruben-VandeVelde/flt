@@ -1122,8 +1122,8 @@ begin
     rw ←h6 at h7,
     norm_num at h7,
     exact h7 },
-
-  have := factors' C D x z hodd HCDcoprime h6 _,
+  have h8' := nat.pos_iff_ne_zero.mpr h8,
+  have := factors' C D x z hodd h8' h6 _,
   obtain ⟨w, hwdvd, hwodd, hnform⟩ := this,
   have hwdvd' := dvd_trans hwdvd hzdvd',
   refine ⟨w, _, _, _, _⟩,
