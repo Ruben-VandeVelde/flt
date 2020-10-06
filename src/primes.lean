@@ -228,9 +228,15 @@ lemma dvd_of_dvd_add (a b c : nat) : a ∣ b + c → a ∣ b → a ∣ c :=
 begin
   intros H G,
   rw [←nat.add_sub_cancel c b, add_comm],
-  exact nat.dvd_sub (nat.le.intro rfl) H G,
+  exact nat.dvd_sub (nat.le_add_right b c) H G,
 end
 
+lemma dvd_of_dvd_add' (a b c : nat) : a ∣ b + c → a ∣ c → a ∣ b :=
+begin
+  intros H G,
+  rw [←nat.add_sub_cancel b c],
+  exact nat.dvd_sub (nat.le_add_left c b) H G,
+end
 lemma nat.pos_pow_iff {b : ℕ} (n : ℕ) (h : 0 < n) : 0 < b ↔ 0 < b ^ n :=
 begin
   split,
@@ -248,3 +254,99 @@ not_lt_of_ge (nat.le_of_dvd zero_lt_one $ by rw ←co; exact H) dgt1
 -/
 
 theorem int.nat_abs_ne_zero {a : ℤ} : a.nat_abs ≠ 0 ↔ a ≠ 0 := not_congr int.nat_abs_eq_zero
+
+lemma nat.split_factors
+  {a b : ℕ}
+  (a_pos : 0 < a)
+  (one_lt_b : 1 < b) :
+  ∃ k l : ℕ, a = b ^ k * l ∧ ¬(b ∣ l) :=
+begin
+  by_cases hdvd : b ∣ a,
+  { revert a_pos hdvd,
+    apply nat.strong_induction_on a,
+    intros a' IH a'_pos hdvd,
+    obtain ⟨c, hc⟩ := hdvd,
+    have c_pos : 0 < c,
+    { rw nat.pos_iff_ne_zero,
+      rintro rfl,
+      rw mul_zero at hc,
+      subst hc,
+      exact lt_irrefl _ a'_pos },
+    have hsmaller : c < a',
+    { rw [hc, lt_mul_iff_one_lt_left c_pos],
+      exact one_lt_b },
+    by_cases H : b ∣ c,
+    { obtain ⟨k', l', heqb, hnotdvd⟩ := IH c hsmaller c_pos H,
+      refine ⟨k' + 1, l', _, hnotdvd⟩,
+      rw [hc, heqb, pow_succ, mul_assoc] },
+    { refine ⟨1, c, _, H⟩,
+      rwa pow_one } },
+  { refine ⟨0, a, _, hdvd⟩,
+    rwa [pow_zero, one_mul] }
+end
+
+lemma nat.dvd_sub_of_mod_eq {a b c : ℕ} (h : a % b = c) : b ∣ a - c :=
+begin
+  have : c ≤ a,
+  { rw ←h, exact nat.mod_le a b },
+  rw [←int.coe_nat_dvd, int.coe_nat_sub this],
+  apply int.dvd_sub_of_mod_eq,
+  rw ←int.coe_nat_mod, rw h,
+end
+
+theorem nat.one_le_of_not_even {n : ℕ} (h : ¬n.even) : 1 ≤ n :=
+begin
+  apply nat.succ_le_of_lt,
+  rw nat.pos_iff_ne_zero,
+  rintro rfl,
+  exact h nat.even_zero
+end
+
+lemma two_mul_add_one_iff_not_odd (n : ℕ) : ¬n.even ↔ ∃ m, n = 2 * m + 1 :=
+begin
+  split; intro h,
+  { have hn : 1 ≤ n := nat.one_le_of_not_even h,
+    rw nat.not_even_iff at h,
+    obtain ⟨m, hm⟩ := nat.dvd_sub_of_mod_eq h,
+    use m,
+    rw [←hm, nat.sub_add_cancel hn] },
+  { obtain ⟨m, hm⟩ := h,
+    rw hm,
+    apply nat.two_not_dvd_two_mul_add_one }
+end
+
+lemma mod_four_of_odd {n : nat} (hodd: ¬n.even) : ∃ m, n = 4 * m - 1 ∨ n = 4 * m + 1 :=
+begin
+  rw two_mul_add_one_iff_not_odd at hodd,
+  obtain ⟨m, hm⟩ := hodd,
+  by_cases m.even,
+  { obtain ⟨k, hk⟩ := h,
+    use k,
+    right,
+    rw [hm, hk, ←mul_assoc],
+    norm_num },
+  { rw two_mul_add_one_iff_not_odd at h,
+    obtain ⟨k, hk⟩ := h,
+    use k + 1,
+    left,
+    rw [hm, hk],
+    ring }
+end
+
+lemma mod_four_of_odd' {n : nat} (hodd: ¬n.even) : ∃ m, n = 4 * m + 3 ∨ n = 4 * m + 1 :=
+begin
+  rw two_mul_add_one_iff_not_odd at hodd,
+  obtain ⟨m, hm⟩ := hodd,
+  by_cases m.even,
+  { obtain ⟨k, hk⟩ := h,
+    use k,
+    right,
+    rw [hm, hk, ←mul_assoc],
+    norm_num },
+  { rw two_mul_add_one_iff_not_odd at h,
+    obtain ⟨k, hk⟩ := h,
+    use k,
+    left,
+    rw [hm, hk],
+    ring, }
+end

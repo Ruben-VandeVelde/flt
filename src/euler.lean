@@ -3,6 +3,7 @@ import data.int.parity
 import data.nat.gcd
 import data.pnat.basic
 import algebra.euclidean_domain
+import algebra.gcd_monoid
 import tactic
 import data.nat.modeq
 import .primes
@@ -564,76 +565,6 @@ begin
   apply nat.not_coprime_of_dvd_of_dvd (by norm_num : 1 < 3) hdvdp hdvdq hcoprime,
 end
 
---example (n m : nat) : n < m → n + 1 ≤ m := by library_search
-example (m n k : int) (h : m % n = k) : n ∣ m - k := int.dvd_sub_of_mod_eq h
---example (a b c n : nat) : a % n + b % n = c % n
-lemma nat.dvd_sub_of_mod_eq {a b c : ℕ} (h : a % b = c) : b ∣ a - c :=
-begin
-  have : c ≤ a,
-  { rw ←h, exact nat.mod_le a b },
-  rw [←int.coe_nat_dvd, int.coe_nat_sub this],
-  apply int.dvd_sub_of_mod_eq,
-  rw ←int.coe_nat_mod, rw h,
-end
-
-theorem nat.one_le_of_not_even {n : ℕ} (h : ¬n.even) : 1 ≤ n :=
-begin
-  apply nat.succ_le_of_lt,
-  rw nat.pos_iff_ne_zero,
-  rintro rfl,
-  exact h nat.even_zero
-end
-
-lemma two_mul_add_one_iff_not_odd (n : ℕ) : ¬n.even ↔ ∃ m, n = 2 * m + 1 :=
-begin
-  split; intro h,
-  { have hn : 1 ≤ n := nat.one_le_of_not_even h,
-    rw nat.not_even_iff at h,
-    obtain ⟨m, hm⟩ := nat.dvd_sub_of_mod_eq h,
-    use m,
-    rw [←hm, nat.sub_add_cancel hn] },
-  { obtain ⟨m, hm⟩ := h,
-    rw hm,
-    apply nat.two_not_dvd_two_mul_add_one }
-end
-
-lemma mod_four_of_odd {n : nat} (hodd: ¬n.even) : ∃ m, n = 4 * m - 1 ∨ n = 4 * m + 1 :=
-begin
-  rw two_mul_add_one_iff_not_odd at hodd,
-  obtain ⟨m, hm⟩ := hodd,
-  by_cases m.even,
-  { obtain ⟨k, hk⟩ := h,
-    use k,
-    right,
-    rw [hm, hk, ←mul_assoc],
-    norm_num },
-  { rw two_mul_add_one_iff_not_odd at h,
-    obtain ⟨k, hk⟩ := h,
-    use k + 1,
-    left,
-    rw [hm, hk],
-    ring }
-end
-
-lemma mod_four_of_odd' {n : nat} (hodd: ¬n.even) : ∃ m, n = 4 * m + 3 ∨ n = 4 * m + 1 :=
-begin
-  rw two_mul_add_one_iff_not_odd at hodd,
-  obtain ⟨m, hm⟩ := hodd,
-  by_cases m.even,
-  { obtain ⟨k, hk⟩ := h,
-    use k,
-    right,
-    rw [hm, hk, ←mul_assoc],
-    norm_num },
-  { rw two_mul_add_one_iff_not_odd at h,
-    obtain ⟨k, hk⟩ := h,
-    use k,
-    left,
-    rw [hm, hk],
-    ring, }
-end
-
-
 lemma factors2
   {a b : ℕ}
   (heven : (a ^ 2 + 3 * b ^ 2).even) :
@@ -773,35 +704,6 @@ begin
     exact hcd }
 end
 
-lemma nat.split_factors
-  {a b : ℕ}
-  (a_pos : 0 < a)
-  (one_lt_b : 1 < b) :
-  ∃ k l : ℕ, a = b ^ k * l ∧ ¬(b ∣ l) :=
-begin
-  by_cases hdvd : b ∣ a,
-  { revert a_pos hdvd,
-    apply nat.strong_induction_on a,
-    intros a' IH a'_pos hdvd,
-    obtain ⟨c, hc⟩ := hdvd,
-    have c_pos : 0 < c,
-    { rw nat.pos_iff_ne_zero,
-      rintro rfl,
-      rw mul_zero at hc,
-      subst hc,
-      exact lt_irrefl _ a'_pos },
-    have hsmaller : c < a',
-    { rw [hc, lt_mul_iff_one_lt_left c_pos],
-      exact one_lt_b },
-    by_cases H : b ∣ c,
-    { obtain ⟨k', l', heqb, hnotdvd⟩ := IH c hsmaller c_pos H,
-      refine ⟨k' + 1, l', _, hnotdvd⟩,
-      rw [hc, heqb, pow_succ, mul_assoc] },
-    { refine ⟨1, c, _, H⟩,
-      rwa pow_one } },
-  { refine ⟨0, a, _, hdvd⟩,
-    rwa [pow_zero, one_mul] }
-end
 
 example (f g k : ℕ) (hodd : ¬f.even)
   (hdvd : 2 ^ k ∣ f * g) :
@@ -821,10 +723,12 @@ IH: ∀ a : list ℕ,
          
 -/
 
+/-
 lemma induction_factors {p : nat → Prop} (n : nat) (pos : 0 < n)
   (b : p 1)
   (h : ∀ k, (∀ m, m < k → p m) → p k)
   : p n := sorry
+-/
 
 lemma int.sq_plus_three_sq_eq_zero_iff {a b : ℤ} : a ^ 2 + 3 * b ^ 2 = 0 ↔ a = 0 ∧ b = 0 :=
 begin
@@ -844,6 +748,84 @@ lemma nat.sq_plus_three_sq_eq_zero_iff {a b : ℕ} : a ^ 2 + 3 * b ^ 2 = 0 ↔ a
 begin
   zify,
   exact int.sq_plus_three_sq_eq_zero_iff
+end
+
+lemma spts_mul_spts
+  {a b c d : ℕ} :
+  ∃ e f, (a ^ 2 + 3 * b ^ 2) * (c ^ 2 + 3 * d ^ 2) = e ^ 2 + 3 * f ^ 2 :=
+begin
+  use [(a * c - 3 * b * d : ℤ).nat_abs, a * d + b * c],
+  zify,
+  rw int.nat_abs_pow_two,
+  ring,
+end
+example (a b c : int) (h : a = b + c) : (a - c = b) := sub_eq_of_eq_add h
+lemma sq_plus_three_sq_prime_dvd (p q a b: ℕ)
+  (hprime : nat.prime (p ^ 2 + 3 * q ^ 2))
+  (h : p ^ 2 + 3 * q ^ 2 ∣ a ^ 2 + 3 * b ^ 2) :
+  ∃ c d, (p ^ 2 + 3 * q ^ 2) * (c ^ 2 + 3 * d ^ 2) = a ^ 2 + 3 * b ^ 2 :=
+begin
+  obtain ⟨f, hf⟩ := h,
+  rw hf,
+  have : ((p * b - a * q) * (p * b + a * q) : ℤ) = b ^ 2 * (p ^ 2 + 3 * q ^ 2) - q ^ 2 * (a ^ 2 + 3 * b ^ 2),
+  { ring },
+  have : ((p * b - a * q) * (p * b + a * q) : ℤ) = (p ^ 2 + 3 * q ^ 2) * (b ^ 2 - q ^ 2 * f),
+  { rw this,
+    zify at hf,
+    rw hf,
+    ring },
+  have h0 : p ^ 2 + 3 * q ^ 2 ∣ (p * b - a * q : ℤ).nat_abs ∨
+         p ^ 2 + 3 * q ^ 2 ∣ (p * b + a * q : ℤ).nat_abs,
+  { apply int.prime.dvd_mul hprime,
+    rw this,
+    norm_cast,
+    apply dvd_mul_right },
+  have h1 : (p ^ 2 + 3 * q ^ 2) * (a ^ 2 + 3 * b ^ 2) =
+            (p * a - 3 * q * b : ℤ).nat_abs ^ 2 + 3 * (p * b + a * q : ℤ).nat_abs ^ 2,
+  { zify,
+    rw int.nat_abs_pow_two,
+    rw int.nat_abs_pow_two,
+    ring },
+  cases h0 with h0 h0,
+  swap,
+  { obtain ⟨d, hd⟩ := h0,
+    obtain ⟨c, hc⟩ : (p ^ 2 + 3 * q ^ 2) ∣ (p * a - 3 * q * b : ℤ).nat_abs,
+    { apply @nat.prime.dvd_of_dvd_pow _ _ 2 hprime,
+      apply dvd_of_dvd_add' (p ^ 2 + 3 * q ^ 2),
+      { rw ←h1, exact dvd_mul_right _ _},
+      { apply dvd_mul_of_dvd_right,
+        rw ←int.coe_nat_dvd,
+        rw hd,
+        rw int.coe_nat_dvd,
+        apply dvd_pow _ two_ne_zero,
+        apply dvd_mul_right } },
+    use [c, d],
+    apply nat.eq_of_mul_eq_mul_left hprime.pos,
+    symmetry,
+    calc (p ^ 2 + 3 * q ^ 2) * ((p ^ 2 + 3 * q ^ 2) * f)
+        = (p ^ 2 + 3 * q ^ 2) * (a ^ 2 + 3 * b ^ 2) : by rw hf
+    ... = (p * a - 3 * q * b : ℤ).nat_abs ^ 2 +
+            3 * (p * b + a * q : ℤ).nat_abs ^ 2 : by rw h1
+    ... = ((p ^ 2 + 3 * q ^ 2) * c) ^ 2 +
+            3 * (p * b + a * q : ℤ).nat_abs ^ 2 : by rw hc
+    ... = ((p ^ 2 + 3 * q ^ 2) * c) ^ 2 +
+            3 * ((p ^ 2 + 3 * q ^ 2) * d) ^ 2 : by rw hd
+    ... = (p ^ 2 + 3 * q ^ 2) * (
+            (p ^ 2 + 3 * q ^ 2) * (c ^ 2 + 3 * d ^ 2)) : by ring,
+  },
+  { obtain ⟨F, hF⟩ := h0,
+    have : ((p * a + 3 * q * b) ^ 2 : ℤ) =
+           (p ^ 2 + 3 * q ^ 2) * (a ^ 2 + 3 * b ^ 2) - 3 * (p * b - a * q : ℤ).nat_abs ^ 2,
+    { rw int.nat_abs_pow_two, ring },
+    have : ((p * a + 3 * q * b) ^ 2 : ℤ) = (p ^ 2 + 3 * q ^ 2) * ((a ^ 2 + 3 * b ^ 2) - 3 * F ^ 2),
+    { rw this,
+      zify at hF,
+      rw hF,
+      ring,
+
+    },
+    sorry,
+  },
 end
 
 lemma factors'
