@@ -34,17 +34,17 @@ begin
     use [a / d, b / d, c / d],
     unfold flt_coprime,
     have hdpos : 0 < d := nat.gcd_pos_of_pos_left _ hpos.1,
-    have hdnpos : 0 < d ^ n := nat.pow_pos hdpos n,
+    have hdnpos : 0 < d ^ n := pow_pos hdpos n,
     have hsoln : (a / d) ^ n + (b / d) ^ n = (c / d) ^ n,
     { apply nat.eq_of_mul_eq_mul_right hdnpos,
       calc ((a / d) ^ n + (b / d) ^ n) * d ^ n
           = (a / d) ^ n * d ^ n + (b / d) ^ n * d ^ n : add_mul _ _ _
-      ... = (a / d * d) ^ n  + (b / d) ^ n * d ^ n : by rw nat.mul_pow
-      ... = (a / d * d) ^ n  + (b / d * d) ^ n : by rw nat.mul_pow (b / d)
+      ... = (a / d * d) ^ n  + (b / d) ^ n * d ^ n : by rw mul_pow
+      ... = (a / d * d) ^ n  + (b / d * d) ^ n : by rw mul_pow (b / d)
       ... = a ^ n + b ^ n : by rw [nat.div_mul_cancel ha, nat.div_mul_cancel hb]
       ... = c ^ n : h
       ... = (c / d * d) ^ n : by rw [nat.div_mul_cancel hc]
-      ... = (c / d) ^ n * d ^ n : by rw nat.mul_pow },
+      ... = (c / d) ^ n * d ^ n : by rw mul_pow },
     have hsoln' : (a / d) ^ n = (c / d) ^ n - (b / d) ^ n,
     {
       rw ←hsoln,
@@ -67,7 +67,7 @@ begin
     { exact hsoln },
     {exact nat.coprime_div_gcd_div_gcd hdpos,},
     { refine nat.coprime_of_dvd' _,
-      intros,
+      rintros k - a_1 a_2,
       have : k ∣ (b / d),
       { rw ←nat.pow_dvd_pow_iff hn,
         rw hsoln'',
@@ -84,7 +84,7 @@ begin
       change nat.coprime _ _,
       exact nat.coprime_div_gcd_div_gcd hdpos },
     { refine nat.coprime_of_dvd' _,
-      intros,
+      rintros k - a_1 a_2,
       have : k ∣ (a / d),
       { rw ←nat.pow_dvd_pow_iff hn,
         rw hsoln',
@@ -111,7 +111,7 @@ example (a b : nat) (h : a + b = 0 + b) : a = 0 := (add_left_inj b).mp h
 --example (n : nat) : 2 ≠ n ^ 2 := by suggest
 example (a b : nat) : a ^2 < b ^2 ↔  a < b := (nat.pow_lt2 a b).symm
 @[parity_simps]
-lemma int.nat_abs.even (p : ℤ ) : p.nat_abs.even ↔ p.even := int.coe_nat_dvd_left.symm
+lemma int.nat_abs.even (p : ℤ ) : even p.nat_abs ↔ even p := int.coe_nat_dvd_left.symm
 
 lemma descent1 (a b c : ℕ)
   (h : flt_coprime a b c 3) :
@@ -119,24 +119,24 @@ lemma descent1 (a b c : ℕ)
     0 < p ∧
     0 < q ∧
     p.gcd q = 1 ∧
-    (p.even ↔ ¬q.even) ∧
+    (even p ↔ ¬even q) ∧
     (2 * p * (p ^ 2 + 3 * q ^ 2) = a ^ 3 ∨
      2 * p * (p ^ 2 + 3 * q ^ 2) = b ^ 3 ∨
      2 * p * (p ^ 2 + 3 * q ^ 2) = c ^ 3) :=
 begin
   obtain ⟨hapos, hbpos, hcpos, h, habcoprime, haccoprime, hbccoprime⟩ := h,
-  have contra : ∀ {x y}, nat.coprime x y → x.even → y.even → false,
+  have contra : ∀ {x y}, nat.coprime x y → even x → even y → false,
   { intros x y hcoprime hx hy,
     have : 2 ∣ nat.gcd x y := nat.dvd_gcd hx hy,
     rw hcoprime.gcd_eq_one at this,
     norm_num at this },
   have :
-    ((a.even ∧ ¬b.even ∧ ¬c.even) ∨  
-     (¬a.even ∧ b.even ∧ ¬c.even)) ∨  
-    (¬a.even ∧ ¬b.even ∧ c.even),
-  { by_cases haparity : a.even;
-    by_cases hbparity : b.even;
-    by_cases hcparity : c.even,
+    ((even a ∧ ¬even b ∧ ¬even c) ∨  
+     (¬even a ∧ even b ∧ ¬even c)) ∨  
+     (¬even a ∧ ¬even b ∧ even c),
+  { by_cases haparity : even a;
+    by_cases hbparity : even b;
+    by_cases hcparity : even c,
     { exact false.elim (contra habcoprime ‹_› ‹_›) },
     { exact false.elim (contra habcoprime ‹_› ‹_›) },
     { exact false.elim (contra haccoprime ‹_› ‹_›) },
@@ -154,9 +154,9 @@ begin
     cases this,
     {
       rcases this with ⟨ha, hb, hc⟩,
-      obtain ⟨p, hp⟩ : int.even (c - b),
+      obtain ⟨p, hp⟩ : even (c - b : ℤ),
       { simp [hb, hc] with parity_simps},
-      obtain ⟨q, hq⟩ : int.even (c + b),
+      obtain ⟨q, hq⟩ : even (c + b : ℤ),
       { simp [hb, hc] with parity_simps},
       have hadd : p + q = c,
       { apply int.eq_of_mul_eq_mul_right two_ne_zero,
@@ -195,7 +195,7 @@ begin
           rw nat.pow_lt3,
           rw ←h,
           apply nat.lt_add_of_pos_left,
-          apply nat.pow_pos,
+          apply pow_pos,
           exact hapos },
         { norm_num }
         
@@ -219,7 +219,7 @@ begin
           apply dvd_add; rw int.coe_nat_dvd_left,
           { apply nat.gcd_dvd_left },
           { apply nat.gcd_dvd_right } } },
-      { have : ¬int.even (p + q),
+      { have : ¬even (p + q),
         { rwa [hadd, int.even_coe_nat] },
         simp with parity_simps at this ⊢,
         tauto },
@@ -240,9 +240,9 @@ begin
     },   
     {
       rcases this with ⟨ha, hb, hc⟩,
-      obtain ⟨p, hp⟩ : int.even (c - a),
+      obtain ⟨p, hp⟩ : even (c - a : ℤ),
       { simp [ha, hc] with parity_simps},
-      obtain ⟨q, hq⟩ : int.even (c + a),
+      obtain ⟨q, hq⟩ : even (c + a : ℤ),
       { simp [ha, hc] with parity_simps},
       have hadd : p + q = c,
       { apply int.eq_of_mul_eq_mul_right two_ne_zero,
@@ -280,7 +280,7 @@ begin
           rw nat.pow_lt3,
           rw ←h,
           apply nat.lt_add_of_pos_right,
-          apply nat.pow_pos,
+          apply pow_pos,
           exact hbpos },
         { norm_num }
         
@@ -304,7 +304,7 @@ begin
           apply dvd_add; rw int.coe_nat_dvd_left,
           { apply nat.gcd_dvd_left },
           { apply nat.gcd_dvd_right } } },
-      { have : ¬int.even (p + q),
+      { have : ¬even (p + q),
         { rwa [hadd, int.even_coe_nat] },
         simp with parity_simps at this ⊢,
         tauto },
@@ -326,9 +326,9 @@ begin
   },
   {
     rcases this with ⟨ha, hb, hc⟩,
-    obtain ⟨p, hp⟩ : int.even (a + b),
+    obtain ⟨p, hp⟩ : even (a + b : ℤ),
     { simp [ha, hb] with parity_simps},
-    obtain ⟨q, hq⟩ : int.even (a - b),
+    obtain ⟨q, hq⟩ : even (a - b : ℤ),
     { simp [ha, hb] with parity_simps},
     have hadd : p + q = a,
     { apply int.eq_of_mul_eq_mul_right two_ne_zero,
@@ -399,7 +399,7 @@ begin
       rw int.nat_abs_ne_zero,
       assumption, },
     { assumption },
-    { have : ¬int.even (p + q),
+    { have : ¬even (p + q),
       { rwa [hadd, int.even_coe_nat] },
         simp with parity_simps at this ⊢,
       tauto },
@@ -440,7 +440,7 @@ lemma descent2 (a b c : ℕ)
     0 < p ∧
     0 < q ∧
     p.gcd q = 1 ∧
-    (p.even ↔ ¬q.even) ∧
+    (even p ↔ ¬even q) ∧
     (2 * p * (p ^ 2 + 3 * q ^ 2) = a ^ 3 ∨
      2 * p * (p ^ 2 + 3 * q ^ 2) = b ^ 3 ∨
      2 * p * (p ^ 2 + 3 * q ^ 2) = c ^ 3) ∧
@@ -469,7 +469,7 @@ lemma gcd1or3
   (p q : ℕ)
   (hp : 0 < p) (hq : 0 < q)
   (hcoprime : nat.coprime p q)
-  (hparity : nat.even p ↔ ¬nat.even q) :
+  (hparity : even p ↔ ¬even q) :
   nat.gcd (2 * p) (p ^ 2 + 3 * q ^ 2) = 1 ∨ nat.gcd (2 * p) (p ^ 2 + 3 * q ^ 2) = 3 :=
 begin
   let g := nat.gcd (2 * p) (p ^ 2 + 3 * q ^ 2),
@@ -486,7 +486,7 @@ begin
   { intros d hdprime hdleft hdright,
     have hne2 : d ≠ 2,
     { rintro rfl,
-      change nat.even _ at hdright,
+      change even _ at hdright,
       simp [hparity, two_ne_zero] with parity_simps at hdright,
       assumption },
     have : 2 < d := lt_of_le_of_ne (hdprime.two_le) hne2.symm,
@@ -539,7 +539,7 @@ begin
   refine ⟨k, hg, _⟩,
   by_contra H,
   push_neg at H,
-  rw ←nat.pow_eq_mul_pow_sub _ H at hg,
+  rw ←pow_mul_pow_sub _ H at hg,
   have hdvdp : 3 ∣ p,
   { suffices : 3 ∣ 2 * p,
     { apply dvd_mul_cancel_prime this (by norm_num) nat.prime_two nat.prime_three },
@@ -567,20 +567,20 @@ end
 
 lemma factors2
   {a b : ℕ}
-  (heven : (a ^ 2 + 3 * b ^ 2).even) :
+  (heven : even (a ^ 2 + 3 * b ^ 2)) :
   ∃ c d, a ^ 2 + 3 * b ^ 2 = 4 * (c ^ 2 + 3 * d ^ 2) :=
 begin
-  have hparity : a.even ↔ b.even,
+  have hparity : even a ↔ even b,
   { simp [two_ne_zero] with parity_simps at heven, assumption },
 
-  by_cases h : a.even,
+  by_cases h : even a,
   {
     obtain ⟨d, hd⟩ := hparity.mp h,
     obtain ⟨c, hc⟩ := h,
     use [c, d],
     rw [hc, hd],
     ring },
-  { have : ¬b.even,
+  { have : ¬even b,
     { rwa ←hparity },
 
     obtain ⟨m, hm⟩ := mod_four_of_odd' h,
@@ -654,7 +654,7 @@ begin
   have hsmaller : b < a',
   { rw [hb, lt_mul_iff_one_lt_left hbpos],
     norm_num },
-  by_cases H : b.even,
+  by_cases H : even b,
   { obtain ⟨k', l', heqb, hnotdvd⟩ := IH b hsmaller hbpos H,
     refine ⟨k' + 1, l', _, hnotdvd⟩,
     rw [hb, heqb, pow_succ, mul_assoc] },
@@ -665,16 +665,16 @@ end
 lemma factors2''
   {a b : ℕ}
   (hnontrivial : a ^ 2 + 3 * b ^ 2 ≠ 0)
-  (heven : (a ^ 2 + 3 * b ^ 2).even) :
+  (heven : even (a ^ 2 + 3 * b ^ 2)) :
   ∃ c d k : ℕ,
     a ^ 2 + 3 * b ^ 2 = 4 ^ k * (c ^ 2 + 3 * d ^ 2) ∧
-    ¬(c ^ 2 + 3 * d ^ 2).even :=
+    ¬even (c ^ 2 + 3 * d ^ 2) :=
 begin
   suffices : ∀ s a b : ℕ,
     s = a ^ 2 + 3 * b ^ 2 →
     s ≠ 0 →
-    s.even →
-    ∃ c d k : ℕ, s = 4 ^ k * (c ^ 2 + 3 * d ^ 2) ∧ ¬(c ^ 2 + 3 * d ^ 2).even,
+    even s →
+    ∃ c d k : ℕ, s = 4 ^ k * (c ^ 2 + 3 * d ^ 2) ∧ ¬even (c ^ 2 + 3 * d ^ 2),
   {
     exact this ( a ^ 2 + 3 * b ^ 2 ) a b rfl hnontrivial heven,
   },
@@ -705,7 +705,7 @@ begin
 end
 
 
-example (f g k : ℕ) (hodd : ¬f.even)
+example (f g k : ℕ) (hodd : ¬even f)
   (hdvd : 2 ^ k ∣ f * g) :
   2 ^ k ∣ g :=
 begin
@@ -831,14 +831,14 @@ lemma nat.lt_mul_left (a b : nat) (h : 1 < b) (h' : 0 < a): a < b * a := by {
 } 
 lemma factors'
   (a b f g : ℕ)
-  (hodd : ¬f.even)
+  (hodd : ¬even f)
   (hgpos : 0 < g)
   (hfactor : f * g = (a ^ 2 + 3 * b ^ 2))
   (hnotform : ¬∃p q, f = p ^ 2 + 3 * q ^ 2)
   :
   ∃ f',
     f' ∣ g ∧
-    ¬f'.even ∧
+    ¬even f' ∧
     ¬∃p q, f' = p ^ 2 + 3 * q ^ 2 :=
 begin
   contrapose! hnotform,
@@ -887,7 +887,7 @@ begin
         rw nat.succ_le_iff,
         exact hgpos },
       obtain ⟨p, pprime, pdvd⟩ := nat.exists_prime_and_dvd this,
-      have podd : ¬p.even,
+      have podd : ¬even p,
       { rcases pprime.eq_two_or_odd with (rfl|hodd),
         { contrapose! H,
           rw ←hfactor,
@@ -931,7 +931,7 @@ example (a b : ℤ ) (h : a ≤ b) : 0 ≤ b - a := sub_nonneg.mpr h
 example (a : ℤ ) (h : 0 ≤ a) : abs a = a := abs_of_nonneg h
 
 lemma factor_div (a x : ℕ)
-  (hodd : ¬x.even)
+  (hodd : ¬even x)
   (h0' : 0 < x) :
   ∃ (m : ℕ) (c : ℤ), c + ↑m * ↑x = ↑a ∧ 2 * c.nat_abs < x :=
 begin
@@ -977,7 +977,7 @@ end
 lemma factors
   (a b x : ℕ)
   (hcoprime : nat.gcd a b = 1)
-  (hodd : ¬nat.even x)
+  (hodd : ¬even x)
   (hfactor : x ∣ (a ^ 2 + 3 * b ^ 2)) :
   ∃ c d, x = c ^ 2 + 3 * d ^ 2 :=
 begin
@@ -1158,7 +1158,7 @@ lemma obscure
   (p q : ℕ)
   (hp : 0 < p) (hq : 0 < q)
   (hcoprime : nat.gcd p q = 1)
-  (hparity : nat.even p ↔ ¬nat.even q)
+  (hparity : even p ↔ ¬even q)
   (hcube : ∃ r, p ^ 2 + 3 * q ^ 2 = r ^ 3) :
   ∃ a b,
     0 < b ∧
@@ -1166,13 +1166,13 @@ lemma obscure
     p = a ^ 3 - 9 * a * b ^ 2 ∧
     q = 3 * a ^ 2 * b - 3 * b ^ 3 ∧
     nat.gcd a b = 1 ∧
-    (nat.even a ↔ ¬nat.even b) :=
+    (even a ↔ ¬even b) :=
 begin
   -- (1)
   obtain ⟨u, hu⟩ := hcube,
 
   -- (2)
-  have hodd : ¬nat.even u,
+  have hodd : ¬even u,
   { rw ←nat.even_pow' (dec_trivial : ¬ 3 = 0),
     rw ←hu,
     simp [(dec_trivial : ¬ 3 = 0)] with parity_simps,
@@ -1238,22 +1238,22 @@ gcd(a,b)=1 [since otherwise, any common factor would divide p and q].
 -/
   -- (9)
   {
-    by_cases haparity : a.even; by_cases hbparity : b.even,
+    by_cases haparity : even a; by_cases hbparity : even b,
     { exfalso,
-      have : nat.even p,
+      have : even p,
       { rw hp',
         simp [haaa, haparity, hbparity, (by norm_num : 3 ≠ 0)] with parity_simps },
-      have : nat.even q,
+      have : even q,
       { rw hq',
         simp [hbbb, haparity, hbparity, (by norm_num : 3 ≠ 0)] with parity_simps },
       tauto },
     { tauto },
     { tauto },
     { exfalso,
-      have : nat.even p,
+      have : even p,
       { rw hp',
         simp [haaa, haparity, hbparity, (by norm_num : 3 ≠ 0)] with parity_simps },
-      have : nat.even q,
+      have : even q,
       { rw hq',
         simp [hbbb, haparity, hbparity, (by norm_num : 3 ≠ 0)] with parity_simps },
       tauto } }
@@ -1300,7 +1300,7 @@ lemma descent_gcd1 (a b c p q : ℕ)
   (hp : 0 < p)
   (hq : 0 < q)
   (hcoprime : p.gcd q = 1)
-  (hodd : p.even ↔ ¬q.even)
+  (hodd : even p ↔ ¬even q)
   (hcube : 2 * p * (p ^ 2 + 3 * q ^ 2) = a ^ 3 ∨
              2 * p * (p ^ 2 + 3 * q ^ 2) = b ^ 3 ∨
                2 * p * (p ^ 2 + 3 * q ^ 2) = c ^ 3)
@@ -1320,7 +1320,7 @@ begin
     [use a, use b, use c];
     exact hcube },
   have hposleft : 0 < 2 * p := nat.mul_pos zero_lt_two hp,
-  have hposright : 0 < p ^ 2 + 3 * q ^ 2 := nat.add_pos_left (nat.pos_pow_of_pos 2 hp) _,
+  have hposright : 0 < p ^ 2 + 3 * q ^ 2 := nat.add_pos_left (pow_pos hp 2) _,
   have hcubeleft : ∃ s, 2 * p = s ^ 3 := nat.eq_pow_of_mul_eq_pow hposleft hposright hgcd hr,
   have hcuberight : ∃ t, p ^ 2 + 3 * q ^ 2 = t ^ 3,
   { rw mul_comm at hr,
@@ -1332,7 +1332,7 @@ begin
     p = u ^ 3 - 9 * u * v ^ 2 ∧
     q = 3 * u ^ 2 * v - 3 * v ^ 3 ∧
     nat.gcd u v = 1 ∧
-    (nat.even u ↔ ¬nat.even v) := obscure p q hp hq hcoprime hodd hcuberight,
+    (even u ↔ ¬even v) := obscure p q hp hq hcoprime hodd hcuberight,
   have upos : 0 < u := lt_of_le_of_lt (nat.zero_le _) huv,
   have : 9 * v ^ 2 = (3 * v) ^ 2,
   { zify, ring },
@@ -1352,9 +1352,9 @@ begin
   calc 2 * p
       = 2 * (u * (u - 3 * v) * (u + 3 * v)) : by rw hpfactor
   ... = (2 * u) * (u - 3 * v) * (u + 3 * v) : by ring,
-  have : ¬ nat.even (u - 3 * v),
+  have : ¬even (u - 3 * v),
   { simp [le_of_lt ‹ 3 * v < u›, huvodd] with parity_simps },
-  have : ¬ nat.even (u + 3 * v),
+  have : ¬even (u + 3 * v),
   { simp [huvodd] with parity_simps },
   have husub_le_uadd : (u - 3 * v) ≤ (u + 3 * v),
   { transitivity u,
@@ -1362,7 +1362,7 @@ begin
     exact nat.le.intro rfl },
   have notdvd_2_2 : ¬(2 ∣ u - 3 * v),
   { intro hd2,
-    exact ‹¬ nat.even (u - 3 * v)› hd2 },
+    exact ‹¬even (u - 3 * v)› hd2 },
   have huadd_add_usub : 2 * u = (u + 3 * v) + (u - 3 * v),
   { zify [(le_of_lt huv)],
     ring },
@@ -1377,7 +1377,7 @@ begin
   { intro H,
     have : 3 ∣ p ^ 2 + 3 * q ^ 2,
     { apply nat.dvd_add,
-      { rw nat.pow_two,
+      { rw pow_two,
         apply dvd_mul_of_dvd_right H },
       { apply dvd_mul_right } },
     have : 3 ∣ 2 * p := dvd_mul_of_dvd_right H 2,
@@ -1503,14 +1503,14 @@ begin
   rw mul_comm,
   rw mul_pow,
   rw nat.mul_div_cancel _ hpos,
-  rw nat.mul_div_cancel _ (nat.pow_pos hpos k),
+  rw nat.mul_div_cancel _ (pow_pos hpos k),
 end.
 
 lemma descent_gcd3 (a b c p q : ℕ)
   (hp : 0 < p)
   (hq : 0 < q)
   (hcoprime : p.gcd q = 1)
-  (hodd : p.even ↔ ¬q.even)
+  (hodd : even p ↔ ¬even q)
   (hcube : 2 * p * (p ^ 2 + 3 * q ^ 2) = a ^ 3 ∨
              2 * p * (p ^ 2 + 3 * q ^ 2) = b ^ 3 ∨
                2 * p * (p ^ 2 + 3 * q ^ 2) = c ^ 3)
@@ -1551,14 +1551,14 @@ begin
     rw ←hcoprime,
     exact nat.dvd_gcd hkdvdp hkdvdright },
   
-  have hodd' : q.even ↔ ¬s.even,
-  { have : p.even ↔ s.even,
+  have hodd' : even q ↔ ¬even s,
+  { have : even p ↔ even s,
     { simp [hs] with parity_simps },
     rw this at hodd,
     tauto },
   have hcoprime'' : nat.coprime (3^2 * 2 * s) (q ^ 2 + 3 * s ^ 2),
   { have : ¬(2 ∣ (q ^ 2 + 3 * s ^ 2)),
-    { change ¬(nat.even _),
+    { change ¬(even _),
       simp [hs, two_ne_zero, hodd'] with parity_simps },
 
     have : ¬(3 ∣ (q ^ 2 + 3 * s ^ 2)),
@@ -1595,7 +1595,7 @@ begin
   { linarith },
   have : 0 < q ^ 2 + 3 * s ^ 2,
   { apply nat.add_pos_right,
-    apply nat.mul_pos (by norm_num : 0 < 3) (nat.pow_pos hspos _) },
+    apply nat.mul_pos (by norm_num : 0 < 3) (pow_pos hspos _) },
   have hcubeleft : ∃ e, 3 ^ 2 * 2 * s = e ^ 3,
   { rw hps at hr,
     exact nat.eq_pow_of_mul_eq_pow ‹_› ‹_› hcoprime'' hr },
@@ -1610,7 +1610,7 @@ begin
     q = u ^ 3 - 9 * u * v ^ 2 ∧
     s = 3 * u ^ 2 * v - 3 * v ^ 3 ∧
     nat.gcd u v = 1 ∧
-    (nat.even u ↔ ¬nat.even v) := obscure q s hq hspos hcoprime'.symm hodd' hcuberight,
+    (even u ↔ ¬even v) := obscure q s hq hspos hcoprime'.symm hodd' hcuberight,
   have hu : 0 < u := lt_of_le_of_lt (nat.zero_le _) huv,
   have huv' : v < u,
   { apply lt_of_le_of_lt _ huv,
@@ -1626,9 +1626,9 @@ begin
     exact nat.le.intro rfl },
 
   -- 6.
-  have haddodd : ¬(u + v).even,
+  have haddodd : ¬even (u + v),
   { simp [huvodd] with parity_simps },
-  have hsubodd : ¬(u - v).even,
+  have hsubodd : ¬even (u - v),
   { simp [huvodd, le_of_lt huv'] with parity_simps },
 
   have haddcoprime : nat.coprime (u + v) (2 * v),

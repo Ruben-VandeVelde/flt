@@ -66,7 +66,7 @@ begin
 
       calc n
           = 2 ^ k : h2
-      ... = 2 ^ 2 * 2 ^ (k - 2) : (nat.pow_eq_mul_pow_sub _ h3).symm
+      ... = 2 ^ 2 * 2 ^ (k - 2) : (pow_mul_pow_sub _ h3).symm
       ... = 4 * 2 ^ (k - 2) : by norm_num,
       },
     { left, refl } },
@@ -183,7 +183,7 @@ lemma nat.pow_lt3 (a b : ℕ) : a < b ↔ a ^ 3 < b ^ 3 := begin
 
 end
 
-lemma nat.even_pow' {m n : nat} (h : n ≠ 0) : nat.even (m^n) ↔ nat.even m :=
+lemma nat.even_pow' {m n : nat} (h : n ≠ 0) : even (m^n) ↔ even m :=
 begin
   rw [nat.even_pow], tauto,
 end
@@ -240,12 +240,16 @@ end
 lemma nat.pos_pow_iff {b : ℕ} (n : ℕ) (h : 0 < n) : 0 < b ↔ 0 < b ^ n :=
 begin
   split,
-  apply nat.pos_pow_of_pos,
-  rw [nat.pos_iff_ne_zero, nat.pos_iff_ne_zero],
-  contrapose!,
-  rintro rfl,
-  apply nat.zero_pow h,
+  { intro h,
+    apply pow_pos h },
+  { rw [nat.pos_iff_ne_zero, nat.pos_iff_ne_zero],
+    contrapose!,
+    rintro rfl,
+    apply zero_pow h }
 end
+
+theorem pos_pow_of_pos {b : ℕ} (n : ℕ) (h : 0 < b) : 0 < b^n := pow_pos h n
+
 /-
 theorem not_coprime_of_dvd_gcd {m n d : ℕ} (dgt1 : 1 < d) (H : d ∣ nat.gcd m n) :
   ¬ nat.coprime m n :=
@@ -294,7 +298,7 @@ begin
   rw ←int.coe_nat_mod, rw h,
 end
 
-theorem nat.one_le_of_not_even {n : ℕ} (h : ¬n.even) : 1 ≤ n :=
+theorem nat.one_le_of_not_even {n : ℕ} (h : ¬even n) : 1 ≤ n :=
 begin
   apply nat.succ_le_of_lt,
   rw nat.pos_iff_ne_zero,
@@ -302,24 +306,17 @@ begin
   exact h nat.even_zero
 end
 
-lemma two_mul_add_one_iff_not_odd (n : ℕ) : ¬n.even ↔ ∃ m, n = 2 * m + 1 :=
+lemma two_mul_add_one_iff_not_odd (n : ℕ) : ¬even n ↔ ∃ m, n = 2 * m + 1 :=
 begin
-  split; intro h,
-  { have hn : 1 ≤ n := nat.one_le_of_not_even h,
-    rw nat.not_even_iff at h,
-    obtain ⟨m, hm⟩ := nat.dvd_sub_of_mod_eq h,
-    use m,
-    rw [←hm, nat.sub_add_cancel hn] },
-  { obtain ⟨m, hm⟩ := h,
-    rw hm,
-    apply nat.two_not_dvd_two_mul_add_one }
+  rw ←nat.odd_iff_not_even,
+  refl,
 end
 
-lemma mod_four_of_odd {n : nat} (hodd: ¬n.even) : ∃ m, n = 4 * m - 1 ∨ n = 4 * m + 1 :=
+lemma mod_four_of_odd {n : nat} (hodd: ¬even n) : ∃ m, n = 4 * m - 1 ∨ n = 4 * m + 1 :=
 begin
   rw two_mul_add_one_iff_not_odd at hodd,
   obtain ⟨m, hm⟩ := hodd,
-  by_cases m.even,
+  by_cases even m,
   { obtain ⟨k, hk⟩ := h,
     use k,
     right,
@@ -333,11 +330,11 @@ begin
     ring }
 end
 
-lemma mod_four_of_odd' {n : nat} (hodd: ¬n.even) : ∃ m, n = 4 * m + 3 ∨ n = 4 * m + 1 :=
+lemma mod_four_of_odd' {n : nat} (hodd: ¬even n) : ∃ m, n = 4 * m + 3 ∨ n = 4 * m + 1 :=
 begin
   rw two_mul_add_one_iff_not_odd at hodd,
   obtain ⟨m, hm⟩ := hodd,
-  by_cases m.even,
+  by_cases even m,
   { obtain ⟨k, hk⟩ := h,
     use k,
     right,
@@ -356,3 +353,6 @@ iff.intro
   (assume h, let ⟨ca, ha⟩ := nat.gcd_dvd_left a b, ⟨cb, hb⟩ := nat.gcd_dvd_right a b in
     by rw [h, nat.zero_mul] at ha hb; exact ⟨ha, hb⟩)
   (assume ⟨ha, hb⟩, by rw [ha, hb, nat.gcd_zero_left])
+
+theorem nat.pow_two_sub_pow_two (a b : ℕ) : a ^ 2 - b ^ 2 = (a + b) * (a - b) :=
+by { simp only [pow_two], exact nat.mul_self_sub_mul_self_eq a b }
