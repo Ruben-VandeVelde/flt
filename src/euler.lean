@@ -832,7 +832,6 @@ lemma nat.lt_mul_left (a b : nat) (h : 1 < b) (h' : 0 < a): a < b * a := by {
 lemma factors'
   (a b f g : ℕ)
   (hodd : ¬f.even)
---  (hcoprime : nat.gcd a b = 1)
   (hgpos : 0 < g)
   (hfactor : f * g = (a ^ 2 + 3 * b ^ 2))
   (hnotform : ¬∃p q, f = p ^ 2 + 3 * q ^ 2)
@@ -843,23 +842,12 @@ lemma factors'
     ¬∃p q, f' = p ^ 2 + 3 * q ^ 2 :=
 begin
   contrapose! hnotform,
-  /-
-  have hgpos : 0 < g,
-  { rw nat.pos_iff_ne_zero,
-    rintro rfl,
-    rw [mul_zero] at hfactor,
-    obtain ⟨rfl, rfl⟩ := nat.sq_plus_three_sq_eq_zero_iff.mp hfactor.symm,
-    rw [nat.gcd_zero_right] at hcoprime,
-    exact zero_ne_one hcoprime },
-  -/
   revert g a b,
   intro g',
   apply g'.strong_induction_on _,
---  intros g IH a b hcoprime hfactor hnotform hgpos,
   intros g IH a b hgpos hfactor hnotform,
   by_cases H : 2 ∣ a ^ 2 + 3 * b ^ 2,
-  {
-    obtain ⟨c, d, hcd⟩ := factors2 H,
+  { obtain ⟨c, d, hcd⟩ := factors2 H,
     obtain ⟨g', hg'⟩ : 2 ^ 2 ∣ g,
     { apply @nat.coprime.dvd_of_dvd_mul_left f _ (2 ^ 2) _ _,
       { apply nat.coprime.symm,
@@ -877,43 +865,18 @@ begin
       rcases hfactor with (rfl|rfl),
       { exact hodd nat.even_zero },
       { exact (lt_irrefl 0) hgpos } },
-/-
-    obtain ⟨c', d', hcd', hc', hd'⟩ := nat.exists_coprime hgcdcd,
-    set G := nat.gcd c d with hG,
-    obtain ⟨m, hm⟩ : (4 * G ^ 2) ∣ g := sorry,
-    have : 1 < m := sorry,
-    have h111 : 0 < 4 * G ^ 2,
-    {
-      have := pow_pos hgcdcd 2,
-      linarith
-    },
-    have h111' : 1 ≤ G ^ 2,
-    { rw nat.succ_le_iff, exact pow_pos hgcdcd 2 }, 
-    refine IH m _ c' d' _ _ _ _,
--/
     refine IH g' _ c d _ _ _,
-    { rw hg', apply nat.lt_mul_left,
-      { linarith },
-      { linarith } },
-    { rw hg' at hgpos, linarith, },
-    { /-have h000 : 4 * G ^ 2 * (c' ^ 2 + 3 * d' ^ 2) = 4 * (c ^ 2 + 3 * d ^ 2),
-      { rw [hc', hd'],
-        ring },
-      
-      rw ←nat.mul_right_inj h111,
-      rw h000,
-
-      rw [←hcd, ←hfactor, hm],-/
-      rw ←nat.mul_right_inj (by norm_num : 0 < 4),
-      rw [←hcd, ←hfactor, hg'],
+    { rw hg',
+      apply nat.lt_mul_left; linarith },
+    { rw hg' at hgpos,
+      linarith, },
+    { rw [←nat.mul_right_inj (by norm_num : 0 < 4), ←hcd, ←hfactor, hg'],
       ring },
     { intros f' hf'dvd hf'odd,
       refine hnotform f' _ hf'odd,
       rw hg',
-      apply dvd_mul_of_dvd_right hf'dvd },
-  },
-  {
-    by_cases g = 1,
+      apply dvd_mul_of_dvd_right hf'dvd } },
+  { by_cases g = 1,
     { subst h,
       rw mul_one at hfactor,
       exact ⟨_, _, hfactor⟩ },
@@ -930,115 +893,39 @@ begin
           rw ←hfactor,
           apply dvd_mul_of_dvd_right pdvd },
         { exact nat.not_even_iff.mpr hodd } },
-      have := hnotform p pdvd podd,
+      obtain ⟨A, B, hAB⟩ := hnotform p pdvd podd,
+      have pdvd' : A ^ 2 + 3 * B ^ 2 ∣ a ^ 2 + 3 * b ^ 2,
+      { rw ←hAB,
+        apply dvd_trans pdvd,
+        rw ←hfactor,
+        exact dvd_mul_left g f },
+      rw hAB at pprime,
+      obtain ⟨c, d, hcd⟩ := sq_plus_three_sq_prime_dvd A B _ _ pprime pdvd',
       obtain ⟨q, hq⟩ := pdvd,
-      refine IH q _ _ _ _ _ _,
-      { rw hq,
+      refine IH q _ c d _ _ _,
+      { rw [hq, hAB],
         apply nat.lt_mul_left _ _ pprime.one_lt,
         rw hq at hgpos,
-        linarith [pprime.one_lt] },
-      sorry,
+        rw nat.pos_iff_ne_zero at hgpos ⊢,
+        contrapose! hgpos,
+        subst hgpos,
+        rw mul_zero },
+      { rw hq at hgpos,
+        rw nat.pos_iff_ne_zero,
+        rintro rfl,
+        norm_num at hgpos },
+      { rw ←nat.mul_right_inj pprime.pos,
+        rw hcd,
+        rw ←hfactor,
+        rw hq,
+        rw ←hAB,
+        ring },
+      { intros f' hf'dvd hf'odd,
+        refine hnotform f' _ hf'odd,
+        rw hq,
+        apply dvd_mul_of_dvd_right hf'dvd },
     } }
-/-
-  obtain ⟨k, l, heq, hdvd⟩ := nat.split_factors hgpos one_lt_two,
-  subst heq,
-  have : 2 ∣ a ^ 2 + 3 * b ^ 2 → 2 ^ 2 ∣ g,
-  {
-    intro h,
-    obtain ⟨c, d, hcd⟩ := factors2 h,
-    apply @nat.coprime.dvd_of_dvd_mul_left f _ (2 ^ 2) _ _,
-    { apply nat.coprime.symm,
-      exact nat.prime.coprime_pow_of_not_dvd nat.prime_two hodd },
-    { rw [hfactor, hcd],
-      exact dvd_mul_right _ _ },
-  },
--/
-/-
-  have : ∃ c d, l = (c ^ 2 + 3 * d ^ 2) ∧ ¬(c ^ 2 + 3 * d ^ 2).even,
-  {
-    induction k,
---      by_cases H : 2 ∣ a ^ 2 + 3 * b ^ 2,
---    { obtain ⟨x, hx⟩ := this H,
-    { /-have : k = 0,
-      {
-        rw ←hfactor at H,
-        rw nat.prime.dvd_mul nat.prime_two at H,
-        push_neg at H,
-        obtain ⟨-, Hg⟩ := H,
-        contrapose! Hg with k_ne_zero,
-        rw heq,
-        apply dvd_mul_of_dvd_left,
-        exact dvd_pow (dvd_refl _) k_ne_zero },-/
-      
-      simp only [one_mul, nat.pow_zero] at *,
---      obtain ⟨c, d, hcd⟩ := hnotform g (dvd_refl g) hdvd,
-      obtain ⟨c, d, hcd⟩ := hnotform l (dvd_refl l) hdvd,
-      refine ⟨c, d, hcd, _⟩,
-      { rw ←hcd, exact hdvd }
-    },
-    {
-      have : (a ^ 2 + 3 * b ^ 2).even,
-      { rw ←hfactor,
-        rw nat.succ_eq_add_one, -- XXX add to simp set?
-        simp with parity_simps },
-      obtain ⟨c, d, hcd⟩ := factors2 this,
-      have := k_ih _ _ _ _,
-      {exact this},
-      { intros,
-        sorry,
-
-      },
-      {sorry},
-      {sorry},
-      {sorry},
-    },
-
-  },
--/
-
-/-
-  obtain ⟨g', prod_factors⟩ : ∃ g' : list ℕ, g'.prod = g := ⟨g.factors, nat.prod_factors hgpos ⟩,
-  induction g',
-  { rw [list.prod_nil] at prod_factors,
-    rw [←prod_factors, mul_one] at hfactor,
-    exact ⟨a, b, hfactor⟩ },
-  {
-
-    sorry,
-  },
--/
-
-/-
-  have : 2 ∣ a ^ 2 + 3 * b ^ 2 → ∃ c d, g = 2 ^ 2 * (c ^ 2 + 3 * d ^ 2),
-  {
-    intro h,
-    obtain ⟨c, d, hcd⟩ := factors2 h,
-    use [c, d],
-    apply @nat.coprime.dvd_of_dvd_mul_left f _ (2 ^ 2) _ _,
-    { apply nat.coprime.symm,
-      exact nat.prime.coprime_pow_of_not_dvd nat.prime_two hodd },
-    { rw [←hg, hcd],
-      exact dvd_mul_right _ _ },
-  },
--/
-  all_goals { sorry },
-
 end
-/-
-(4) In this series, we can replace all instances of 2 with instances of 4.
-
-    (a) We know that if 2 divides a2 + 3b2, then 4 divides it. [See here for proof]
-    (b) We know that f is odd so each instance of 4 necessarily divides g
-
-
-(5) Now we can divide all instances of 4 from g and from a2 + 3b2 and still have a result in the form of p2 + 3q2. [See here for proof]
-
-(6) Likewise, we can divide all odd primes from g since we are assuming that all odd factors take the form p2 + 3q2. [The proof is found here.]
-
-(7) But then this leaves f = p2 + 3q2 which is a contradiction.
-
-(8) Therefore, we reject our assumption.
--/
 
 example (a b : ℤ ) (h : a ≤ b) : 0 ≤ b - a := sub_nonneg.mpr h
 example (a : ℤ ) (h : 0 ≤ a) : abs a = a := abs_of_nonneg h
