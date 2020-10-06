@@ -864,6 +864,7 @@ begin
       exact dvd_mul_right _ _ },
   },
 -/
+/-
   have : ∃ c d, l = (c ^ 2 + 3 * d ^ 2) ∧ ¬(c ^ 2 + 3 * d ^ 2).even,
   {
     induction k,
@@ -904,6 +905,9 @@ begin
     },
 
   },
+-/
+
+/-
   obtain ⟨g', prod_factors⟩ : ∃ g' : list ℕ, g'.prod = g := ⟨g.factors, nat.prod_factors hgpos ⟩,
   induction g',
   { rw [list.prod_nil] at prod_factors,
@@ -913,6 +917,8 @@ begin
 
     sorry,
   },
+-/
+
 /-
   have : 2 ∣ a ^ 2 + 3 * b ^ 2 → ∃ c d, g = 2 ^ 2 * (c ^ 2 + 3 * d ^ 2),
   {
