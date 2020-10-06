@@ -825,11 +825,15 @@ begin
     rw [←hf, h1', hc, hd],
     ring },
 end
-
+lemma nat.lt_mul_left (a b : nat) (h : 1 < b) (h' : 0 < a): a < b * a := by {
+  convert nat.mul_lt_mul h (le_refl _) h',
+  rw one_mul
+} 
 lemma factors'
   (a b f g : ℕ)
   (hodd : ¬f.even)
-  (hcoprime : nat.gcd a b = 1)
+--  (hcoprime : nat.gcd a b = 1)
+  (hgpos : 0 < g)
   (hfactor : f * g = (a ^ 2 + 3 * b ^ 2))
   (hnotform : ¬∃p q, f = p ^ 2 + 3 * q ^ 2)
   :
@@ -839,6 +843,7 @@ lemma factors'
     ¬∃p q, f' = p ^ 2 + 3 * q ^ 2 :=
 begin
   contrapose! hnotform,
+  /-
   have hgpos : 0 < g,
   { rw nat.pos_iff_ne_zero,
     rintro rfl,
@@ -846,13 +851,70 @@ begin
     obtain ⟨rfl, rfl⟩ := nat.sq_plus_three_sq_eq_zero_iff.mp hfactor.symm,
     rw [nat.gcd_zero_right] at hcoprime,
     exact zero_ne_one hcoprime },
-  revert g,
+  -/
+  revert g a b,
   intro g',
   apply g'.strong_induction_on _,
-  intros g IH hfactor hnotform hgpos,
+--  intros g IH a b hcoprime hfactor hnotform hgpos,
+  intros g IH a b hgpos hfactor hnotform,
+  by_cases H : 2 ∣ a ^ 2 + 3 * b ^ 2,
+  {
+    obtain ⟨c, d, hcd⟩ := factors2 H,
+    obtain ⟨g', hg'⟩ : 2 ^ 2 ∣ g,
+    { apply @nat.coprime.dvd_of_dvd_mul_left f _ (2 ^ 2) _ _,
+      { apply nat.coprime.symm,
+        exact nat.prime.coprime_pow_of_not_dvd nat.prime_two hodd },
+      { rw [hfactor, hcd],
+        exact dvd_mul_right _ _ } },
+    have hgcdcd : 0 < nat.gcd c d,
+    { rw nat.pos_iff_ne_zero,
+      intro H',
+      obtain ⟨rfl, rfl⟩ := nat.gcd_eq_zero_iff.mp H',
+      norm_num at hcd,
+      obtain rfl := pow_eq_zero hcd.left,
+      obtain rfl := pow_eq_zero hcd.right,
+      norm_num at hfactor,
+      rcases hfactor with (rfl|rfl),
+      { exact hodd nat.even_zero },
+      { exact (lt_irrefl 0) hgpos } },
+/-
+    obtain ⟨c', d', hcd', hc', hd'⟩ := nat.exists_coprime hgcdcd,
+    set G := nat.gcd c d with hG,
+    obtain ⟨m, hm⟩ : (4 * G ^ 2) ∣ g := sorry,
+    have : 1 < m := sorry,
+    have h111 : 0 < 4 * G ^ 2,
+    {
+      have := pow_pos hgcdcd 2,
+      linarith
+    },
+    have h111' : 1 ≤ G ^ 2,
+    { rw nat.succ_le_iff, exact pow_pos hgcdcd 2 }, 
+    refine IH m _ c' d' _ _ _ _,
+-/
+    refine IH g' _ c d _ _ _,
+    { rw hg', apply nat.lt_mul_left,
+      { linarith },
+      { linarith } },
+    { rw hg' at hgpos, linarith, },
+    { /-have h000 : 4 * G ^ 2 * (c' ^ 2 + 3 * d' ^ 2) = 4 * (c ^ 2 + 3 * d ^ 2),
+      { rw [hc', hd'],
+        ring },
+      
+      rw ←nat.mul_right_inj h111,
+      rw h000,
+
+      rw [←hcd, ←hfactor, hm],-/
+      rw ←nat.mul_right_inj (by norm_num : 0 < 4),
+      rw [←hcd, ←hfactor, hg'],
+      ring },
+    { intros f' hf'dvd hf'odd,
+      refine hnotform f' _ hf'odd,
+      rw hg',
+      apply dvd_mul_of_dvd_right hf'dvd },
+  },
+/-
   obtain ⟨k, l, heq, hdvd⟩ := nat.split_factors hgpos one_lt_two,
   subst heq,
-/-
   have : 2 ∣ a ^ 2 + 3 * b ^ 2 → 2 ^ 2 ∣ g,
   {
     intro h,

@@ -350,3 +350,9 @@ begin
     rw [hm, hk],
     ring, }
 end
+
+@[simp] theorem nat.gcd_eq_zero_iff {a b : ℕ} : nat.gcd a b = 0 ↔ a = 0 ∧ b = 0 :=
+iff.intro
+  (assume h, let ⟨ca, ha⟩ := nat.gcd_dvd_left a b, ⟨cb, hb⟩ := nat.gcd_dvd_right a b in
+    by rw [h, nat.zero_mul] at ha hb; exact ⟨ha, hb⟩)
+  (assume ⟨ha, hb⟩, by rw [ha, hb, nat.gcd_zero_left])
