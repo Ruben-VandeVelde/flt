@@ -801,29 +801,9 @@ begin
         apply dvd_mul_right } },
     use [c, d],
     apply nat.eq_of_mul_eq_mul_left hprime.pos,
-    symmetry,
-    calc (p ^ 2 + 3 * q ^ 2) * ((p ^ 2 + 3 * q ^ 2) * f)
-        = (p ^ 2 + 3 * q ^ 2) * (a ^ 2 + 3 * b ^ 2) : by rw hf
-    ... = (p * a - 3 * q * b : ℤ).nat_abs ^ 2 +
-            3 * (p * b + a * q : ℤ).nat_abs ^ 2 : by rw h1
-    ... = ((p ^ 2 + 3 * q ^ 2) * c) ^ 2 +
-            3 * (p * b + a * q : ℤ).nat_abs ^ 2 : by rw hc
-    ... = ((p ^ 2 + 3 * q ^ 2) * c) ^ 2 +
-            3 * ((p ^ 2 + 3 * q ^ 2) * d) ^ 2 : by rw hd
-    ... = (p ^ 2 + 3 * q ^ 2) * (
-            (p ^ 2 + 3 * q ^ 2) * (c ^ 2 + 3 * d ^ 2)) : by ring,
-  },
-  { obtain ⟨F, hF⟩ := h0,
-    have : ((p * a + 3 * q * b) ^ 2 : ℤ) =
-           (p ^ 2 + 3 * q ^ 2) * (a ^ 2 + 3 * b ^ 2) - 3 * (p * b - a * q : ℤ).nat_abs ^ 2,
-    { rw int.nat_abs_pow_two, ring },
-    have : ((p * a + 3 * q * b) ^ 2 : ℤ) = (p ^ 2 + 3 * q ^ 2) * ((a ^ 2 + 3 * b ^ 2) - 3 * F ^ 2),
-    { rw this,
-      zify at hF,
-      rw hF,
-      ring,
-
-    },
+    rw [←hf, h1, hc, hd],
+    ring },
+  { obtain ⟨d, hd⟩ := h0,
     sorry,
   },
 end
