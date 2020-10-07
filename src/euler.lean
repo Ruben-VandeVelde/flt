@@ -1746,10 +1746,8 @@ lemma flt_three
   (hpos : 0 < a ∧ 0 < b ∧ 0 < c) :
   a ^ 3 + b ^ 3 ≠ c ^ 3 :=
 begin
-  revert a b c,
   suffices h : ∀ k a b c : ℕ, k = a * b * c → (0 < a ∧ 0 < b ∧ 0 < c) → a ^ 3 + b ^ 3 ≠ c ^ 3,
-  { intros a b c hpos,
-    exact h (a * b * c) a b c rfl hpos },
+  { exact h (a * b * c) a b c rfl hpos },
   intro k,
   refine nat.strong_induction_on k _,
   intros k' IH x y z hk hpos H,
