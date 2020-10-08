@@ -323,3 +323,13 @@ iff.intro
 
 theorem nat.pow_two_sub_pow_two (a b : ℕ) : a ^ 2 - b ^ 2 = (a + b) * (a - b) :=
 by { simp only [pow_two], exact nat.mul_self_sub_mul_self_eq a b }
+
+lemma div_pow (n m k : nat) (h : m ∣ n) (hpos : 0 < m) : (n / m) ^ k = (n ^ k) / (m ^ k) :=
+begin
+  obtain ⟨d, hd⟩ := h,
+  rw hd,
+  rw mul_comm,
+  rw mul_pow,
+  rw nat.mul_div_cancel _ hpos,
+  rw nat.mul_div_cancel _ (pow_pos hpos k),
+end.

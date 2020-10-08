@@ -1495,16 +1495,6 @@ begin
     ring },
 end
 
-lemma div_pow (n m k : nat) (h : m ∣ n) (hpos : 0 < m) : (n / m) ^ k = (n ^ k) / (m ^ k) :=
-begin
-  obtain ⟨d, hd⟩ := h,
-  rw hd,
-  rw mul_comm,
-  rw mul_pow,
-  rw nat.mul_div_cancel _ hpos,
-  rw nat.mul_div_cancel _ (pow_pos hpos k),
-end.
-
 lemma descent_gcd3 (a b c p q : ℕ)
   (hp : 0 < p)
   (hq : 0 < q)
