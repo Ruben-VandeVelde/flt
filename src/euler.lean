@@ -1307,9 +1307,9 @@ lemma descent_gcd1 (a b c p q : ℕ)
   (h : flt_coprime a b c 3)
   (hgcd : (2 * p).gcd (p ^ 2 + 3 * q ^ 2) = 1) :
   ∃ (a' b' c' : ℕ),
-    0 < a' ∧
-      0 < b' ∧
-        0 < c' ∧ a' * b' * c' < a * b * c ∧ a' ^ 3 + b' ^ 3 = c' ^ 3 :=
+    0 < a' ∧ 0 < b' ∧ 0 < c' ∧
+    a' ^ 3 * b' ^ 3 * c' ^ 3 ≤ 2 * p ∧
+    a' ^ 3 + b' ^ 3 = c' ^ 3 :=
 begin
   -- 2.
   obtain ⟨hapos, hbpos, hcpos, h, habcoprime, haccoprime, hbccoprime⟩ := h,
@@ -1484,12 +1484,9 @@ begin
     subst huvcoprime,
     norm_num at huv,
     },
-  { rw ←nat.pow_lt_iff_lt_left (by norm_num : 1 ≤ 3),
-    iterate 4 {rw mul_pow},
-    rw [mul_comm, ←mul_assoc (C^3)],
+  { rw [mul_comm, ←mul_assoc (C^3)],
     rw [←HA, ←HB, ←HC],
-    rw ←‹2 * p = _›,
-    assumption },
+    rw ←‹2 * p = _› },
   { rw [←HA, ←HB, ←HC],
     zify [le_of_lt huv],
     ring },
@@ -1507,9 +1504,9 @@ lemma descent_gcd3 (a b c p q : ℕ)
   (h : flt_coprime a b c 3)
   (hgcd : (2 * p).gcd (p ^ 2 + 3 * q ^ 2) = 3) :
   ∃ (a' b' c' : ℕ),
-    0 < a' ∧
-      0 < b' ∧
-        0 < c' ∧ a' * b' * c' < a * b * c ∧ a' ^ 3 + b' ^ 3 = c' ^ 3 :=
+    0 < a' ∧ 0 < b' ∧ 0 < c' ∧
+    a' ^ 3 * b' ^ 3 * c' ^ 3 ≤ 2 * p ∧
+    a' ^ 3 + b' ^ 3 = c' ^ 3 :=
 begin
   obtain ⟨hapos, hbpos, hcpos, h, habcoprime, haccoprime, hbccoprime⟩ := h,
   -- 1.
@@ -1696,8 +1693,7 @@ begin
   refine ⟨A, B, C, HApos, HBpos, HCpos, _, _⟩,
 
   -- 9.
-  { rw ←nat.pow_lt_iff_lt_left (by norm_num : 1 ≤ 3),
-    iterate 4 {rw mul_pow},
+  { apply le_of_lt,
     calc A ^ 3 * B ^ 3 * C ^ 3
         = 2 * v * (u - v) * (u + v) : by rw [←HA, ←HB, ←HC]
     ... = 2 * (v * (u - v) * (u + v)) : by ring
@@ -1705,8 +1701,7 @@ begin
     ... = s : by {rw [hq], zify [le_of_lt huv', le_of_lt huv'''], ring }
     ... < 3 * s : by linarith
     ... = p : hs.symm
-    ... < 2 * p : by linarith
-    ... < _ : haaa, },
+    ... < 2 * p : by linarith },
 
   -- 8.
   { calc A ^ 3 + B ^ 3
@@ -1723,6 +1718,17 @@ begin
   -- 3.
   have := descent2 a b c h,
   obtain ⟨p, q, hp, hq, hcoprime, hodd, hcube, haaa⟩ := this,
+
+  suffices : ∃ a' b' c',
+    0 < a' ∧ 0 < b' ∧ 0 < c' ∧
+    a' ^ 3 * b' ^ 3 * c' ^ 3 ≤ 2 * p ∧
+    a' ^ 3 + b' ^ 3 = c' ^ 3,
+  { obtain ⟨a', b', c', ha', hb', hc', hsmaller, hsolution⟩ := this,
+    refine ⟨a', b', c', ha', hb', hc', _, hsolution⟩,
+    rw ←nat.pow_lt_iff_lt_left (by norm_num : 1 ≤ 3),
+    iterate 4 {rw mul_pow},
+    exact lt_of_le_of_lt hsmaller haaa },
+
   -- 4.
   cases gcd1or3 p q hp hq hcoprime hodd with hgcd hgcd,
   -- 5.
