@@ -150,39 +150,6 @@ begin
   { assumption },
 end
 
-lemma nat.pow_lt2 (a b : ℕ) : a < b ↔ a ^ 2 < b ^ 2 := begin
-  rw [pow_two, pow_two],
-  split,
-  { intro h',
-    apply nat.mul_lt_mul'; linarith,
-  },
-  { contrapose!,
-    intro h',
-    apply nat.mul_le_mul h' h',
-  }
-
-end
-lemma nat.pow_lt3 (a b : ℕ) : a < b ↔ a ^ 3 < b ^ 3 := begin
-  rw pow_succ a,
-  rw pow_succ b,
-  split,
-  { intro h,
-    have := (nat.pow_lt2 a b).mp h,
-    apply nat.mul_lt_mul'; linarith,
-  },
-  {
-    contrapose!,
-    intro h',
-    apply nat.mul_le_mul h',
-    cases lt_or_eq_of_le h',
-    { apply le_of_lt,
-      rw ←nat.pow_lt2 b a,
-      exact h },
-    { subst h },
-  }
-
-end
-
 lemma nat.even_pow' {m n : nat} (h : n ≠ 0) : even (m^n) ↔ even m :=
 begin
   rw [nat.even_pow], tauto,

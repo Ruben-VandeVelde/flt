@@ -109,7 +109,6 @@ example (p n : nat) (h0 : p ≤ n) (h1 : n ≤ p) : n = p := le_antisymm h1 h0
 example (a b : nat) (h : a + b = 0 + b) : a = 0 := (add_left_inj b).mp h
 --open euclidean_domain
 --example (n : nat) : 2 ≠ n ^ 2 := by suggest
-example (a b : nat) : a ^2 < b ^2 ↔  a < b := (nat.pow_lt2 a b).symm
 @[parity_simps]
 lemma int.nat_abs.even (p : ℤ ) : even p.nat_abs ↔ even p := int.coe_nat_dvd_left.symm
 
@@ -192,7 +191,7 @@ begin
         { rw ←hp,
           rw sub_pos,
           norm_cast,
-          rw nat.pow_lt3,
+          rw ←nat.pow_lt_iff_lt_left (by norm_num : 1 ≤ 3),
           rw ←h,
           apply nat.lt_add_of_pos_left,
           apply pow_pos,
@@ -277,7 +276,7 @@ begin
         { rw ←hp,
           rw sub_pos,
           norm_cast,
-          rw nat.pow_lt3,
+          rw ←nat.pow_lt_iff_lt_left (by norm_num : 1 ≤ 3),
           rw ←h,
           apply nat.lt_add_of_pos_right,
           apply pow_pos,
@@ -1485,7 +1484,7 @@ begin
     subst huvcoprime,
     norm_num at huv,
     },
-  { rw nat.pow_lt3,
+  { rw ←nat.pow_lt_iff_lt_left (by norm_num : 1 ≤ 3),
     iterate 4 {rw mul_pow},
     rw [mul_comm, ←mul_assoc (C^3)],
     rw [←HA, ←HB, ←HC],
@@ -1617,7 +1616,7 @@ begin
     apply nat.le_mul_of_pos_left,
     norm_num },
   have huv'' : v ^ 3 < u ^ 2 * v,
-  { rwa [pow_succ, mul_comm, mul_lt_mul_right hv, ←nat.pow_lt2] },
+  { rwa [pow_succ, mul_comm, mul_lt_mul_right hv, nat.pow_lt_iff_lt_left one_le_two] },
   have huv''' : 3 * v ^ 3 < 3 * u ^ 2 * v,
   { rwa [mul_assoc, mul_lt_mul_left (by norm_num : 0 < 3)] },
   have huv'''' : u - v ≤ u + v,
@@ -1707,7 +1706,7 @@ begin
   refine ⟨A, B, C, HApos, HBpos, HCpos, _, _⟩,
 
   -- 9.
-  { rw nat.pow_lt3,
+  { rw ←nat.pow_lt_iff_lt_left (by norm_num : 1 ≤ 3),
     iterate 4 {rw mul_pow},
     calc A ^ 3 * B ^ 3 * C ^ 3
         = 2 * v * (u - v) * (u + v) : by rw [←HA, ←HB, ←HC]
