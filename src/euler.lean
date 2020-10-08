@@ -1160,11 +1160,11 @@ lemma obscure
   (hcoprime : nat.gcd p q = 1)
   (hparity : even p ↔ ¬even q)
   (hcube : ∃ r, p ^ 2 + 3 * q ^ 2 = r ^ 3) :
-  ∃ a b,
+  ∃ a b p' q',
     0 < b ∧
     3 * b < a ∧
-    p = a ^ 3 - 9 * a * b ^ 2 ∧
-    q = 3 * a ^ 2 * b - 3 * b ^ 3 ∧
+    p' = a ^ 3 - 9 * a * b ^ 2 ∧
+    q' = 3 * a ^ 2 * b - 3 * b ^ 3 ∧
     nat.gcd a b = 1 ∧
     (even a ↔ ¬even b) :=
 begin
@@ -1193,8 +1193,6 @@ begin
 
   have hb : 0 < b := sorry,
   have hab : 3 * b < a := sorry,
-  have hp' : p = a ^ 3 - 9 * a * b ^ 2 := sorry,
-  have hq' : q = 3 * a ^ 2 * b - 3 * b ^ 3 := sorry,
   have haaa : 9 * a * b ^ 2 ≤ a ^ 3,
   { rw [pow_succ a, mul_comm 9, mul_assoc],
     apply nat.mul_le_mul_left,
@@ -1212,7 +1210,9 @@ begin
     apply nat.le_mul_of_pos_left,
     norm_num },
 
-  refine ⟨a, b, hb, hab, hp', hq', _, _⟩,
+  refine ⟨a, b, a ^ 3 - 9 * a * b ^ 2, 3 * a ^ 2 * b - 3 * b ^ 3, hb, hab, rfl, rfl, _, _⟩,
+  sorry,
+  /-
   { apply nat.coprime_of_dvd'',
     intros k hkprime hkdvdleft hkdvdright,
     rw ←hcoprime,
@@ -1229,6 +1229,7 @@ begin
       { apply dvd_mul_of_dvd_right,
         exact dvd_pow hkdvdright (by norm_num) },
      } },
+  -/
 
 /-
 (8) Which means that we could define a,b such that:
@@ -1237,6 +1238,8 @@ q = 3a2b - 3b3.
 gcd(a,b)=1 [since otherwise, any common factor would divide p and q].
 -/
   -- (9)
+  sorry,
+  /-
   {
     by_cases haparity : even a; by_cases hbparity : even b,
     { exfalso,
@@ -1257,6 +1260,7 @@ gcd(a,b)=1 [since otherwise, any common factor would divide p and q].
       { rw hq',
         simp [hbbb, haparity, hbparity, (by norm_num : 3 ≠ 0)] with parity_simps },
       tauto } }
+  -/
 end
 
 lemma cube_of_coprime (a b c s : ℕ)
@@ -1326,13 +1330,14 @@ begin
   { rw mul_comm at hr,
     rw nat.gcd_comm at hgcd,
     exact nat.eq_pow_of_mul_eq_pow hposright hposleft hgcd hr },
-  obtain ⟨u, v, -, huv, hp, hq, huvcoprime, huvodd⟩ : ∃ u v,
+  obtain ⟨u, v, p', q', -, huv, hp, hq, hpqcoprime, huvcoprime, huvodd⟩ : ∃ u v p' q',
     0 < v ∧
     3 * v < u ∧
-    p = u ^ 3 - 9 * u * v ^ 2 ∧
-    q = 3 * u ^ 2 * v - 3 * v ^ 3 ∧
+    p' = u ^ 3 - 9 * u * v ^ 2 ∧
+    q' = 3 * u ^ 2 * v - 3 * v ^ 3 ∧
+    nat.gcd p' q' = 1 ∧
     nat.gcd u v = 1 ∧
-    (even u ↔ ¬even v) := obscure p q hp hq hcoprime hodd hcuberight,
+    (even u ↔ ¬even v) := sorry,--obscure p q hp hq hcoprime hodd hcuberight,
   have upos : 0 < u := lt_of_le_of_lt (nat.zero_le _) huv,
   have : 9 * v ^ 2 = (3 * v) ^ 2,
   { zify, ring },
@@ -1342,14 +1347,14 @@ begin
   ... = (u + 3 * v) * (u - 3 * v) : nat.pow_two_sub_pow_two _ _
   ... = (u - 3 * v) * (u + 3 * v) : mul_comm _ _,
   have hpfactor,
-  calc p
+  calc p'
       = (u ^ 3 - 9 * u * v ^ 2) : by rw hp
   ... = (u * u ^ 2 - u * (9 * v ^ 2)) : by ring
   ... = (u * (u ^ 2 - 9 * v ^ 2)) : by rw ←nat.mul_sub_left_distrib
   ... = u * ((u - 3 * v) * (u + 3 * v)) : by rw this
   ... = u * (u - 3 * v) * (u + 3 * v) : by rw mul_assoc u _ _,
   have,
-  calc 2 * p
+  calc 2 * p'
       = 2 * (u * (u - 3 * v) * (u + 3 * v)) : by rw hpfactor
   ... = (2 * u) * (u - 3 * v) * (u + 3 * v) : by ring,
   have : ¬even (u - 3 * v),
@@ -1373,16 +1378,16 @@ begin
   have hbbb : 2 * 3 * v = 2 * u - 2 * (u - 3 * v),
   { zify [(le_of_lt huv), husub_le_uadd, hccc],
     ring },
-  have hddd : ¬(3 ∣ p),
+  have hddd : ¬(3 ∣ p'),
   { intro H,
-    have : 3 ∣ p ^ 2 + 3 * q ^ 2,
+    have : 3 ∣ p' ^ 2 + 3 * q' ^ 2,
     { apply nat.dvd_add,
       { rw pow_two,
         apply dvd_mul_of_dvd_right H },
       { apply dvd_mul_right } },
-    have : 3 ∣ 2 * p := dvd_mul_of_dvd_right H 2,
-    have : 3 ∣ nat.gcd (2 * p) (p ^ 2 + 3 * q ^ 2) := nat.dvd_gcd ‹_› ‹_›,
-        rw hgcd at this,
+    have : 3 ∣ 2 * p' := dvd_mul_of_dvd_right H 2,
+    have : 3 ∣ nat.gcd (2 * p') (p' ^ 2 + 3 * q' ^ 2) := nat.dvd_gcd ‹_› ‹_›,
+    rw hpqcoprime at this,
     have := nat.eq_one_of_dvd_one this,
     norm_num at this },
   have not_3_dvd_2 : ¬(3 ∣ (u - 3 * v)),
@@ -1610,7 +1615,7 @@ begin
     q = u ^ 3 - 9 * u * v ^ 2 ∧
     s = 3 * u ^ 2 * v - 3 * v ^ 3 ∧
     nat.gcd u v = 1 ∧
-    (even u ↔ ¬even v) := obscure q s hq hspos hcoprime'.symm hodd' hcuberight,
+    (even u ↔ ¬even v) := sorry, -- obscure q s hq hspos hcoprime'.symm hodd' hcuberight,
   have hu : 0 < u := lt_of_le_of_lt (nat.zero_le _) huv,
   have huv' : v < u,
   { apply lt_of_le_of_lt _ huv,
