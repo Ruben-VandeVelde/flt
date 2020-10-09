@@ -46,17 +46,9 @@ begin
       ... = (c / d * d) ^ n : by rw [nat.div_mul_cancel hc]
       ... = (c / d) ^ n * d ^ n : by rw mul_pow },
     have hsoln' : (a / d) ^ n = (c / d) ^ n - (b / d) ^ n,
-    {
-      rw ←hsoln,
-      rw nat.add_sub_cancel,
-    },
+    { rw [←hsoln, nat.add_sub_cancel] },
     have hsoln'' : (b / d) ^ n = (c / d) ^ n - (a / d) ^ n,
-    {
-      have := hsoln,
-      rw add_comm at this,
-      rw ←this,
-      rw nat.add_sub_cancel,
-    },
+    { rw [←hsoln, add_comm, nat.add_sub_cancel] },
     refine ⟨_, _, _, _, _, _, _, _, _, _⟩,
     { apply nat.div_le_self },
     { apply nat.div_le_self },
@@ -65,7 +57,7 @@ begin
     { refine nat.div_pos (nat.le_of_dvd hpos.2.1 ‹_›) hdpos },
     { refine nat.div_pos (nat.le_of_dvd hpos.2.2 ‹_›) hdpos },
     { exact hsoln },
-    {exact nat.coprime_div_gcd_div_gcd hdpos,},
+    { exact nat.coprime_div_gcd_div_gcd hdpos },
     { refine nat.coprime_of_dvd' _,
       rintros k - a_1 a_2,
       have : k ∣ (b / d),
@@ -1333,20 +1325,20 @@ begin
     nat.gcd u v = 1 ∧
     (even u ↔ ¬even v) := obscure p q hp hq hcoprime hodd hcuberight,
   have upos : 0 < u := lt_of_le_of_lt (nat.zero_le _) huv,
-  have : 9 * v ^ 2 = (3 * v) ^ 2,
-  { zify, ring },
-  have,
-  calc u ^ 2 - 9 * v ^ 2
-      = u ^ 2 - (3 * v) ^ 2 : by rw this
-  ... = (u + 3 * v) * (u - 3 * v) : nat.pow_two_sub_pow_two _ _
-  ... = (u - 3 * v) * (u + 3 * v) : mul_comm _ _,
   have hpfactor,
-  calc p
-      = (u ^ 3 - 9 * u * v ^ 2) : by rw hp
-  ... = (u * u ^ 2 - u * (9 * v ^ 2)) : by ring
-  ... = (u * (u ^ 2 - 9 * v ^ 2)) : by rw ←nat.mul_sub_left_distrib
-  ... = u * ((u - 3 * v) * (u + 3 * v)) : by rw this
-  ... = u * (u - 3 * v) * (u + 3 * v) : by rw mul_assoc u _ _,
+  { have : 9 * v ^ 2 = (3 * v) ^ 2,
+    { zify, ring },
+    have,
+    calc u ^ 2 - 9 * v ^ 2
+        = u ^ 2 - (3 * v) ^ 2 : by rw this
+    ... = (u + 3 * v) * (u - 3 * v) : nat.pow_two_sub_pow_two _ _
+    ... = (u - 3 * v) * (u + 3 * v) : mul_comm _ _,
+    calc p
+        = (u ^ 3 - 9 * u * v ^ 2) : by rw hp
+    ... = (u * u ^ 2 - u * (9 * v ^ 2)) : by ring
+    ... = (u * (u ^ 2 - 9 * v ^ 2)) : by rw ←nat.mul_sub_left_distrib
+    ... = u * ((u - 3 * v) * (u + 3 * v)) : by rw this
+    ... = u * (u - 3 * v) * (u + 3 * v) : by rw mul_assoc u _ _ },
   have,
   calc 2 * p
       = 2 * (u * (u - 3 * v) * (u + 3 * v)) : by rw hpfactor
@@ -1676,7 +1668,8 @@ begin
     ... = (3 ^ 3 * (2 * (u ^ 2 * v - v ^ 3))) / 3 ^ 3 : by rw hxxx
     ... = ((2 * (u ^ 2 * v - v ^ 3)) * 3 ^ 3) / 3 ^ 3 : by rw mul_comm
     ... = 2 * (u ^ 2 * v - v ^ 3) : nat.mul_div_cancel _ (by norm_num : 0 < 3 ^ 3)
-    ... = 2 * v * (u - v) * (u + v) : by { zify [huv''.le, huv'.le], ring }
+    ... = 2 * v * (u ^ 2 - v ^ 2) : by rw [mul_assoc, mul_comm v, nat.mul_sub_right_distrib, pow_succ' v]
+    ... = 2 * v * (u - v) * (u + v) : by { rw nat.pow_two_sub_pow_two, ring }
   },
   obtain ⟨A, B, C, HApos, HBpos, HCpos, HA, HB, HC⟩ : ∃ X Y Z,
     0 < X ∧ 0 < Y ∧ 0 < Z ∧
