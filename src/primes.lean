@@ -155,29 +155,6 @@ begin
   rw [nat.even_pow], tauto,
 end
 
-namespace nat
-
-theorem coprime_of_dvd_prime {m n : ℕ} (H : ∀ k, prime k → k ∣ m → ¬ k ∣ n) : coprime m n :=
-begin
-  cases eq_zero_or_pos (gcd m n) with g0 g1,
-  { rw [eq_zero_of_gcd_eq_zero_left g0, eq_zero_of_gcd_eq_zero_right g0] at H,
-    exfalso,
-    exact H 2 prime_two (dvd_zero _) (dvd_zero _) },
-  apply eq.symm,
-  change 1 ≤ _ at g1,
-  apply (lt_or_eq_of_le g1).resolve_left,
-  intro g2,
-  obtain ⟨p, hp, hpdvd⟩ := exists_prime_and_dvd g2,
-  apply H p hp; apply dvd_trans hpdvd,
-  { exact gcd_dvd_left _ _ },
-  { exact gcd_dvd_right _ _ }
-end
-
-lemma coprime_of_dvd'' {m n : ℕ} (H : ∀ k, prime k → k ∣ m → k ∣ n → k ∣ 1) : coprime m n :=
-coprime_of_dvd_prime $ λk kp km kn, not_le_of_gt kp.one_lt $ le_of_dvd zero_lt_one $ H k kp km kn
-
-end nat
-
 lemma gcd_eq_of_dvd
   (p q g : ℕ)
   (hp' : g ∣ p) (hq' : g ∣ q)
