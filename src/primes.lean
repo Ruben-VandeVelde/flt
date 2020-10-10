@@ -380,3 +380,9 @@ begin
   convert nat.mul_lt_mul h (le_refl _) h',
   rw one_mul
 end
+
+lemma int.nat_abs_square (a : ℤ) : (a.nat_abs ^ 2 : ℤ) = a ^ 2 :=
+begin
+  rw [pow_two, pow_two],
+  exact int.nat_abs_mul_self' a
+end
