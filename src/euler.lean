@@ -58,14 +58,6 @@ begin
   ⟩
 end
 
-example (p n : nat) (h : p < n + 1) : p ≤ n := nat.lt_succ_iff.mp h
-example (p n : nat) (h0 : p ≤ n) (h1 : n ≤ p) : n = p := le_antisymm h1 h0
-example (a b : nat) (h : a + b = 0 + b) : a = 0 := (add_left_inj b).mp h
---open euclidean_domain
---example (n : nat) : 2 ≠ n ^ 2 := by suggest
-@[parity_simps]
-lemma int.nat_abs.even (p : ℤ ) : even p.nat_abs ↔ even p := int.coe_nat_dvd_left.symm
-
 lemma descent1 (a b c : ℕ)
   (h : flt_coprime a b c 3) :
   ∃ (p q : ℕ),
@@ -657,32 +649,6 @@ begin
     exact hcd }
 end
 
-
-example (f g k : ℕ) (hodd : ¬even f)
-  (hdvd : 2 ^ k ∣ f * g) :
-  2 ^ k ∣ g :=
-begin
-  apply nat.coprime.dvd_of_dvd_mul_left _ hdvd,
-  apply nat.coprime.symm,
-  exact nat.prime.coprime_pow_of_not_dvd nat.prime_two hodd
-end
-
-/-
-h0: nat.prime p → P p
-IH: ∀ a : list ℕ,
-  (∀ el ∈ a, nat.prime el) →
-  P a.tail.prod →
-  P a.prod
-         
--/
-
-/-
-lemma induction_factors {p : nat → Prop} (n : nat) (pos : 0 < n)
-  (b : p 1)
-  (h : ∀ k, (∀ m, m < k → p m) → p k)
-  : p n := sorry
--/
-
 lemma int.sq_plus_three_sq_eq_zero_iff {a b : ℤ} : a ^ 2 + 3 * b ^ 2 = 0 ↔ a = 0 ∧ b = 0 :=
 begin
   split,
@@ -778,10 +744,7 @@ begin
     rw [←hf, h1', hc, hd],
     ring },
 end
-lemma nat.lt_mul_left (a b : nat) (h : 1 < b) (h' : 0 < a): a < b * a := by {
-  convert nat.mul_lt_mul h (le_refl _) h',
-  rw one_mul
-} 
+
 lemma factors'
   (a b f g : ℕ)
   (hodd : ¬even f)
@@ -879,9 +842,6 @@ begin
         apply dvd_mul_of_dvd_right hf'dvd },
     } }
 end
-
-example (a b : ℤ ) (h : a ≤ b) : 0 ≤ b - a := sub_nonneg.mpr h
-example (a : ℤ ) (h : 0 ≤ a) : abs a = a := abs_of_nonneg h
 
 lemma factor_div (a x : ℕ)
   (hodd : ¬even x)
@@ -1095,18 +1055,6 @@ begin
   exact IH,
 end
 
-example (a b c : nat) (h : a ∣ b) (g : b ∣ c) : a ∣ c :=dvd.trans h g
-example (a b : nat) (h : a+b=0) : a=0 := nat.eq_zero_of_add_eq_zero_right h
-example (a b : nat) (h : 0 < a) : b ≤ a * b := nat.le_mul_of_pos_left h
-example (P Q : Prop) (h : ¬P) : (P ∨ Q) ↔ Q := by tauto
-
-example (a b c d : nat) (h : 0 < a) (h' : a * c < a * d) : c < d := begin
-  rw ←mul_lt_mul_left _,
-  apply h',
-  apply h,
---  refine ( _).mp _,
-
-end
 lemma obscure
   (p q : ℕ)
   (hp : 0 < p) (hq : 0 < q)

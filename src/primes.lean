@@ -394,3 +394,12 @@ begin
   apply coprime_add_self,
   exact nat.coprime.pow n n hxx
 end
+
+@[parity_simps]
+lemma int.nat_abs.even (p : ℤ ) : even p.nat_abs ↔ even p := int.coe_nat_dvd_left.symm
+
+lemma nat.lt_mul_left (a b : nat) (h : 1 < b) (h' : 0 < a): a < b * a :=
+begin
+  convert nat.mul_lt_mul h (le_refl _) h',
+  rw one_mul
+end
