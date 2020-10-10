@@ -27,27 +27,24 @@ begin
   let d := nat.gcd a b,
   obtain ⟨ha : d ∣ a, hb : d ∣ b⟩ := nat.gcd_dvd a b,
   have hc : d ∣ c,
-  { rw ←nat.pow_dvd_pow_iff hn,
-    rw ←h,
+  { rw [←nat.pow_dvd_pow_iff hn, ←h],
     apply dvd_add; rw nat.pow_dvd_pow_iff hn; assumption },
-  use [a / d, b / d, c / d],
-  unfold flt_coprime,
   have hdpos : 0 < d := nat.gcd_pos_of_pos_left _ hapos,
-  have hdnpos : 0 < d ^ n := pow_pos hdpos n,
   have hsoln : (a / d) ^ n + (b / d) ^ n = (c / d) ^ n,
-  { apply nat.eq_of_mul_eq_mul_right hdnpos,
+  { apply nat.eq_of_mul_eq_mul_right (pow_pos hdpos n),
     calc ((a / d) ^ n + (b / d) ^ n) * d ^ n
-        = (a / d) ^ n * d ^ n + (b / d) ^ n * d ^ n : add_mul _ _ _
-    ... = (a / d * d) ^ n  + (b / d) ^ n * d ^ n : by rw mul_pow
-    ... = (a / d * d) ^ n  + (b / d * d) ^ n : by rw mul_pow (b / d)
+        = (a / d * d) ^ n  + (b / d * d) ^ n : by rw [add_mul, mul_pow (a / d), mul_pow (b / d)]
     ... = a ^ n + b ^ n : by rw [nat.div_mul_cancel ha, nat.div_mul_cancel hb]
     ... = c ^ n : h
     ... = (c / d * d) ^ n : by rw [nat.div_mul_cancel hc]
     ... = (c / d) ^ n * d ^ n : by rw mul_pow },
   have hsoln' : (b / d) ^ n + (a / d) ^ n = (c / d) ^ n,
   { rwa add_comm at hsoln },
-  have hxx : nat.coprime (a / d) (b / d) := nat.coprime_div_gcd_div_gcd hdpos,
+  have hcoprime_div : nat.coprime (a / d) (b / d) := nat.coprime_div_gcd_div_gcd hdpos,
   exact ⟨
+    a / d,
+    b / d,
+    c / d,
     nat.div_le_self a d,
     nat.div_le_self b d,
     nat.div_le_self c d,
@@ -55,9 +52,9 @@ begin
     nat.div_pos (nat.le_of_dvd hbpos hb) hdpos,
     nat.div_pos (nat.le_of_dvd hcpos hc) hdpos,
     hsoln,
-    hxx,
-    coprime_add_self_pow hn hsoln hxx,
-    coprime_add_self_pow hn hsoln' hxx.symm
+    hcoprime_div,
+    coprime_add_self_pow hn hsoln hcoprime_div,
+    coprime_add_self_pow hn hsoln' hcoprime_div.symm
   ⟩
 end
 
