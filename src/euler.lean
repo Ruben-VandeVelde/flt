@@ -1205,7 +1205,6 @@ lemma descent_gcd1 (a b c p q : ℕ)
   (hcube : 2 * p * (p ^ 2 + 3 * q ^ 2) = a ^ 3 ∨
              2 * p * (p ^ 2 + 3 * q ^ 2) = b ^ 3 ∨
                2 * p * (p ^ 2 + 3 * q ^ 2) = c ^ 3)
-  (haaa : 2 * p < a ^ 3 * b ^ 3 * c ^ 3)
   (h : flt_coprime a b c 3)
   (hgcd : (2 * p).gcd (p ^ 2 + 3 * q ^ 2) = 1) :
   ∃ (a' b' c' : ℕ),
@@ -1402,7 +1401,6 @@ lemma descent_gcd3 (a b c p q : ℕ)
   (hcube : 2 * p * (p ^ 2 + 3 * q ^ 2) = a ^ 3 ∨
              2 * p * (p ^ 2 + 3 * q ^ 2) = b ^ 3 ∨
                2 * p * (p ^ 2 + 3 * q ^ 2) = c ^ 3)
-  (haaa : 2 * p < a ^ 3 * b ^ 3 * c ^ 3)
   (h : flt_coprime a b c 3)
   (hgcd : (2 * p).gcd (p ^ 2 + 3 * q ^ 2) = 3) :
   ∃ (a' b' c' : ℕ),
@@ -1635,8 +1633,8 @@ begin
   -- 4.
   cases gcd1or3 p q hp hq hcoprime hodd with hgcd hgcd,
   -- 5.
-  { apply descent_gcd1 a b c p q hp hq hcoprime hodd hcube haaa h hgcd },
-  { apply descent_gcd3 a b c p q hp hq hcoprime hodd hcube haaa h hgcd },
+  { apply descent_gcd1 a b c p q hp hq hcoprime hodd hcube h hgcd },
+  { apply descent_gcd3 a b c p q hp hq hcoprime hodd hcube h hgcd },
 end
 
 lemma flt_three
