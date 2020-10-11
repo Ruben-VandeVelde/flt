@@ -298,15 +298,9 @@ begin
     { right, right,
       rw  ←h,
       zify,
-      rw ←‹p = _›,
-      have : (a : ℤ) ^ 3 + b ^ 3 = 2 * p * (p ^2 + 3 * q ^ 2), -- (a + b)(a ^ 2 - a * b + b ^ 2), --
-      {
-        rw [←hadd, ←hsub],
-        ring,
-      },
-      rw this,
-      rw int.nat_abs_square q,
-    }  },
+      rw [←‹p = _›, int.nat_abs_square q, ←hadd, ←hsub],
+      ring,
+    } },
 end
 
 lemma descent11 {a b c d : ℕ} (h : d = a ∨ d = b ∨ d = c) : d ∣ (a * b * c) :=
