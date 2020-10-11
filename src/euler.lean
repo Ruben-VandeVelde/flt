@@ -190,6 +190,16 @@ begin
     ring },
 end
 
+lemma two_not_cube {r : ℕ} : r ^ 3 ≠ 2 :=
+begin
+  rcases r with (rfl|rfl|k),
+  {norm_num},
+  {norm_num},
+  apply ne_of_gt,
+  calc 2 < 2 ^ 3 : by norm_num
+  ... ≤ (k + 2) ^ 3 : nat.pow_le_pow_of_le_left (nat.le_add_left _ _) _
+end 
+
 lemma descent1 (a b c : ℕ)
   (h : flt_coprime a b c 3) :
   ∃ (p q : ℕ),
@@ -258,21 +268,7 @@ begin
         rw nat.coprime_self at habcoprime,
         subst habcoprime,
         norm_num at h,
-        by_cases H : c = 1,
-        {
-          subst H,
-          norm_num at h,
-        },
-        {
-          have : 2 ≤ c,
-          { rw nat.succ_le_iff,
-            apply lt_of_le_of_ne,
-            { rw nat.succ_le_iff, exact hcpos },
-            { symmetry, exact H } },
-          have := nat.pow_le_pow_of_le_left this 3,
-          rw ←h at this,
-          norm_num at this,
-        }
+        apply two_not_cube h.symm,
       },
       rintro rfl,
       rw mul_zero at hq,
