@@ -301,14 +301,22 @@ iff.intro
 theorem nat.pow_two_sub_pow_two (a b : ℕ) : a ^ 2 - b ^ 2 = (a + b) * (a - b) :=
 by { simp only [pow_two], exact nat.mul_self_sub_mul_self_eq a b }
 
-lemma div_pow (n m k : nat) (h : m ∣ n) (hpos : 0 < m) : (n / m) ^ k = (n ^ k) / (m ^ k) :=
+lemma div_pow (n m k : nat) (h : m ∣ n) : (n / m) ^ k = (n ^ k) / (m ^ k) :=
 begin
+  by_cases H : m = 0,
+  { subst H,
+    by_cases G : k = 0,
+    { subst G,
+      rw [pow_zero, pow_zero, pow_zero, nat.div_one] },
+    rw [←ne.def, ←nat.pos_iff_ne_zero] at G,
+    rw [zero_pow G, nat.div_zero, nat.div_zero, zero_pow G], },
+  rw [←ne.def, ←nat.pos_iff_ne_zero] at H,
   obtain ⟨d, hd⟩ := h,
   rw hd,
   rw mul_comm,
   rw mul_pow,
-  rw nat.mul_div_cancel _ hpos,
-  rw nat.mul_div_cancel _ (pow_pos hpos k),
+  rw nat.mul_div_cancel _ H,
+  rw nat.mul_div_cancel _ (pow_pos H k),
 end.
 
 theorem nat.coprime.pow' {k l : ℕ} (m n : ℕ)

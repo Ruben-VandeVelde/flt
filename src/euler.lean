@@ -1497,7 +1497,7 @@ begin
     { rw ←nat.pow_dvd_pow_iff (by norm_num : 0 < 3),
       rw ←hxxx,
       exact dvd_mul_right _ _ },
-    have : (e / 3) ^ 3 = e ^ 3 / 3 ^ 3 := div_pow _ _ _ this  (by norm_num : 0 < 3),
+    have : (e / 3) ^ 3 = e ^ 3 / 3 ^ 3 := div_pow _ _ _ this,
     use e / 3,
     symmetry,
     calc (e / 3) ^ 3
