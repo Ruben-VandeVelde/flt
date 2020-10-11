@@ -190,7 +190,7 @@ begin
     ring },
 end
 
-lemma two_not_cube {r : ℕ} : r ^ 3 ≠ 2 :=
+lemma two_not_cube (r : ℕ) : r ^ 3 ≠ 2 :=
 begin
   rcases r with (rfl|rfl|k),
   {norm_num},
@@ -198,7 +198,23 @@ begin
   apply ne_of_gt,
   calc 2 < 2 ^ 3 : by norm_num
   ... ≤ (k + 2) ^ 3 : nat.pow_le_pow_of_le_left (nat.le_add_left _ _) _
-end 
+end
+
+lemma flt_not_add_self {a b c : ℕ} (hapos : 0 < a) (h : a ^ 3 + b ^ 3 = c ^ 3) : a ≠ b :=
+begin
+  rintro rfl,
+  rw ←mul_two at h,
+  apply two_not_cube (c/a),
+  rw div_pow,
+  rw ←h,
+  rw mul_comm,
+  rw nat.mul_div_cancel,
+  exact pow_pos hapos 3,
+
+  rw ←nat.pow_dvd_pow_iff (by norm_num : 0 < 3),
+  rw ←h,
+  apply dvd_mul_right,
+end
 
 lemma descent1 (a b c : ℕ)
   (h : flt_coprime a b c 3) :
@@ -263,17 +279,9 @@ begin
       apply abs_of_nonneg,
       exact this.le },
     have : q ≠ 0,
-    { have : a ≠ b,
-      { rintro rfl,
-        rw nat.coprime_self at habcoprime,
-        subst habcoprime,
-        norm_num at h,
-        apply two_not_cube h.symm,
-      },
-      rintro rfl,
-      rw mul_zero at hq,
-      rw sub_eq_zero at hq,
-      norm_cast at hq },
+    { rintro rfl,
+      apply flt_not_add_self hapos h,
+      rwa [mul_zero, sub_eq_zero, int.coe_nat_inj'] at hq },
     refine ⟨p.nat_abs, q.nat_abs, _, _, _, _, _⟩,
     { rw nat.pos_iff_ne_zero,
       rw int.nat_abs_ne_zero,
