@@ -4,6 +4,19 @@ import data.nat.gcd
 import data.pnat.basic
 import tactic
 
+-- https://github.com/leanprover-community/mathlib/pull/4482
+
+lemma monotone.reflect_lt {α β} [linear_order α] [preorder β] {f : α → β} (hf : monotone f)
+  {x x' : α} (h : f x < f x') : x < x' := reflect_lt hf h
+
+/-- If `f` is a monotone function from `ℕ` to a preorder such that `y` lies between `f x` and
+  `f (x + 1)`, then `y` doesn't lie in the range of `f`. -/
+lemma monotone.ne_of_lt_of_lt_nat {α} [preorder α] {f : ℕ → α} (hf : monotone f)
+  (x x' : ℕ) {y : α} (h1 : f x < y) (h2 : y < f (x + 1)) : f x' ≠ y :=
+by { rintro rfl, apply (hf.reflect_lt h1).not_le, exact nat.le_of_lt_succ (hf.reflect_lt h2) }
+
+-- https://github.com/leanprover-community/mathlib/pull/4482
+
 lemma nat.mem_factors' {n p} (hn : 0 < n) : p ∈ nat.factors n ↔ nat.prime p ∧ p ∣ n :=
 ⟨λ h, ⟨nat.mem_factors h, (nat.mem_factors_iff_dvd hn (nat.mem_factors h)).mp h⟩,
  λ ⟨hprime, hdvd⟩, (nat.mem_factors_iff_dvd hn hprime).mpr hdvd⟩

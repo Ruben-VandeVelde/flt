@@ -192,12 +192,9 @@ end
 
 lemma two_not_cube (r : ℕ) : r ^ 3 ≠ 2 :=
 begin
-  rcases r with (rfl|rfl|k),
-  {norm_num},
-  {norm_num},
-  apply ne_of_gt,
-  calc 2 < 2 ^ 3 : by norm_num
-  ... ≤ (k + 2) ^ 3 : nat.pow_le_pow_of_le_left (nat.le_add_left _ _) _
+  have : 1 ≤ 3,
+  { norm_num },
+  apply monotone.ne_of_lt_of_lt_nat (nat.pow_left_strict_mono this).monotone 1; norm_num,
 end
 
 lemma flt_not_add_self {a b c : ℕ} (hapos : 0 < a) (h : a ^ 3 + b ^ 3 = c ^ 3) : a ≠ b :=
