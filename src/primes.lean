@@ -216,6 +216,7 @@ not_lt_of_ge (nat.le_of_dvd zero_lt_one $ by rw ←co; exact H) dgt1
 
 theorem int.nat_abs_ne_zero {a : ℤ} : a.nat_abs ≠ 0 ↔ a ≠ 0 := not_congr int.nat_abs_eq_zero
 
+-- Note eq_pow_two_mul_odd in archive/100-theorems-list/70_perfect_numbers.lean
 lemma nat.split_factors
   {a b : ℕ}
   (a_pos : 0 < a)
