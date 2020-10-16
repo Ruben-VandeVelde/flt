@@ -1125,6 +1125,87 @@ begin
   { rwa [←HC] },
 end
 
+lemma gcd1_coprime12 (u v : ℕ)
+  (huvcoprime : u.gcd v = 1)
+  (notdvd_2_2 : ¬2 ∣ u - 3 * v)
+  (hccc : 2 * (u - 3 * v) ≤ 2 * u)
+  (hbbb : 2 * 3 * v = 2 * u - 2 * (u - 3 * v))
+  (not_3_dvd_2 : ¬3 ∣ u - 3 * v) :
+  (2 * u).coprime (u - 3 * v) :=
+begin
+  apply nat.coprime_of_dvd',
+  intros k hkprime hkdvdleft hkdvdright,
+  have kne2 : k ≠ 2,
+  { rintro rfl, exact notdvd_2_2 hkdvdright },
+  have kne3 : k ≠ 3,
+  { rintro rfl, exact not_3_dvd_2 hkdvdright },
+  have kdvdu : k ∣ u := dvd_mul_cancel_prime hkdvdleft kne2 nat.prime_two hkprime,
+  have kdvdv : k ∣ v,
+  { apply dvd_mul_cancel_prime _ kne3 nat.prime_three hkprime,
+    apply dvd_mul_cancel_prime _ kne2 nat.prime_two hkprime,
+    rw [←mul_assoc, hbbb],
+    apply nat.dvd_sub hccc hkdvdleft,
+    apply dvd_mul_of_dvd_right hkdvdright },
+  have : k ∣ nat.gcd u v := nat.dvd_gcd kdvdu kdvdv,
+  rwa huvcoprime at this
+end
+
+lemma gcd1_coprime13 (u v : ℕ)
+  (huvcoprime : u.gcd v = 1)
+  (this : ¬even (u + 3 * v))
+  (not_3_dvd_2 : ¬3 ∣ u - 3 * v)
+  (notdvd_3_3 : ¬3 ∣ u + 3 * v) :
+  (2 * u).coprime (u + 3 * v) :=
+begin
+  apply nat.coprime_of_dvd',
+  intros k hkprime hkdvdleft hkdvdright,
+  have : k ≠ 2,
+  { rintro rfl, contradiction },
+  have : k ≠ 3,
+  { rintro rfl, contradiction },
+  have : k ∣ u := dvd_mul_cancel_prime hkdvdleft ‹_› nat.prime_two hkprime,
+  have : k ∣ v,
+  { have : 2 * u ≤ 2 * (u + 3 * v), linarith,
+    apply dvd_mul_cancel_prime _ ‹_› nat.prime_three hkprime,
+    apply dvd_mul_cancel_prime _ ‹_› nat.prime_two hkprime,
+    have : 2 * (u + 3 * v) - 2 * u = 2 * (3 * v),
+    { zify [this],
+      ring },
+    rw ←this,
+    apply nat.dvd_sub ‹_› _ hkdvdleft,
+    apply dvd_mul_of_dvd_right hkdvdright },
+  have : k ∣ nat.gcd u v := nat.dvd_gcd ‹_› ‹_›,
+  rwa huvcoprime at this,
+end
+
+lemma gcd1_coprime23 (u v : ℕ)
+  (huvcoprime : u.gcd v = 1)
+  (husub_le_uadd : u - 3 * v ≤ u + 3 * v)
+  (notdvd_2_2 : ¬2 ∣ u - 3 * v)
+  (huadd_add_usub : 2 * u = u + 3 * v + (u - 3 * v))
+  (huadd_sub_usub : 2 * 3 * v = u + 3 * v - (u - 3 * v))
+  (notdvd_3_3 : ¬3 ∣ u + 3 * v) :
+  (u - 3 * v).coprime (u + 3 * v) :=
+begin
+  apply nat.coprime_of_dvd',
+  intros k hkprime hkdvdleft hkdvdright,
+  have : k ≠ 2,
+  { rintro rfl, contradiction },
+  have : k ≠ 3,
+  { rintro rfl, contradiction },
+  have : k ∣ u,
+  { refine dvd_mul_cancel_prime _ ‹_› nat.prime_two hkprime,
+    rw huadd_add_usub,
+    apply nat.dvd_add hkdvdright hkdvdleft },
+  have : k ∣ v,
+  { apply dvd_mul_cancel_prime _ ‹_› nat.prime_three hkprime,
+    apply dvd_mul_cancel_prime _ ‹_› nat.prime_two hkprime,
+    rw [←mul_assoc, huadd_sub_usub],
+    apply nat.dvd_sub husub_le_uadd ‹_› ‹_› },
+  have : k ∣ nat.gcd u v := nat.dvd_gcd ‹_› ‹_›,
+  rwa huvcoprime at this
+end
+
 lemma descent_gcd1 (a b c p q : ℕ)
   (hp : 0 < p)
   (hq : 0 < q)
@@ -1224,64 +1305,6 @@ begin
     apply hddd,
     rw hpfactor,
     apply dvd_mul_of_dvd_right hd3 },
-  have hcoprime12 : nat.coprime (2 * u) (u - 3 * v),
-  { apply nat.coprime_of_dvd',
-    intros k hkprime hkdvdleft hkdvdright,
-    have : k ≠ 2,
-    { rintro rfl, contradiction },
-    have : k ≠ 3,
-    { rintro rfl, contradiction },
-    have : k ∣ u := dvd_mul_cancel_prime hkdvdleft ‹_› nat.prime_two hkprime,
-    have : k ∣ v,
-    { apply dvd_mul_cancel_prime _ ‹_› nat.prime_three hkprime,
-      apply dvd_mul_cancel_prime _ ‹_› nat.prime_two hkprime,
-      rw [←mul_assoc, hbbb],
-      apply nat.dvd_sub hccc hkdvdleft,
-      apply dvd_mul_of_dvd_right hkdvdright },    
-    have : k ∣ nat.gcd u v := nat.dvd_gcd ‹_› ‹_›,
-    rwa huvcoprime at this },
-  have hcoprime13 : nat.coprime (2 * u) (u + 3 * v),
-  {
-    apply nat.coprime_of_dvd',
-    intros k hkprime hkdvdleft hkdvdright,
-    have : k ≠ 2,
-    { rintro rfl, contradiction },
-    have : k ≠ 3,
-    { rintro rfl, contradiction },
-    have : k ∣ u := dvd_mul_cancel_prime hkdvdleft ‹_› nat.prime_two hkprime,
-    have : k ∣ v,
-    { have : 2 * u ≤ 2 * (u + 3 * v), linarith,
-      apply dvd_mul_cancel_prime _ ‹_› nat.prime_three hkprime,
-      apply dvd_mul_cancel_prime _ ‹_› nat.prime_two hkprime,
-      have : 2 * (u + 3 * v) - 2 * u = 2 * (3 * v),
-      { zify [this],
-        ring },
-      rw ←this,
-      apply nat.dvd_sub ‹_› _ hkdvdleft,
-      apply dvd_mul_of_dvd_right hkdvdright },    
-    have : k ∣ nat.gcd u v := nat.dvd_gcd ‹_› ‹_›,
-    rwa huvcoprime at this,
-  },
-  have hcoprime23 : nat.coprime (u - 3 * v) (u + 3 * v),
-  { apply nat.coprime_of_dvd',
-    intros k hkprime hkdvdleft hkdvdright,
-    have : k ≠ 2,
-    { rintro rfl, contradiction },
-    have : k ≠ 3,
-    { rintro rfl, contradiction },
-    have : k ∣ u,
-    { refine dvd_mul_cancel_prime _ ‹_› nat.prime_two hkprime,
-      rw huadd_add_usub,
-      apply nat.dvd_add hkdvdright hkdvdleft },
-    have : k ∣ v,
-    { have : k ∣ 2 * 3 * v,
-      { rw huadd_sub_usub,
-        apply nat.dvd_sub husub_le_uadd ‹_› ‹_› },
-      rw mul_assoc at this,
-      apply dvd_mul_cancel_prime _ ‹_› nat.prime_three hkprime,
-      exact dvd_mul_cancel_prime this ‹_› nat.prime_two hkprime },
-    have : k ∣ nat.gcd u v := nat.dvd_gcd ‹_› ‹_›,
-    rwa huvcoprime at this },
 
   obtain ⟨s, hs⟩ := hcubeleft,
   obtain ⟨C, A, B, HCpos, HApos, HBpos, HC, HA, HB⟩ : ∃ X Y Z,
@@ -1291,9 +1314,9 @@ begin
     { exact nat.mul_pos zero_lt_two upos },
     { exact nat.sub_pos_of_lt huv },
     { exact nat.add_pos_left upos _ },
-    { exact hcoprime12 },
-    { exact hcoprime13 },
-    { exact hcoprime23 },
+    { apply gcd1_coprime12 u v; assumption },
+    { apply gcd1_coprime13 u v; assumption },
+    { apply gcd1_coprime23 u v; assumption },
     { rw [←‹2 * p = _›, hs] } },
 
   refine ⟨A, B, C, _, _, _, _, _⟩,
