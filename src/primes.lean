@@ -17,6 +17,17 @@ by { rintro rfl, apply (hf.reflect_lt h1).not_le, exact nat.le_of_lt_succ (hf.re
 
 -- https://github.com/leanprover-community/mathlib/pull/4482
 
+section
+
+variables {α : Type*} [ordered_semiring α] {a b c d : α}
+
+lemma zero_lt_three : 0 < (3:α) := add_pos zero_lt_two zero_lt_one
+
+@[field_simps] lemma three_ne_zero : (3:α) ≠ 0 :=
+ne.symm (ne_of_lt zero_lt_three)
+
+end
+
 lemma nat.mem_factors' {n p} (hn : 0 < n) : p ∈ nat.factors n ↔ nat.prime p ∧ p ∣ n :=
 ⟨λ h, ⟨nat.mem_factors h, (nat.mem_factors_iff_dvd hn (nat.mem_factors h)).mp h⟩,
  λ ⟨hprime, hdvd⟩, (nat.mem_factors_iff_dvd hn hprime).mpr hdvd⟩
@@ -194,7 +205,7 @@ begin
   rw [←nat.add_sub_cancel b c],
   exact nat.dvd_sub (nat.le_add_left c b) H G,
 end
-lemma nat.pos_pow_iff {b : ℕ} (n : ℕ) (h : 0 < n) : 0 < b ↔ 0 < b ^ n :=
+lemma nat.pos_pow_iff {b n : ℕ} (h : 0 < n) : 0 < b ↔ 0 < b ^ n :=
 begin
   split,
   { intro h,

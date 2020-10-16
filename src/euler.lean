@@ -331,10 +331,10 @@ begin
   apply lt_of_lt_of_le,
   swap,
   { refine descent12 _ _ _ hcube;
-    rwa ←nat.pos_pow_iff 3 (by norm_num) },
+    rwa ←nat.pos_pow_iff zero_lt_three },
   { apply lt_mul_of_one_lt_right,
     { linarith },
-    { rw nat.pos_pow_iff 2 zero_lt_two at hp hq,
+    { rw nat.pos_pow_iff zero_lt_two at hp hq,
       linarith } }
 end
 
@@ -1118,7 +1118,7 @@ begin
       exact ⟨hcoprimeac.symm, hcoprimebc.symm⟩ } },
   refine ⟨A, B, C, _, _, _, HA, HB, HC⟩,
   all_goals {
-    rw [nat.pos_pow_iff 3 (by norm_num)],
+    rw [nat.pos_pow_iff zero_lt_three],
   },
   { rwa [←HA] },
   { rwa [←HB] },
@@ -1297,15 +1297,15 @@ begin
     { rw [←‹2 * p = _›, hs] } },
 
   refine ⟨A, B, C, _, _, _, _, _⟩,
-  { rw [nat.pos_pow_iff 3 (by norm_num), ←HA],
+  { rw [nat.pos_pow_iff zero_lt_three, ←HA],
     apply nat.sub_pos_of_lt,
     apply huv },
-  { rw [nat.pos_pow_iff 3 (by norm_num), ←HB],
+  { rw [nat.pos_pow_iff zero_lt_three, ←HB],
     rw nat.pos_iff_ne_zero,
     intro H,
     obtain ⟨rfl, HR⟩ := nat.eq_zero_of_add_eq_zero H,
     linarith },
-  { rw [nat.pos_pow_iff 3 (by norm_num), ←HC],
+  { rw [nat.pos_pow_iff zero_lt_three, ←HC],
     norm_num,
     rw nat.pos_iff_ne_zero,
     rintro rfl,
