@@ -1321,9 +1321,7 @@ begin
   { rw [mul_comm, ←mul_assoc (C^3)],
     rw [←HA, ←HB, ←HC],
     rw ←‹2 * p = _› },
-  { rw [←HA, ←HB, ←HC],
-    zify [le_of_lt huv],
-    ring },
+  { rw [←HA, ←HB, ←HC, add_comm, huadd_add_usub] },
 end
 
 lemma descent_gcd3 (a b c p q : ℕ)
