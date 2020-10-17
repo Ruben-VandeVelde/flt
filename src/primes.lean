@@ -419,3 +419,13 @@ begin
   rw [pow_two, pow_two],
   exact int.nat_abs_mul_self' a
 end
+
+theorem nat.dvd_sub' {k m n : ℕ} (h₁ : k ∣ m) (h₂ : k ∣ n) : k ∣ m - n :=
+begin
+  by_cases H : n ≤ m,
+  { --rwa [nat.dvd_add_iff_left h₂, nat.sub_add_cancel H]
+    exact nat.dvd_sub H h₁ h₂ },
+  { rw not_le at H,
+    rw nat.sub_eq_zero_of_le H.le,
+    exact dvd_zero k },
+end

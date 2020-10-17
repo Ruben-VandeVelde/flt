@@ -1047,13 +1047,13 @@ begin
     rw ←hcoprime,
     apply nat.dvd_gcd,
     { rw hp',
-      apply nat.dvd_sub haaa,
+      apply nat.dvd_sub',
       { exact dvd_pow hkdvdleft (by norm_num) },
       { rw [mul_comm 9, mul_assoc],
         exact dvd_mul_of_dvd_left hkdvdleft _ },
     },
     { rw hq',
-      apply nat.dvd_sub hbbb,
+      apply nat.dvd_sub',
       { exact dvd_mul_of_dvd_right hkdvdright _ },
       { apply dvd_mul_of_dvd_right,
         exact dvd_pow hkdvdright (by norm_num) },
@@ -1144,7 +1144,7 @@ begin
   { apply dvd_mul_cancel_prime _ kne3 nat.prime_three hkprime,
     apply dvd_mul_cancel_prime _ kne2 nat.prime_two hkprime,
     rw [←mul_assoc, hbbb],
-    apply nat.dvd_sub hccc hkdvdleft,
+    apply nat.dvd_sub' hkdvdleft,
     apply dvd_mul_of_dvd_right hkdvdright },
   have : k ∣ nat.gcd u v := nat.dvd_gcd kdvdu kdvdv,
   rwa huvcoprime at this
@@ -1172,7 +1172,7 @@ begin
     { zify [this],
       ring },
     rw ←this,
-    apply nat.dvd_sub ‹_› _ hkdvdleft,
+    apply nat.dvd_sub' _ hkdvdleft,
     apply dvd_mul_of_dvd_right hkdvdright },
   have : k ∣ nat.gcd u v := nat.dvd_gcd ‹_› ‹_›,
   rwa huvcoprime at this,
@@ -1180,7 +1180,6 @@ end
 
 lemma gcd1_coprime23 (u v : ℕ)
   (huvcoprime : u.gcd v = 1)
-  (husub_le_uadd : u - 3 * v ≤ u + 3 * v)
   (notdvd_2_2 : ¬2 ∣ u - 3 * v)
   (huadd_add_usub : 2 * u = u + 3 * v + (u - 3 * v))
   (huadd_sub_usub : 2 * 3 * v = u + 3 * v - (u - 3 * v))
@@ -1201,7 +1200,7 @@ begin
   { apply dvd_mul_cancel_prime _ ‹_› nat.prime_three hkprime,
     apply dvd_mul_cancel_prime _ ‹_› nat.prime_two hkprime,
     rw [←mul_assoc, huadd_sub_usub],
-    apply nat.dvd_sub husub_le_uadd ‹_› ‹_› },
+    apply nat.dvd_sub'; assumption },
   have : k ∣ nat.gcd u v := nat.dvd_gcd ‹_› ‹_›,
   rwa huvcoprime at this
 end
@@ -1471,7 +1470,7 @@ begin
     rw [←huvcoprime],
     apply nat.dvd_gcd _ hkdvdright',
     rw [←nat.add_sub_cancel u v],
-    exact nat.dvd_sub (le_add_left (le_refl _)) hkdvdleft hkdvdright' },
+    exact nat.dvd_sub' hkdvdleft hkdvdright' },
   have hsubcoprime : nat.coprime (u - v) (2 * v),
   { apply nat.coprime_of_dvd',
     intros k hkprime hkdvdleft hkdvdright,
@@ -1499,7 +1498,7 @@ begin
       have : 2 * v = (u + v) - (u - v),
       { zify [le_of_lt huv', huv''''], ring },
       rw this,
-      exact nat.dvd_sub huv'''' hkdvdleft hkdvdright } },
+      exact nat.dvd_sub' hkdvdleft hkdvdright } },
 
   -- 7.
   obtain ⟨t, ht⟩ : ∃ t, 2 * v * (u - v) * (u + v) = t ^ 3,
