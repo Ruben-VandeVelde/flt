@@ -192,19 +192,6 @@ begin
   exact nat.dvd_gcd hp' hq',
 end
 
-lemma dvd_of_dvd_add (a b c : nat) : a ∣ b + c → a ∣ b → a ∣ c :=
-begin
-  intros H G,
-  rw [←nat.add_sub_cancel c b, add_comm],
-  exact nat.dvd_sub (nat.le_add_right b c) H G,
-end
-
-lemma dvd_of_dvd_add' (a b c : nat) : a ∣ b + c → a ∣ c → a ∣ b :=
-begin
-  intros H G,
-  rw [←nat.add_sub_cancel b c],
-  exact nat.dvd_sub (nat.le_add_left c b) H G,
-end
 lemma nat.pos_pow_iff {b n : ℕ} (h : 0 < n) : 0 < b ↔ 0 < b ^ n :=
 begin
   split,
