@@ -192,15 +192,20 @@ begin
   exact nat.dvd_gcd hp' hq',
 end
 
+@[simp] lemma pow_eq_zero_iff {R: Type} [monoid_with_zero R] [no_zero_divisors R]
+  {a : R} {n : ℕ} (hn : 0 < n) :
+  a ^ n = 0 ↔ a = 0 :=
+begin
+  refine ⟨pow_eq_zero, _⟩,
+  rintros rfl,
+  exact zero_pow hn,
+end
+
 lemma nat.pos_pow_iff {b n : ℕ} (h : 0 < n) : 0 < b ↔ 0 < b ^ n :=
 begin
-  split,
-  { intro h,
-    apply pow_pos h },
-  { rw [nat.pos_iff_ne_zero, nat.pos_iff_ne_zero],
-    contrapose!,
-    rintro rfl,
-    apply zero_pow h }
+  rw [nat.pos_iff_ne_zero, nat.pos_iff_ne_zero, ne.def, ne.def, not_congr],
+  apply (pow_eq_zero_iff h).symm,
+  apply_instance,
 end
 
 theorem pos_pow_of_pos {b : ℕ} (n : ℕ) (h : 0 < b) : 0 < b^n := pow_pos h n
