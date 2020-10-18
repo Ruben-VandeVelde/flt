@@ -822,19 +822,26 @@ lemma factors
   (hfactor : x ∣ (a ^ 2 + 3 * b ^ 2)) :
   ∃ c d, x = c ^ 2 + 3 * d ^ 2 :=
 begin
-  revert x,
-  intros x',
-  apply nat.strong_induction_on x' _,
-  intros x IH hodd hfactor,
-  by_cases x = 1,
+  revert x a b,
+  intro x',
+  apply nat.strong_induction_on x',
+  clear x',
+  intros x IH a b hcoprime hodd hfactor,
+  have hneg1 : 1 ≤ a ^ 2 + 3 * b ^ 2,
+  { rw [nat.succ_le_iff, nat.pos_iff_ne_zero],
+    intro H,
+    obtain ⟨rfl, rfl⟩ := nat.sq_plus_three_sq_eq_zero_iff.mp H,
+    simp only [nat.gcd_zero_right, zero_ne_one] at hcoprime,
+    assumption },
+  by_cases h : x = 1,
   { subst h,
     refine ⟨1, 0, _⟩,
     ring },
   obtain ⟨f, hf⟩ := hfactor,
   have h0' : 0 < x,
-  {   rw nat.pos_iff_ne_zero,
-      rintro rfl,
-      exact hodd nat.even_zero },
+  { rw nat.pos_iff_ne_zero,
+    rintro rfl,
+    exact hodd nat.even_zero },
 
   have h0 : 1 < x,
   { apply lt_of_le_of_ne _ _,
@@ -943,10 +950,6 @@ begin
     rw [←h5, hz],
     ring },
 
-  have hzdvd' : z ∣ x,
-  { 
-    sorry },
-
   contrapose! IH,
   have h6' : z ∣ C ^ 2 + 3 * D ^ 2 := h6 ▸ dvd_mul_left z x,
   have h6'' : x ∣ C ^ 2 + 3 * D ^ 2 := h6 ▸ dvd_mul_right x z,
@@ -958,26 +961,23 @@ begin
     subst HC,
     subst HD,
     norm_num at h4 },
-  have h8 : z ≠ 0,
-  { rintro rfl,
+  have h8 : 0 < z,
+  { rw nat.pos_iff_ne_zero,
+    rintro rfl,
     rw ←h6 at h7,
     norm_num at h7,
     exact h7 },
-  have h8' := nat.pos_iff_ne_zero.mpr h8,
-  have := factors' C D x z hodd h8' h6 _,
-  obtain ⟨w, hwdvd, hwodd, hnform⟩ := this,
-  have hwdvd' := dvd_trans hwdvd hzdvd',
-  refine ⟨w, _, _, _, _⟩,
+  obtain ⟨w, hwdvd, hwodd, hnform⟩ := factors' C D x z hodd h8 h6 (by { push_neg, exact IH }),
+  refine ⟨w, _, C, D, HCDcoprime, hwodd, _, _⟩,
   { calc w
-        ≤ z : nat.le_of_dvd (nat.pos_of_ne_zero h8) hwdvd
+        ≤ z : nat.le_of_dvd h8 hwdvd
     ... ≤ y : by { rw hz, exact nat.le_mul_of_pos_left (pow_pos hgpos 2) }
     ... < x : h3 },
-  { contrapose! hodd with H,
-    exact dvd_trans H hwdvd' },
-  { rw hf,
-    exact dvd_mul_of_dvd_left hwdvd' _ },
+  { exact dvd_trans hwdvd h6' },
   { push_neg at hnform,
     exact hnform },
+end
+
 
   push_neg,
   exact IH,
