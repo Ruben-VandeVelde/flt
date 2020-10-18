@@ -416,3 +416,9 @@ begin
     rw nat.sub_eq_zero_of_le H.le,
     exact dvd_zero k },
 end
+
+lemma nat.le_mul_of_one_le_left (a : ℕ) {b : ℕ} (h : 1 ≤ b) : a ≤ b * a :=
+begin
+  convert nat.mul_le_mul_right a h,
+  rw one_mul,
+end
