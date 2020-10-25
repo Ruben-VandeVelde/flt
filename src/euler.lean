@@ -84,8 +84,8 @@ begin
   { tauto },
   { exfalso,
     apply hcparity,
-    rw [←nat.even_pow' (by norm_num : 3 ≠ 0), ←h],
-    simp [haparity, hbparity, (by norm_num : 3 ≠ 0)] with parity_simps },
+    rw [←nat.even_pow' three_ne_zero, ←h],
+    simp [haparity, hbparity, three_ne_zero] with parity_simps },
 end
 
 lemma descent1left {a b c : ℕ}
@@ -1068,20 +1068,20 @@ gcd(a,b)=1 [since otherwise, any common factor would divide p and q].
     { exfalso,
       have : even p,
       { rw hp',
-        simp [haaa, haparity, hbparity, (by norm_num : 3 ≠ 0)] with parity_simps },
+        simp [haaa, haparity, hbparity, three_ne_zero] with parity_simps },
       have : even q,
       { rw hq',
-        simp [hbbb, haparity, hbparity, (by norm_num : 3 ≠ 0)] with parity_simps },
+        simp [hbbb, haparity, hbparity, three_ne_zero] with parity_simps },
       tauto },
     { tauto },
     { tauto },
     { exfalso,
       have : even p,
       { rw hp',
-        simp [haaa, haparity, hbparity, (by norm_num : 3 ≠ 0)] with parity_simps },
+        simp [haaa, haparity, hbparity, three_ne_zero] with parity_simps },
       have : even q,
       { rw hq',
-        simp [hbbb, haparity, hbparity, (by norm_num : 3 ≠ 0)] with parity_simps },
+        simp [hbbb, haparity, hbparity, three_ne_zero] with parity_simps },
       tauto } }
 end
 
