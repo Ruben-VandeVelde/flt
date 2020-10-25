@@ -1002,15 +1002,13 @@ begin
 
   -- (2)
   have hodd : ¬even u,
-  { rw ←nat.even_pow' (dec_trivial : ¬ 3 = 0),
-    rw ←hu,
-    simp [(dec_trivial : ¬ 3 = 0)] with parity_simps,
-    tauto },
+  { rw [←nat.even_pow' three_ne_zero, ←hu],
+    simp [three_ne_zero, two_ne_zero, hparity] with parity_simps },
   
   -- (3)
   have hfactor : u ∣ p ^ 2 + 3 * q ^ 2,
   { rw hu,
-    refine dvd_pow (dvd_refl u) dec_trivial },
+    exact dvd_pow (dvd_refl u) three_ne_zero },
   obtain ⟨a, b, hab⟩ := factors p q u hcoprime hodd hfactor,
 
   -- (4-7)
