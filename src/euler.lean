@@ -1009,13 +1009,12 @@ begin
   have hfactor : u ∣ p ^ 2 + 3 * q ^ 2,
   { rw hu,
     exact dvd_pow (dvd_refl u) three_ne_zero },
-  obtain ⟨a, b, hab⟩ := factors p q u hcoprime hodd hfactor,
+  obtain ⟨a, b, rfl⟩ := factors p q u hcoprime hodd hfactor,
 
   -- (4-7)
   have : (p ^ 2 + 3 * q ^ 2 : ℤ) = (a ^ 3 - 9 * a * b ^ 2) ^ 2 + 3 * (3 * a ^ 2 * b - 3 * b ^ 3) ^ 2,
   { zify at hu,
-    zify at hab,
-    rw [hu, hab],
+    rw [hu],
     ring },
 
   have hb : 0 < b := sorry,
