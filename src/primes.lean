@@ -4,27 +4,12 @@ import data.nat.gcd
 import data.pnat.basic
 import tactic
 
--- https://github.com/leanprover-community/mathlib/pull/4482
-
-lemma monotone.reflect_lt {α β} [linear_order α] [preorder β] {f : α → β} (hf : monotone f)
-  {x x' : α} (h : f x < f x') : x < x' := reflect_lt hf h
-
-/-- If `f` is a monotone function from `ℕ` to a preorder such that `y` lies between `f x` and
-  `f (x + 1)`, then `y` doesn't lie in the range of `f`. -/
-lemma monotone.ne_of_lt_of_lt_nat {α} [preorder α] {f : ℕ → α} (hf : monotone f)
-  (x x' : ℕ) {y : α} (h1 : f x < y) (h2 : y < f (x + 1)) : f x' ≠ y :=
-by { rintro rfl, apply (hf.reflect_lt h1).not_le, exact nat.le_of_lt_succ (hf.reflect_lt h2) }
-
--- https://github.com/leanprover-community/mathlib/pull/4482
-
 section
 
-variables {α : Type*} [ordered_semiring α] {a b c d : α}
-
-lemma zero_lt_three : 0 < (3:α) := add_pos zero_lt_two zero_lt_one
+variables {α : Type*} [ordered_semiring α] [nontrivial α] {a b c d : α}
 
 @[field_simps] lemma three_ne_zero : (3:α) ≠ 0 :=
-ne.symm (ne_of_lt zero_lt_three)
+zero_lt_three.ne.symm
 
 end
 
@@ -99,67 +84,6 @@ end
 theorem nat.eq_pow_of_mul_eq_pow {a b c : ℕ} (ha : 0 < a) (hb : 0 < b)
   (hab : nat.coprime a b) {k : ℕ} (h : a * b = c ^ k) : ∃ d, a = d ^ k := sorry
 
-/-
-universe u
-
-open nat
-protected def strong_rec_on {p : nat → Sort u} (n : nat) (h : ∀ n, (∀ m, m < n → p m) → p n) : p n :=
-suffices ∀ n m, m < n → p m, from this (succ n) n (lt_succ_self _),
-begin
-  intros n, induction n with n ih,
-    {intros m h₁, exact absurd h₁ (not_lt_zero _)},
-    {intros m h₁,
-      apply or.by_cases (lt_or_eq_of_le (le_of_lt_succ h₁)),
-        {intros, apply ih, assumption},
-        {intros, subst m, apply h _ ih}}
-end
-
-lemma pnat.strong_induction_on {p : pnat → Prop} (n : pnat) (h : ∀ k, (∀ m, m < k → p m) → p k) : p n :=
-begin
-  induction n',
-
-  suffices : ∀ n m, m < n → p m, from this (n + 1) n (nat.lt_succ_self _),
-  intros n, induction (n : ℕ) with n ih,
-  intros m h₁,
-  apply h,
-  intros k hk,
-  {
-    apply or.by_cases (lt_or_eq_of_le (le_of_lt_succ h₁)),
-      {intros, apply ih, assumption},
-      {intros, subst m, apply h _ ih}}
-end
--/
-lemma pnat.strong_induction_on {p : pnat → Prop} (n : pnat) (h : ∀ k, (∀ m, m < k → p m) → p k) : p n :=
-begin
-  let p' : nat → Prop := λ n, if h : 0 < n then p ⟨n, h⟩ else true,
-  have : ∀ n', p' n',
-  {
-    intro n',
-    refine nat.strong_induction_on n' _,
-    intro k,
-    dsimp [p'],
-    split_ifs,
-    {
-      intros a,
-      apply h,
-      intros m hm,
-      have := a m.1 hm,
-      split_ifs at this,
-      {
-        convert this,
-        simp only [subtype.coe_eta, subtype.val_eq_coe],
-      },
-      {exfalso,
-      exact h_2 m.2}},
-    {intros, trivial}    
-  },
-  have a := this n.1,
-  dsimp [p'] at a,
-  split_ifs at a,
-  { convert a, simp only [subtype.coe_eta], },
-  { exfalso, exact h_1 n.pos },
-end.
-
 lemma dvd_mul_cancel_prime {p n k : ℕ}
   (h : k ∣ p * n)
   (hne : k ≠ p)
@@ -190,15 +114,6 @@ begin
     exact nat.gcd_dvd_left p q,
     exact nat.gcd_dvd_right p q},
   exact nat.dvd_gcd hp' hq',
-end
-
-@[simp] lemma pow_eq_zero_iff {R: Type} [monoid_with_zero R] [no_zero_divisors R]
-  {a : R} {n : ℕ} (hn : 0 < n) :
-  a ^ n = 0 ↔ a = 0 :=
-begin
-  refine ⟨pow_eq_zero, _⟩,
-  rintros rfl,
-  exact zero_pow hn,
 end
 
 lemma nat.pos_pow_iff {b n : ℕ} (h : 0 < n) : 0 < b ↔ 0 < b ^ n :=
@@ -318,7 +233,7 @@ iff.intro
 theorem nat.pow_two_sub_pow_two (a b : ℕ) : a ^ 2 - b ^ 2 = (a + b) * (a - b) :=
 by { simp only [pow_two], exact nat.mul_self_sub_mul_self_eq a b }
 
-lemma div_pow (n m k : nat) (h : m ∣ n) : (n / m) ^ k = (n ^ k) / (m ^ k) :=
+lemma div_pow' (n m k : nat) (h : m ∣ n) : (n / m) ^ k = (n ^ k) / (m ^ k) :=
 begin
   by_cases H : m = 0,
   { subst H,

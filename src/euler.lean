@@ -6,6 +6,7 @@ import algebra.euclidean_domain
 import algebra.gcd_monoid
 import tactic
 import data.nat.modeq
+import ring_theory.int.basic
 import .primes
 example (a b c : int) (h : a + b = c) : a = c - b := eq_sub_of_add_eq h
 def flt_coprime
@@ -202,7 +203,7 @@ begin
   rintro rfl,
   rw ←mul_two at h,
   apply two_not_cube (c/a),
-  rw div_pow,
+  rw div_pow',
   rw ←h,
   rw mul_comm,
   rw nat.mul_div_cancel,
@@ -266,7 +267,7 @@ begin
         { apply nat.gcd_dvd_left },
         { apply nat.gcd_dvd_right } } },
     have : 0 < p,
-    { apply pos_of_mul_pos_left _ zero_lt_two.le,
+    { refine pos_of_mul_pos_left _ zero_lt_two.le,
       { rw ←hp,
         norm_cast,
         apply nat.add_pos_left hapos } },
@@ -978,11 +979,6 @@ begin
     exact hnform },
 end
 
-
-  push_neg,
-  exact IH,
-end
-
 lemma obscure
   (p q : ℕ)
   (hp : 0 < p) (hq : 0 < q)
@@ -1496,7 +1492,7 @@ begin
     { rw ←nat.pow_dvd_pow_iff (by norm_num : 0 < 3),
       rw ←hxxx,
       exact dvd_mul_right _ _ },
-    have : (e / 3) ^ 3 = e ^ 3 / 3 ^ 3 := div_pow _ _ _ this,
+    have : (e / 3) ^ 3 = e ^ 3 / 3 ^ 3 := div_pow' _ _ _ this,
     use e / 3,
     symmetry,
     calc (e / 3) ^ 3
