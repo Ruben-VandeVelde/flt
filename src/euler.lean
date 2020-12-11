@@ -444,7 +444,7 @@ lemma factors2
   ∃ c d, a ^ 2 + 3 * b ^ 2 = 4 * (c ^ 2 + 3 * d ^ 2) :=
 begin
   have hparity : even a ↔ even b,
-  { simp [two_ne_zero] with parity_simps at heven, assumption },
+  { simpa [two_ne_zero] with parity_simps using heven },
 
   by_cases h : even a,
   {
@@ -978,9 +978,56 @@ begin
     exact hnform },
 end
 
+lemma surprising
+  {x₁ y₁ x₂ y₂ : ℕ}
+  (h : x₁ ^ 2 + 3 * y₁ ^ 2 = x₂ ^ 2 + 3 * y₂ ^ 2) :
+  x₁ = x₂ ∧ y₁ = y₂ := sorry
 
-  push_neg,
-  exact IH,
+lemma lift_square (a : ℤ) : ∃ a' : ℕ, a ^ 2 = a' ^ 2 :=
+begin
+  use a.nat_abs,
+  exact (int.nat_abs_square a).symm,
+end
+
+lemma obscure'
+  (p q : ℕ)
+  (hp : 0 < p) (hq : 0 < q)
+  (hcoprime : nat.gcd p q = 1)
+  (hparity : even p ↔ ¬even q)
+  (hcube : ∃ r, p ^ 2 + 3 * q ^ 2 = r ^ 3) :
+  ∃ a b,
+    p = a ^ 3 - 9 * a * b ^ 2 ∧
+    q = 3 * a ^ 2 * b - 3 * b ^ 3 :=
+begin
+  classical,
+  by_contra H,
+  push_neg at H,
+
+  -- (1)
+  obtain ⟨u, hu⟩ := hcube,
+
+  -- (2)
+  have hodd : ¬even u,
+  { rw ←nat.even_pow' three_ne_zero,
+    rw ←hu,
+    simp [three_ne_zero] with parity_simps,
+    tauto },
+  
+  -- (3)
+  have hfactor : u ∣ p ^ 2 + 3 * q ^ 2,
+  { rw hu,
+    refine dvd_pow (dvd_refl u) three_ne_zero, },
+  obtain ⟨a, b, hab⟩ := factors p q u hcoprime hodd hfactor,
+
+  -- (4-7)
+  have : (p ^ 2 + 3 * q ^ 2 : ℤ) = (a ^ 3 - 9 * a * b ^ 2) ^ 2 + 3 * (3 * a ^ 2 * b - 3 * b ^ 3) ^ 2,
+  { zify at hu,
+    zify at hab,
+    rw [hu, hab],
+    ring },
+
+  have := H a b,
+  sorry,
 end
 
 lemma obscure
@@ -1016,10 +1063,19 @@ begin
   { zify at hu,
     rw [hu],
     ring },
+  rw ←int.nat_abs_square (a ^ 3 - 9 * a * b ^ 2) at this,
+  rw ←int.nat_abs_square (3 * a ^ 2 * b - 3 * b ^ 3) at this,
+  norm_cast at this,
+  have := surprising this,
+
 
   have hb : 0 < b := sorry,
   have hab : 3 * b < a := sorry,
-  have hp' : p = a ^ 3 - 9 * a * b ^ 2 := sorry,
+  have hp' : p = a ^ 3 - 9 * a * b ^ 2, -- a (a² - 9b²) = a (a - 3b) (a + 3b)
+  {
+    by_contra H,
+    sorry
+  },
   have hq' : q = 3 * a ^ 2 * b - 3 * b ^ 3 := sorry,
   have haaa : 9 * a * b ^ 2 ≤ a ^ 3,
   { rw [pow_succ a, mul_comm 9, mul_assoc],
