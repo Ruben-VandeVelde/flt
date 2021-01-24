@@ -118,7 +118,7 @@ end
 
 lemma nat.pos_pow_iff {b n : ℕ} (h : 0 < n) : 0 < b ↔ 0 < b ^ n :=
 begin
-  rw [nat.pos_iff_ne_zero, nat.pos_iff_ne_zero, ne.def, ne.def, not_congr],
+  rw [pos_iff_ne_zero, pos_iff_ne_zero, ne.def, ne.def, not_congr],
   apply (pow_eq_zero_iff h).symm,
   apply_instance,
 end
@@ -147,7 +147,7 @@ begin
     intros a' IH a'_pos hdvd,
     obtain ⟨c, hc⟩ := hdvd,
     have c_pos : 0 < c,
-    { rw nat.pos_iff_ne_zero,
+    { rw pos_iff_ne_zero,
       rintro rfl,
       rw mul_zero at hc,
       subst hc,
@@ -177,7 +177,7 @@ end
 theorem nat.one_le_of_not_even {n : ℕ} (h : ¬even n) : 1 ≤ n :=
 begin
   apply nat.succ_le_of_lt,
-  rw nat.pos_iff_ne_zero,
+  rw pos_iff_ne_zero,
   rintro rfl,
   exact h nat.even_zero
 end
@@ -224,12 +224,6 @@ begin
     ring, }
 end
 
-@[simp] theorem nat.gcd_eq_zero_iff {a b : ℕ} : nat.gcd a b = 0 ↔ a = 0 ∧ b = 0 :=
-iff.intro
-  (assume h, let ⟨ca, ha⟩ := nat.gcd_dvd_left a b, ⟨cb, hb⟩ := nat.gcd_dvd_right a b in
-    by rw [h, nat.zero_mul] at ha hb; exact ⟨ha, hb⟩)
-  (assume ⟨ha, hb⟩, by rw [ha, hb, nat.gcd_zero_left])
-
 theorem nat.pow_two_sub_pow_two (a b : ℕ) : a ^ 2 - b ^ 2 = (a + b) * (a - b) :=
 by { simp only [pow_two], exact nat.mul_self_sub_mul_self_eq a b }
 
@@ -240,9 +234,9 @@ begin
     by_cases G : k = 0,
     { subst G,
       rw [pow_zero, pow_zero, pow_zero, nat.div_one] },
-    rw [←ne.def, ←nat.pos_iff_ne_zero] at G,
+    rw [←ne.def, ←pos_iff_ne_zero] at G,
     rw [zero_pow G, nat.div_zero, nat.div_zero, zero_pow G], },
-  rw [←ne.def, ←nat.pos_iff_ne_zero] at H,
+  rw [←ne.def, ←pos_iff_ne_zero] at H,
   obtain ⟨d, hd⟩ := h,
   rw hd,
   rw mul_comm,
@@ -262,7 +256,7 @@ begin
   apply ne_of_gt,
   apply lt_of_lt_of_le,
   { apply lt_of_le_of_ne _ H1.symm,
-    rw [nat.succ_le_iff, nat.pos_iff_ne_zero],
+    rw [nat.succ_le_iff, pos_iff_ne_zero],
     intro H,
     obtain ⟨rfl, rfl⟩ := nat.gcd_eq_zero_iff.mp H,
     rw [or_self] at h,
@@ -300,7 +294,7 @@ lemma coprime_add_self_pow
   (hxx : (a).coprime (b))
    : (a).coprime (c) :=
 begin
-  have hn' := nat.pos_iff_ne_zero.mp hn,
+  have hn' := pos_iff_ne_zero.mp hn,
   apply nat.coprime.pow' n n hn' hn',
   { contrapose! hxx,
     obtain ⟨rfl, rfl⟩ := hxx,
