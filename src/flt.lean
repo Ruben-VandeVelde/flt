@@ -6,21 +6,21 @@ import tactic
 import .primes
 
 lemma flt_three
-  (a b c : ℕ+) :
+  (a b c : ℤ) :
   a ^ 3 + b ^ 3 ≠ c ^ 3 :=
 begin
   sorry,
 end
 
 lemma flt_four
-  (a b c : ℕ+) :
+  (a b c : ℤ) :
   a ^ 4 + b ^ 4 ≠ c ^ 4 :=
 begin
   sorry,
 end
 
 lemma flt_primes
-  (p : ℕ) (a b c : ℕ+) (h : 5 ≤ p) (hp : p.prime) :
+  (p : ℕ) (a b c : ℤ) (h : 5 ≤ p) (hp : p.prime) :
   a ^ p + b ^ p ≠ c ^ p :=
 begin
 --  let frey := sorry, --y ^ 2 = x * ( x - a ^ p ) * ( x + b ^ p )
@@ -28,8 +28,8 @@ begin
 end
 
 lemma flt_composite
-  (p n : ℕ) (a b c : ℕ+) (h : p ∣ n) (g : a ^ n + b ^ n = c ^ n):
-  ∃ a' b' c' : ℕ+, a' ^ p + b' ^ p = c' ^ p :=
+  (p n : ℕ) (a b c : ℤ) (h : p ∣ n) (g : a ^ n + b ^ n = c ^ n):
+  ∃ a' b' c' : ℤ, a' ^ p + b' ^ p = c' ^ p :=
 begin
   obtain ⟨m, hm⟩ := h,
   subst hm,
@@ -38,7 +38,7 @@ begin
   exact g,
 end
 
-theorem flt (n : ℕ) (a b c : ℕ+) (h : 2 < n) : a ^ n + b ^ n ≠ c ^ n :=
+theorem flt (n : ℕ) (a b c : ℤ) (h : 2 < n) : a ^ n + b ^ n ≠ c ^ n :=
 begin
   by_contradiction H,
   push_neg at H,
