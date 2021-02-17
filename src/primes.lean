@@ -45,29 +45,27 @@ begin
     exact zero_le _ }
 end
 
+lemma exists_odd_prime_and_dvd_or_two_pow
+  {n : ℕ} (n2 : 2 ≤ n) : (∃ k : ℕ, n = 2 ^ k) ∨ ∃ p, nat.prime p ∧ p ∣ n ∧ odd p :=
+begin
+  rw or_iff_not_imp_right,
+  intro H,
+  push_neg at H,
+  use n.factors.length,
+  apply eq_pow,
+  linarith,
+  intros p hprime hdvd,
+  apply hprime.eq_two_or_odd.resolve_right,
+  rw ←nat.odd_iff,
+  exact H p hprime hdvd,
+end
+
 lemma exists_prime_and_dvd'
   {n : ℕ} (n2 : 2 < n) : ∃ p, p ∣ n ∧ (p = 4 ∨ (nat.prime p ∧ p % 2 = 1)) :=
 begin
-  by_cases ∃ p, p ∣ n ∧ nat.prime p ∧ p % 2 = 1,
-  { obtain ⟨p, hdvd, hp, hodd⟩ := h,
-    have pnetwo : p ≠ 2,
-    { intro ptwo,
-      subst ptwo,
-      norm_num at hodd },
-    exact ⟨p, hdvd, or.inr ⟨hp, hodd⟩⟩ },
-  { use 4,
-    split,
-    { push_neg at h,
-      have h0 : 0 < n := by linarith,
-      set k := n.factors.length,
-      use 2 ^ (k - 2),
-
-      have h2 : n = 2 ^ k,
-      { apply eq_pow h0,
-        intros d hdprime hddvd,
-        cases nat.prime.eq_two_or_odd hdprime with H H,
-        { assumption },
-        { have := h d hddvd hdprime, contradiction } },
+  obtain ⟨k, h2⟩|⟨p, hp, hdvd, hodd⟩ := exists_odd_prime_and_dvd_or_two_pow n2.le,
+  { refine ⟨4, _, _⟩,
+    { use 2 ^ (k - 2),
 
       have h3 : 2 ≤ k,
       { rw h2 at n2,
@@ -76,9 +74,13 @@ begin
       calc n
           = 2 ^ k : h2
       ... = 2 ^ 2 * 2 ^ (k - 2) : (pow_mul_pow_sub _ h3).symm
-      ... = 4 * 2 ^ (k - 2) : by norm_num,
-      },
+      ... = 4 * 2 ^ (k - 2) : by norm_num },
     { left, refl } },
+  { rw nat.odd_iff at hodd,
+    have pnetwo : p ≠ 2,
+    { rintro rfl,
+      norm_num at hodd },
+    exact ⟨p, hdvd, or.inr ⟨hp, hodd⟩⟩ },
 end
 
 theorem nat.eq_pow_of_mul_eq_pow {a b c : ℕ} (ha : 0 < a) (hb : 0 < b)
