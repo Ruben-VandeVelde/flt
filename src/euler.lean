@@ -457,24 +457,10 @@ begin
   { have : ¬even b,
     { rwa ←hparity },
 
-    obtain ⟨m, hm⟩ := mod_four_of_odd' h,
-    zify at hm,
-    obtain ⟨n, hn⟩ := mod_four_of_odd' this,
-    zify at hn,
     have h4 : (4 : ℤ) ∣ a + b ∨ (4 : ℤ) ∣ a - b,
-    {
-      cases hm; cases hn; rw [hm, hn],
-      any_goals
-      { right,
-        rw [add_sub_add_right_eq_sub, ←mul_sub_left_distrib],
-        apply dvd_mul_right },
-      all_goals
-      { left,
-        rw add_assoc,
-        apply dvd_add (dvd_mul_right _ _),
-        rw [add_comm, add_assoc],
-        apply dvd_add (dvd_mul_right _ _),
-        apply dvd_refl } },
+    { apply int.four_dvd_add_or_sub_of_odd,
+      { rwa [←nat.odd_iff_not_even, ←int.coe_nat_odd] at h },
+      { rwa [←nat.odd_iff_not_even, ←int.coe_nat_odd] at this } },
     have h4coe : (4 : ℤ) = ((4 : ℕ) : ℤ),
     { refl },
     cases h4,

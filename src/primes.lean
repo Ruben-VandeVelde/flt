@@ -226,6 +226,46 @@ begin
     ring, }
 end
 
+lemma int.mod_four_of_odd' {n : ℤ} (hodd: odd n) : ∃ m, n = 4 * m + 3 ∨ n = 4 * m + 1 :=
+begin
+  obtain ⟨m, hm⟩ := hodd,
+  cases int.even_or_odd m with h h;
+    obtain ⟨k, hk⟩ := h;
+    use k;
+    [right, left];
+    rw [hm, hk];
+    ring,
+end
+
+lemma int.four_dvd_add_or_sub_of_odd {a b : ℤ}
+  (ha : odd a)
+  (hb : odd b) :
+  4 ∣ a + b ∨ 4 ∣ a - b :=
+begin
+  obtain ⟨m, hm⟩ := int.mod_four_of_odd' ha,
+  obtain ⟨n, hn⟩ := int.mod_four_of_odd' hb,
+  cases hm; cases hn; rw [hm, hn],
+  any_goals
+  { right,
+    rw [add_sub_add_right_eq_sub, ←mul_sub_left_distrib],
+    apply dvd_mul_right },
+  all_goals
+  { left,
+    rw add_assoc,
+    apply dvd_add (dvd_mul_right _ _),
+    rw [add_comm, add_assoc],
+    apply dvd_add (dvd_mul_right _ _),
+    apply dvd_refl },
+end
+
+@[norm_cast]
+lemma int.coe_nat_even {n : ℕ} : even (n : ℤ) ↔ even n :=
+by { rw [int.even_iff, nat.even_iff], norm_cast }
+
+@[norm_cast]
+lemma int.coe_nat_odd {n : ℕ} : odd (n : ℤ) ↔ odd n :=
+by { rw [int.odd_iff, nat.odd_iff], norm_cast }
+
 theorem nat.pow_two_sub_pow_two (a b : ℕ) : a ^ 2 - b ^ 2 = (a + b) * (a - b) :=
 by { simp only [pow_two], exact nat.mul_self_sub_mul_self_eq a b }
 
