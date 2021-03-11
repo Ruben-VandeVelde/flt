@@ -1,0 +1,58 @@
+hfactor: x ∣ a ^ 2 + 3 * b ^ 2
+hI: I = (a ^ 2 + 3 * b ^ 2) * x
+ha: c + m * x = a
+hc: |2 * c| < x
+hb: d + n * x = b
+hd: |2 * d| < x
+h2: x ∣ c ^ 2 + 3 * d ^ 2
+hy: c ^ 2 + 3 * d ^ 2 = x * y < x * x
+h3: y < x
+HD: d.nat_abs = D * g
+HC: c.nat_abs = C * g
+h5: x * y = (C ^ 2 + 3 * D ^ 2) * g ^ 2
+hz: y = g ^ 2 * z
+h6: x * z = C ^ 2 + 3 * D ^ 2
+hwdvd: w ∣ z
+xxx : w ≤ z ≤ y < x
+⊢ z * w < f * x = a ^ 2 + 3 * b ^ 2
+⊢ x * z * w < x * f * x
+⊢ (C ^ 2 + 3 * D ^ 2) * w < I = (a ^ 2 + 3 * b ^ 2) * x
+
+
+a ^ 2 + 3 * b ^ 2
+= (c + m * x)² + 3 (d + n * x)²
+= c² + 2cmx + (mx)² + 3 (d² + 2dnx + (nx)²)
+= c² + 3d² + (2cmx + (mx)² + 6dnx + 3(nx)²)
+= c² + 3d² + x * (2cm + m²x + 6dn + 3n²x)
+
+
+??? 0 \le (2cm + m²x + 6dn + 3n²x)
+
+abs (2cm + m²x + 6dn + 3n²x)
+\le m |2c| + m²x + 3n |2d| + 3n²x
+< mx + m²x + 3nx + 3n²x
+= x ((m + m²) + 3(n + n²))
+
+m + m² = m(1+m) 
+
+a b x m n : ℕ
+c d : ℤ
+
+
+C ^ 2 + 3 * D ^ 2 \le (C ^ 2 + 3 * D ^ 2) * g ^ 2 = c ^ 2 + 3 * d ^ 2
+
+⊢ (C ^ 2 + 3 * D ^ 2) = x*z < x < (a ^ 2 + 3 * b ^ 2)
+⊢ w < x
+  OK
+
+⊢ (C ^ 2 + 3 * D ^ 2) * w = x * z * w < x * (a ^ 2 + 3 * b ^ 2)
+xxx : w ≤ z ≤ y < x
+
+
+x * z = C ^ 2 + 3 * D ^ 2
+x * y = (C ^ 2 + 3 * D ^ 2) * g ^ 2
+c.nat_abs ^ 2 + 3 * d.nat_abs ^ 2 = x * y
+y < x
+xy < x²
+
+xz < xf

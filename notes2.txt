@@ -1,0 +1,19 @@
+J = sqrt(-3)
+(p+qJ)³ = p³ + 3p²qJ + 3pq²J² + q³J³
+  = p³ - 9pq² + (3p²q - 3 q³)J
+
+pt 187 pg 399
+pt 182 pg 396
+
+u² = x² + cy²
+J = sqrt(-c)
+x² + cy² = (x + yJ)(x - yJ)
+
+pq = u², p.coprime q → \ex r s, p = r² & q = s²
+
+→ x + yJ = r²
+
+x + yJ \in \Z[J] →? r \in \Z[J] → r = a + bJ
+
+x + yJ = r² = a² + 
+
