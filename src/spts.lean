@@ -216,7 +216,7 @@ begin
   rw int.nat_abs_pow_two,
   ring,
 end
-example (a b c : int) (h : a = b + c) : (a - c = b) := sub_eq_of_eq_add h
+
 lemma sq_plus_three_sq_prime_dvd (p q a b: ℕ)
   (hprime : nat.prime (p ^ 2 + 3 * q ^ 2))
   (h : p ^ 2 + 3 * q ^ 2 ∣ a ^ 2 + 3 * b ^ 2) :
