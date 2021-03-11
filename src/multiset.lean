@@ -15,22 +15,6 @@ begin
     apply h _ (multiset.mem_cons_of_mem ha') _ (multiset.mem_cons_of_mem hb') h' }
 end
 
--- https://github.com/leanprover-community/mathlib/commit/be6753ca1b464625abb386d4e0e71b569d88163f
-lemma multiset.map_filter
-  (f : α → β) (p : β → Prop) [decidable_pred p] :
-  multiset.filter p (multiset.map f s) = multiset.map f (multiset.filter (p ∘ f) s) :=
-begin
-  refine multiset.induction_on s _ _,
-  { simp only [multiset.filter_zero, multiset.map_zero] },
-  { intros a t ih,
-    simp only [multiset.map_cons],
-    by_cases h': (p ∘ f) a,
-    { have h'' : p (f a) := h',
-      rw [multiset.filter_cons_of_pos _ h', multiset.map_cons, ←ih, multiset.filter_cons_of_pos _ h''] },
-    { have h'' : ¬p (f a) := h',
-      rw [multiset.filter_cons_of_neg _ h', ←ih, multiset.filter_cons_of_neg _ h''] } }
-end
-
 lemma multiset.pow_count [comm_monoid α] (a : α) [decidable_eq α] :
   a ^ (multiset.count a s) = (multiset.filter (eq a) s).prod :=
 begin
@@ -157,19 +141,18 @@ begin
   { rintro -, simp only [multiset.countp_zero] },
   { intros a t ih h,
     specialize ih _,
+    { intros x hx,
+      apply h,
+      rw multiset.mem_cons,
+      right,
+      assumption },
     { by_cases ha1 : p1 a,
       { have ha2 : p2 a,
         { rwa ←h a (multiset.mem_cons_self a t) },
         simp only [ha1, ha2, multiset.countp_cons_of_pos, ih] },
       { have ha2 : ¬p2 a,
         { rwa ←h a (multiset.mem_cons_self a t) },
-        rw [multiset.countp_cons_of_neg _ ha1, multiset.countp_cons_of_neg _ ha2, ih] } },
-    -- todo move up for new mathlib
-    { intros x hx,
-      apply h,
-      rw multiset.mem_cons,
-      right,
-      assumption } },
+        rw [multiset.countp_cons_of_neg _ ha1, multiset.countp_cons_of_neg _ ha2, ih] } } }
 end
 
 end

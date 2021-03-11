@@ -632,7 +632,7 @@ theorem of_irreducible_pow {α} [comm_monoid α] {x : α} {n : ℕ} (hn : 1 < n)
 begin
   intro h,
   rcases n with rfl|rfl|_,
-  { norm_num at hn },
+  { norm_num at hn, contradiction },
   { norm_num at hn },
   { rw pow_succ at h,
     cases of_irreducible_mul h with hu hu,
