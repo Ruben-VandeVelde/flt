@@ -433,6 +433,59 @@ begin
   apply nat.not_coprime_of_dvd_of_dvd (by norm_num : 1 < 3) hdvdp hdvdq hcoprime,
 end
 
+lemma obscure'
+  (p q : ℕ)
+  (hp : 0 < p) (hq : 0 < q)
+  (hcoprime : nat.gcd p q = 1)
+  (hparity : even p ↔ ¬even q)
+  (hcube : ∃ r, p ^ 2 + 3 * q ^ 2 = r ^ 3) :
+  ∃ a b : ℤ,
+    (p : ℤ) = a ^ 3 - 9 * a * b ^ 2 ∧
+    (q : ℤ) = 3 * a ^ 2 * b - 3 * b ^ 3 ∧
+    is_coprime a b ∧
+    (even a ↔ ¬even b) :=
+begin
+  obtain ⟨u, hu⟩ := hcube,
+
+  have hcoprime' : is_coprime (p : ℤ) q,
+  { rw ←int.gcd_eq_one_iff_coprime,
+    simp only [int.gcd],
+    rwa [int.nat_abs_of_nat] },
+
+  obtain ⟨a, b, hp', hq'⟩ := step6 p q u hcoprime' _,
+  refine ⟨a, b, hp', hq', _, _⟩,
+  { apply is_coprime_of_dvd,
+    { rintro ⟨rfl, rfl⟩,
+      norm_num at hp',
+      exact hp.ne.symm hp' },
+
+    intros k hknu hknezero hkdvdleft hkdvdright,
+    apply hknu,
+    apply hcoprime'.is_unit_of_dvd',
+    { rw hp',
+      apply dvd_sub,
+      { exact dvd_pow hkdvdleft (by norm_num) },
+      { rw [mul_comm (9 : ℤ), mul_assoc],
+        exact dvd_mul_of_dvd_left hkdvdleft _ } },
+    { rw hq',
+      apply dvd_sub,
+      { exact dvd_mul_of_dvd_right hkdvdright _ },
+      { apply dvd_mul_of_dvd_right,
+        exact dvd_pow hkdvdright (by norm_num) } } },
+
+  { by_cases haparity : even a; by_cases hbparity : even b;
+    [skip, tauto, tauto, skip];
+    { exfalso,
+      have : even p,
+      { rw [←int.even_coe_nat, hp'],
+        simp [haparity, hbparity, three_ne_zero] with parity_simps },
+      have : even q,
+      { rw [←int.even_coe_nat, hq'],
+        simp [haparity, hbparity, three_ne_zero] with parity_simps },
+      tauto } },
+  { norm_cast, exact hu.symm }
+end
+
 lemma obscure
   (p q : ℕ)
   (hp : 0 < p) (hq : 0 < q)
