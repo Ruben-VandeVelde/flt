@@ -446,7 +446,7 @@ begin
     
     {refine ⟨u, v, h1, h2, _⟩, { rwa hp }},
     {refine ⟨u, v, h1, _, _⟩, { simp only [neg_neg], rwa or_comm, }, { rwa hp }},
-    {refine ⟨-u, -v, is_coprime_neg h1, _, _⟩, { rw or_comm, convert h2 using 2;
+    {refine ⟨-u, -v, h1.neg_neg, _, _⟩, { rw or_comm, convert h2 using 2;
       {
 
         rw zsqrtd.mul_def,
@@ -457,7 +457,7 @@ begin
       },
     
      }, { rwa [hp, pow_two_neg, pow_two_neg], }},
-    {refine ⟨-u, -v, is_coprime_neg h1, _, _⟩, { convert h2 using 2;
+    {refine ⟨-u, -v, h1.neg_neg, _, _⟩, { convert h2 using 2;
       {
 
         rw zsqrtd.mul_def,
@@ -1644,7 +1644,7 @@ begin
           simp only [hcoprime],
 
           simp only [zsqrtd.neg_im, mul_neg_eq_neg_mul_symm, zsqrtd.neg_re],
-          exact is_coprime_neg hcoprime },
+          exact hcoprime.neg_neg },
 
 
       },
@@ -1709,7 +1709,7 @@ begin
           simp only [hcoprime],
 
           simp only [zsqrtd.neg_im, mul_neg_eq_neg_mul_symm, zsqrtd.neg_re],
-          exact is_coprime_neg hcoprime } },
+          exact hcoprime.neg_neg } },
 
       exfalso,
       apply no_conj f,
@@ -1722,7 +1722,7 @@ begin
         simp only [hcoprime],
 
         simp only [zsqrtd.neg_im, mul_neg_eq_neg_mul_symm, zsqrtd.neg_re],
-        exact is_coprime_neg hcoprime },
+        exact hcoprime.neg_neg },
       refine ⟨HA, _⟩,
       rw ←hu,
       convert hx,

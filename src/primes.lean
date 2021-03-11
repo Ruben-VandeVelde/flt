@@ -608,12 +608,22 @@ end
 section
 variables {R : Type*} [comm_ring R]
 
-lemma is_coprime_neg {a b : R} (h : is_coprime a b) : is_coprime (-a) (-b) :=
+lemma is_coprime.neg_left {a b : R} (h : is_coprime a b) : is_coprime (-a) b :=
 begin
   obtain ⟨x, y, h⟩ := h,
-  use [-x, -y],
+  use [-x, y],
   simpa only [neg_mul_eq_neg_mul_symm, mul_neg_eq_neg_mul_symm, neg_neg] using h,
 end
+
+lemma is_coprime.neg_right {a b : R} (h : is_coprime a b) : is_coprime a (-b) :=
+begin
+  obtain ⟨x, y, h⟩ := h,
+  use [x, -y],
+  simpa only [neg_mul_eq_neg_mul_symm, mul_neg_eq_neg_mul_symm, neg_neg] using h,
+end
+
+lemma is_coprime.neg_neg {a b : R} (h : is_coprime a b) : is_coprime (-a) (-b) :=
+h.neg_left.neg_right
 
 end
 section
