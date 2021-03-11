@@ -127,20 +127,6 @@ begin
   { assumption },
 end
 
-lemma int.dvd_mul_cancel_prime {p n k : ℕ}
-  (h : k ∣ p * n)
-  (hne : k ≠ p)
-  (hp : nat.prime p)
-  (hk : nat.prime k) : k ∣ n :=
-begin
-  rw hk.dvd_mul at h,
-  cases h,
-  { exfalso,
-    rw nat.prime_dvd_prime_iff_eq hk hp at h,
-    contradiction },
-  { assumption },
-end
-
 lemma nat.even_pow' {m n : nat} (h : n ≠ 0) : even (m^n) ↔ even m :=
 begin
   rw [nat.even_pow], tauto,
@@ -603,6 +589,16 @@ begin
   rw ←h1,
   apply dvd_add; { apply dvd_mul_of_dvd_right, assumption },
 end
+
+lemma is_coprime.is_unit_of_dvd'' {a b x : R} (h : is_coprime a b) (ha : x ∣ a) (hb : x ∣ b) :
+is_unit x :=
+begin
+  rw is_unit_iff_dvd_one,
+  obtain ⟨c, d, h1⟩ := h,
+  rw ←h1,
+  apply dvd_add; { apply dvd_mul_of_dvd_right, assumption },
+end
+
 end
 
 section
@@ -748,4 +744,90 @@ begin
   { right, exact h },
   { right, rwa [eq_neg_iff_eq_neg, eq_comm] },
   { left, rwa [eq_neg_iff_eq_neg, eq_comm, neg_neg] at h },
+end
+
+lemma int.nat_abs_eq_nat_abs_iff {a b : ℤ} (h : a.nat_abs = b.nat_abs) : a = b ∨ a = -b :=
+begin
+  apply int.abs_eq_abs_iff,
+  rwa [int.abs_eq_nat_abs, int.abs_eq_nat_abs, int.coe_nat_inj'],
+end
+
+theorem int.exists_prime_and_dvd {n : ℤ} (n2 : 2 ≤ n.nat_abs) : ∃ p, prime p ∧ p ∣ n :=
+begin
+  obtain ⟨p, pp, pd⟩ := nat.exists_prime_and_dvd n2,
+  exact ⟨p, nat.prime_iff_prime_int.mp pp, int.coe_nat_dvd_left.mpr pd⟩,
+end
+
+theorem int.is_coprime_of_dvd' {x y : ℤ}
+  (z : ¬ (x = 0 ∧ y = 0))
+  (H : ∀ z ∈ nonunits ℤ, z ≠ 0 → prime z → z ∣ x → ¬ z ∣ y) :
+  is_coprime x y :=
+begin
+  rw [←int.gcd_eq_one_iff_coprime],
+  simp only [int.gcd],
+  change nat.coprime _ _,
+  apply nat.coprime_of_dvd,
+  intros k kprime ka kb,
+  apply H k,
+  { intro H,
+    apply kprime.ne_one,
+    rwa [int.is_unit_iff_nat_abs, int.nat_abs_of_nat] at H },
+  { simp only [int.coe_nat_eq_zero, ne.def], exact kprime.ne_zero },
+  { rwa ←nat.prime_iff_prime_int },
+  { exact int.coe_nat_dvd_left.mpr ka },
+  { exact int.coe_nat_dvd_left.mpr kb },
+end
+
+/-
+lemma int.dvd_mul_cancel_prime {p n k : ℤ}
+  (h : k ∣ p * n)
+  (hne : k.nat_abs ≠ p.nat_abs)
+  (hp : prime p)
+  (hk : prime k) : k ∣ n :=
+begin
+  rw ←nat.prime_iff_prime_int at hp hk,
+  cases hk.div_or_div h with h h,
+  { exfalso,
+    rw nat.prime_dvd_prime_iff_eq at h,
+    contradiction },
+  { assumption },
+end
+-/
+
+theorem int.associated_pow_of_mul_eq_pow {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
+  (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ k) : ∃ d, associated a (d ^ k) :=
+begin
+  have ha' : associates.mk a ≠ 0,
+  { rwa [ne.def, associates.mk_eq_zero] },
+  have hb' : associates.mk b ≠ 0,
+  { rwa [ne.def, associates.mk_eq_zero] },
+  have hab' : ∀ (d : associates ℤ), d ∣ associates.mk a → d ∣ associates.mk b → ¬prime d,
+  { intros d da db dprime,
+    obtain ⟨d', rfl⟩ := associates.exists_rep d,
+    rw associates.mk_dvd_mk at da db,
+    rw [associates.prime_mk] at dprime,
+    apply dprime.not_unit,
+    exact is_coprime.is_unit_of_dvd' hab da db },
+  have h' : associates.mk a * associates.mk b = (associates.mk c) ^ k,
+  { rw [associates.mk_mul_mk, ←associates.mk_pow, h] },
+  obtain ⟨d, hd⟩ := associates.eq_pow_of_mul_eq_pow ha' hb' hab' h',
+  obtain ⟨d', rfl⟩ := associates.exists_rep d,
+  rw [←associates.mk_pow, associates.mk_eq_mk_iff_associated, int.associated_iff] at hd,
+  use d',
+  rwa int.associated_iff
+end
+
+lemma int.pow_neg_of_odd {a : ℤ} {n : ℕ} (hn : odd n) : (-a) ^ n = - (a ^ n) :=
+begin
+  sorry
+end
+
+theorem int.eq_pow_of_mul_eq_pow {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
+  (hab : is_coprime a b) {k : ℕ} (hk : odd k) (h : a * b = c ^ k) : ∃ d, a = d ^ k :=
+begin
+  obtain ⟨d, hd⟩ := int.associated_pow_of_mul_eq_pow ha hb hab h,
+  rw int.associated_iff at hd,
+  obtain rfl|rfl := int.nat_abs_eq_nat_abs_iff hd,
+  { use d, },
+  { use -d, rw int.pow_neg_of_odd hk },
 end
