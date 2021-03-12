@@ -701,31 +701,6 @@ begin
   refl,
 end
 
-lemma gcd1_coprime12 (u v : ℕ)
-  (huvcoprime : u.gcd v = 1)
-  (notdvd_2_2 : ¬2 ∣ u - 3 * v)
-  (hccc : 2 * (u - 3 * v) ≤ 2 * u)
-  (hbbb : 2 * 3 * v = 2 * u - 2 * (u - 3 * v))
-  (not_3_dvd_2 : ¬3 ∣ u - 3 * v) :
-  (2 * u).coprime (u - 3 * v) :=
-begin
-  apply nat.coprime_of_dvd',
-  intros k hkprime hkdvdleft hkdvdright,
-  have kne2 : k ≠ 2,
-  { rintro rfl, exact notdvd_2_2 hkdvdright },
-  have kne3 : k ≠ 3,
-  { rintro rfl, exact not_3_dvd_2 hkdvdright },
-  have kdvdu : k ∣ u := dvd_mul_cancel_prime hkdvdleft kne2 nat.prime_two hkprime,
-  have kdvdv : k ∣ v,
-  { apply dvd_mul_cancel_prime _ kne3 nat.prime_three hkprime,
-    apply dvd_mul_cancel_prime _ kne2 nat.prime_two hkprime,
-    rw [←mul_assoc, hbbb],
-    apply nat.dvd_sub' hkdvdleft,
-    apply dvd_mul_of_dvd_right hkdvdright },
-  have : k ∣ nat.gcd u v := nat.dvd_gcd kdvdu kdvdv,
-  rwa huvcoprime at this
-end
-
 lemma int.dvd_iff_abs_dvd {a b : ℤ} : a ∣ b ↔ abs a ∣ b :=
 begin
   have : associated a (abs a),
@@ -738,9 +713,8 @@ begin
 end
 
 lemma int.gcd1_coprime12 (u v : ℤ)
-  (huvcoprime : u.gcd v = 1)
+  (huvcoprime : is_coprime u v)
   (notdvd_2_2 : ¬2 ∣ u - 3 * v)
-  (hbbb : 2 * 3 * v = 2 * u - 2 * (u - 3 * v))
   (not_3_dvd_2 : ¬3 ∣ u - 3 * v) :
   is_coprime (2 * u) (u - 3 * v) :=
 begin
@@ -750,7 +724,7 @@ begin
     subst h1,
     simp only [three_ne_zero, false_or, zero_sub, neg_eq_zero, mul_eq_zero] at h2,
     subst h2,
-    simpa only [int.gcd_zero_right, zero_ne_one, int.nat_abs_zero] using huvcoprime },
+    exact not_coprime_zero_zero huvcoprime },
   intros k hknu hknz hkprime hkdvdleft hkdvdright,
   rw int.prime_iff at hkprime,
   have kne2 : abs k ≠ 2,
@@ -762,10 +736,8 @@ begin
     rw [int.dvd_iff_abs_dvd, hk] at hkdvdright,
     exact not_3_dvd_2 hkdvdright },
 
-
   apply hknu,
-  apply is_coprime.is_unit_of_dvd',
-  { rwa ←int.gcd_eq_one_iff_coprime },
+  apply huvcoprime.is_unit_of_dvd',
   { rw ←int.nat_abs_dvd_abs_iff,
     rw [←int.nat_abs_dvd_abs_iff, int.nat_abs_mul] at hkdvdleft,
     apply dvd_mul_cancel_prime hkdvdleft _ nat.prime_two hkprime,
@@ -976,8 +948,6 @@ begin
   { simp [huvodd] with parity_simps },
   have notdvd_2_2 : ¬(2 ∣ u - 3 * v),
   { exact ‹¬even (u - 3 * v)› },
-  have hbbb : 2 * 3 * v = 2 * u - 2 * (u - 3 * v),
-  { ring },
   have hddd : ¬(3 ∣ p),
   { intro H,
     have : 3 ∣ p ^ 2 + 3 * q ^ 2,
@@ -1012,7 +982,7 @@ begin
     { apply mul_ne_zero two_ne_zero u_ne_zero },
     { sorry },
     { sorry },
-    { apply int.gcd1_coprime12 u v; sorry },
+    { apply int.gcd1_coprime12 u v; assumption },
     { sorry },
     { sorry },
     { sorry } },
