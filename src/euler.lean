@@ -828,31 +828,66 @@ begin
     norm_cast at kne3 },
 end
 
-lemma gcd1_coprime23 (u v : ℕ)
-  (huvcoprime : u.gcd v = 1)
+lemma int.gcd1_coprime23 (u v : ℤ)
+  (huvcoprime : is_coprime u v)
   (notdvd_2_2 : ¬2 ∣ u - 3 * v)
-  (huadd_add_usub : 2 * u = u + 3 * v + (u - 3 * v))
-  (huadd_sub_usub : 2 * 3 * v = u + 3 * v - (u - 3 * v))
   (notdvd_3_3 : ¬3 ∣ u + 3 * v) :
-  (u - 3 * v).coprime (u + 3 * v) :=
+  is_coprime (u - 3 * v) (u + 3 * v) :=
 begin
-  apply nat.coprime_of_dvd',
-  intros k hkprime hkdvdleft hkdvdright,
-  have : k ≠ 2,
-  { rintro rfl, contradiction },
-  have : k ≠ 3,
-  { rintro rfl, contradiction },
-  have : k ∣ u,
-  { refine dvd_mul_cancel_prime _ ‹_› nat.prime_two hkprime,
-    rw huadd_add_usub,
-    apply nat.dvd_add hkdvdright hkdvdleft },
-  have : k ∣ v,
-  { apply dvd_mul_cancel_prime _ ‹_› nat.prime_three hkprime,
-    apply dvd_mul_cancel_prime _ ‹_› nat.prime_two hkprime,
-    rw [←mul_assoc, huadd_sub_usub],
-    apply nat.dvd_sub'; assumption },
-  have : k ∣ nat.gcd u v := nat.dvd_gcd ‹_› ‹_›,
-  rwa huvcoprime at this
+  apply int.is_coprime_of_dvd',
+  { rintro ⟨h1, -⟩,
+    norm_num [h1] at notdvd_2_2,
+    exact notdvd_2_2 },
+  intros k hknu hknz hkprime hkdvdleft hkdvdright,
+  rw int.prime_iff at hkprime,
+  have kne2 : abs k ≠ 2,
+  { rintro hk,
+    rw [int.dvd_iff_abs_dvd, hk] at hkdvdleft,
+    exact notdvd_2_2 hkdvdleft },
+  have kne3 : abs k ≠ 3,
+  { rintro hk,
+    rw [int.dvd_iff_abs_dvd, hk] at hkdvdright,
+    exact notdvd_3_3 hkdvdright },
+
+  apply hknu,
+  apply huvcoprime.is_unit_of_dvd',
+
+  { rw ←int.nat_abs_dvd_abs_iff,
+    apply dvd_mul_cancel_prime _ _ nat.prime_two hkprime,
+    have : 2 * u.nat_abs = (2 * u).nat_abs,
+    { rw [int.nat_abs_mul],
+      congr' },
+    rw this,
+    have : 2 * u = (u + 3 * v) + (u - 3 * v),
+    { ring },
+    rw this,
+    rw int.nat_abs_dvd_abs_iff,
+    apply dvd_add; assumption,
+
+    contrapose! kne2,
+    rw [int.abs_eq_nat_abs, kne2],
+    norm_num },
+  { rw ←int.nat_abs_dvd_abs_iff,
+    apply dvd_mul_cancel_prime _ _ nat.prime_three hkprime,
+    apply dvd_mul_cancel_prime _ _ nat.prime_two hkprime,
+    rw ←mul_assoc,
+    have : 2 * 3 * v.nat_abs = (2 * 3 * v).nat_abs,
+    { rw [int.nat_abs_mul],
+      congr' },
+    rw this,
+    have : 2 * 3 * v = u + 3 * v - (u - 3 * v),
+    { ring },
+    rw this,
+    rw int.nat_abs_dvd_abs_iff,
+    apply dvd_sub; assumption,
+
+    contrapose! kne2,
+    rw [int.abs_eq_nat_abs, kne2],
+    norm_num,
+
+    contrapose! kne3,
+    rw [int.abs_eq_nat_abs, kne3],
+    norm_num },
 end
 
 lemma nat_solution_of_int_solution
@@ -1018,7 +1053,7 @@ begin
       simpa [H] with parity_simps using huvodd },
     { apply int.gcd1_coprime12 u v; assumption },
     { apply int.gcd1_coprime13 u v; assumption },
-    { sorry },
+    { apply int.gcd1_coprime23 u v; assumption },
     { rw ←haaa, norm_cast, exact hs } },
 
   apply nat_solution_of_int_solution (2 * p) HApos HBpos HCpos,
