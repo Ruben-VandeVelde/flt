@@ -978,7 +978,7 @@ begin
   obtain ⟨C, A, B, HCpos, HApos, HBpos, HC, HA, HB⟩ : ∃ X Y Z : ℤ,
     X ≠ 0 ∧ Y ≠ 0 ∧ Z ≠ 0 ∧
     2 * u = X ^ 3 ∧ u - 3 * v = Y ^ 3 ∧ u + 3 * v = Z ^ 3,
-  { apply int.cube_of_coprime (2 * u) (u - 3 * v) (u + 3 * v) (2 * p),
+  { apply int.cube_of_coprime (2 * u) (u - 3 * v) (u + 3 * v) s,
     { apply mul_ne_zero two_ne_zero u_ne_zero },
     { rw sub_ne_zero,
       rintro rfl,
@@ -989,7 +989,7 @@ begin
     { apply int.gcd1_coprime12 u v; assumption },
     { sorry },
     { sorry },
-    { sorry } },
+    { rw ←haaa, norm_cast, exact hs } },
 
   apply nat_solution_of_int_solution (2 * p) HApos HBpos HCpos,
   { rw [mul_comm, ←mul_assoc (C ^ 3), ←HA, ←HB, ←HC, ←haaa],
