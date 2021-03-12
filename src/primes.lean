@@ -153,18 +153,8 @@ end
 lemma nat.pos_pow_iff {b n : ℕ} (h : 0 < n) : 0 < b ↔ 0 < b ^ n :=
 begin
   rw [pos_iff_ne_zero, pos_iff_ne_zero, ne.def, ne.def, not_congr],
-  apply (pow_eq_zero_iff h).symm,
-  apply_instance,
+  exact (pow_eq_zero_iff h).symm,
 end
-
-theorem pos_pow_of_pos {b : ℕ} (n : ℕ) (h : 0 < b) : 0 < b^n := pow_pos h n
-
-/-
-theorem not_coprime_of_dvd_gcd {m n d : ℕ} (dgt1 : 1 < d) (H : d ∣ nat.gcd m n) :
-  ¬ nat.coprime m n :=
-λ (co : nat.gcd m n = 1),
-not_lt_of_ge (nat.le_of_dvd zero_lt_one $ by rw ←co; exact H) dgt1
--/
 
 theorem int.nat_abs_ne_zero {a : ℤ} : a.nat_abs ≠ 0 ↔ a ≠ 0 := not_congr int.nat_abs_eq_zero
 
@@ -504,8 +494,7 @@ end
 theorem nat.dvd_sub' {k m n : ℕ} (h₁ : k ∣ m) (h₂ : k ∣ n) : k ∣ m - n :=
 begin
   by_cases H : n ≤ m,
-  { --rwa [nat.dvd_add_iff_left h₂, nat.sub_add_cancel H]
-    exact nat.dvd_sub H h₁ h₂ },
+  { exact nat.dvd_sub H h₁ h₂ },
   { rw not_le at H,
     rw nat.sub_eq_zero_of_le H.le,
     exact dvd_zero k },
@@ -529,15 +518,11 @@ end
 lemma int.prime_iff (a : ℤ) : prime a ↔ nat.prime a.nat_abs :=
 begin
   rw nat.prime_iff_prime_int,
-  refine prime_iff_of_associated _,
-  refine dvd_dvd_iff_associated.mp _,
+  apply prime_iff_of_associated,
+  rw ←dvd_dvd_iff_associated,
   split,
-  refine int.coe_nat_dvd_right.mpr _,
-  exact dvd_refl (int.nat_abs a),
-
-
-  refine int.nat_abs_dvd.mpr _,
-  exact dvd_refl (a),
+  { rw int.coe_nat_dvd_right },
+  { rw int.nat_abs_dvd }
 end
 
 lemma int.factor_div (a: ℤ) (x : ℕ)
@@ -681,10 +666,7 @@ begin
   rw one_mul,
 end
 
-lemma pow_two_neg (a : ℤ) : (-a) ^ 2 = a ^ 2 :=
-begin
-  exact neg_square a
-end
+-- todo square neg_square and neg_pow_bit0
 
 theorem int.associated_iff {a b : ℤ} : associated a b ↔ a.nat_abs = b.nat_abs :=
 begin
@@ -698,8 +680,8 @@ begin
   rw ←int.nat_abs_dvd_abs_iff,
   rw int.associated_iff,
   split; intro H,
-  {rwa nat.prime_dvd_prime_iff_eq pp qp at H},
-  {rw H}
+  { rwa nat.prime_dvd_prime_iff_eq pp qp at H },
+  { rw H }
 end
 
 lemma int.is_unit_iff_nat_abs {x : ℤ} : is_unit x ↔ x.nat_abs = 1 :=
@@ -777,22 +759,6 @@ begin
   { exact int.coe_nat_dvd_left.mpr ka },
   { exact int.coe_nat_dvd_left.mpr kb },
 end
-
-/-
-lemma int.dvd_mul_cancel_prime {p n k : ℤ}
-  (h : k ∣ p * n)
-  (hne : k.nat_abs ≠ p.nat_abs)
-  (hp : prime p)
-  (hk : prime k) : k ∣ n :=
-begin
-  rw ←nat.prime_iff_prime_int at hp hk,
-  cases hk.div_or_div h with h h,
-  { exfalso,
-    rw nat.prime_dvd_prime_iff_eq at h,
-    contradiction },
-  { assumption },
-end
--/
 
 theorem int.associated_pow_of_mul_eq_pow {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
   (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ k) : ∃ d, associated a (d ^ k) :=

@@ -456,7 +456,7 @@ begin
       simp,
       },
     
-     }, { rwa [hp, pow_two_neg, pow_two_neg], }},
+     }, { rwa [hp, neg_pow_bit0, neg_pow_bit0], }},
     {refine ⟨-u, -v, h1.neg_neg, _, _⟩, { convert h2 using 2;
       {
 
@@ -467,7 +467,7 @@ begin
       simp,
       },
     
-     }, { rwa [hp, pow_two_neg, pow_two_neg], }},
+     }, { rwa [hp, neg_pow_bit0, neg_pow_bit0], }},
     
     
      },

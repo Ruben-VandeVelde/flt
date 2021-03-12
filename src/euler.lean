@@ -150,9 +150,7 @@ begin
       apply nat.lt_add_of_pos_left,
       apply pow_pos,
       exact hapos },
-    { norm_num }
-    
-  },
+    { norm_num } },
 
   refine ⟨p.nat_abs, q.nat_abs, _, _, _, _, _⟩,
   { rw pos_iff_ne_zero,
@@ -198,14 +196,11 @@ begin
   rw ←mul_two at h,
   apply two_not_cube (c/a),
   rw div_pow',
-  rw ←h,
-  rw mul_comm,
-  rw nat.mul_div_cancel,
-  exact pow_pos hapos 3,
+  { rw [←h, mul_comm, nat.mul_div_cancel],
+    exact pow_pos hapos 3 },
 
-  rw ←nat.pow_dvd_pow_iff (by norm_num : 0 < 3),
-  rw ←h,
-  apply dvd_mul_right,
+  { rw [←nat.pow_dvd_pow_iff (by norm_num : 0 < 3), ←h],
+    apply dvd_mul_right },
 end
 
 lemma descent1 (a b c : ℕ)
@@ -231,8 +226,7 @@ begin
       obtain ⟨p, q, hp, hq, hcoprime, hodd, hcube⟩ := this,
       refine ⟨p, q, hp, hq, hcoprime, hodd, _⟩,
       tauto } },
-  {
-    rcases this with ⟨ha, hb, hc⟩,
+  { rcases this with ⟨ha, hb, hc⟩,
     obtain ⟨p, hp⟩ : even (a + b : ℤ),
     { simp [ha, hb] with parity_simps},
     obtain ⟨q, hq⟩ : even (a - b : ℤ),
@@ -291,8 +285,7 @@ begin
       rw  ←h,
       zify,
       rw [←‹p = _›, int.nat_abs_square q, ←hadd, ←hsub],
-      ring,
-    } },
+      ring } },
 end
 
 lemma descent11 {a b c d : ℕ} (h : d = a ∨ d = b ∨ d = c) : d ∣ (a * b * c) :=
@@ -347,8 +340,7 @@ begin
     { left, norm_num at hg, exact hg },
     { right, norm_num at hg, exact hg },
     { change k + 2 < 2 at hk,
-      linarith },
-  },
+      linarith } },
 
   have basic : ∀ f, nat.prime f → f ∣ 2 * p → f ∣ (p ^ 2 + 3 * q ^ 2) → f = 3,
   { intros d hdprime hdleft hdright,
@@ -430,7 +422,7 @@ begin
     rw hg,
     apply dvd_mul_right },
 
-  apply nat.not_coprime_of_dvd_of_dvd (by norm_num : 1 < 3) hdvdp hdvdq hcoprime,
+  exact nat.not_coprime_of_dvd_of_dvd (by norm_num : 1 < 3) hdvdp hdvdq hcoprime,
 end
 
 lemma obscure'
@@ -486,43 +478,6 @@ begin
   { norm_cast, exact hu.symm }
 end
 
-lemma cube_of_coprime (a b c s : ℕ)
-  (ha : 0 < a)
-  (hb : 0 < b)
-  (hc : 0 < c)
-  (hcoprimeab : nat.coprime a b)
-  (hcoprimeac : nat.coprime a c)
-  (hcoprimebc : nat.coprime b c)
-  (hs : a * b * c = s ^ 3) :
-  ∃ A B C, 0 < A ∧ 0 < B ∧ 0 < C ∧ a = A ^ 3 ∧ b = B ^ 3 ∧ c = C ^ 3 :=
-begin
-  obtain ⟨A, HA⟩ : ∃ A, a = A ^ 3,
-  { rw [mul_assoc] at hs,
-    apply nat.eq_pow_of_mul_eq_pow ha _ _ hs,
-    { exact nat.mul_pos hb hc },
-    { rw nat.coprime_mul_iff_right,
-      exact ⟨hcoprimeab, hcoprimeac⟩ } },
-  obtain ⟨B, HB⟩ : ∃ B, b = B ^ 3,
-  { rw [mul_comm a b, mul_assoc] at hs,
-    apply nat.eq_pow_of_mul_eq_pow hb _ _ hs,
-    { exact nat.mul_pos ha hc },
-    { rw nat.coprime_mul_iff_right,
-      exact ⟨hcoprimeab.symm, hcoprimebc⟩ } },
-  obtain ⟨C, HC⟩ : ∃ C, c = C ^ 3,
-  { rw [mul_comm] at hs,
-    apply nat.eq_pow_of_mul_eq_pow hc _ _ hs,
-    { exact nat.mul_pos ha hb },
-    { rw nat.coprime_mul_iff_right,
-      exact ⟨hcoprimeac.symm, hcoprimebc.symm⟩ } },
-  refine ⟨A, B, C, _, _, _, HA, HB, HC⟩,
-  all_goals {
-    rw [nat.pos_pow_iff zero_lt_three],
-  },
-  { rwa [←HA] },
-  { rwa [←HB] },
-  { rwa [←HC] },
-end
-
 lemma int.cube_of_coprime (a b c s : ℤ)
   (ha : a ≠ 0)
   (hb : b ≠ 0)
@@ -553,45 +508,7 @@ begin
   { rwa [←HB] },
   { rwa [←HC] },
 end
-/-
-theorem prime.not_dvd_one {p : ℤ} (pp : prime p) : ¬ p ∣ 1 :=
-begin
-  intro d,
-  have := int.le_of_dvd dec_trivial d,
-  exact (not_le_of_gt pp.one_lt) $ le_of_dvd dec_trivial d
-end
 
-
-theorem prime.coprime_iff_not_dvd {p n : ℤ} (pp : prime p) : is_coprime p n ↔ ¬ p ∣ n :=
-begin
-  rw nat.coprime
-  split,
-  intros co d,
-  have := pp.not_dvd_one,
---⟨λ co d, pp.not_dvd_one $ co.dvd_of_dvd_mul_left (by simp [d]),
--- λ nd, coprime_of_dvd $ λ m m2 mp, ((prime_dvd_prime_iff_eq m2 pp).1 mp).symm ▸ nd⟩
-end
-
-example(p a : ℕ) (h : ¬p ∣ a) (hp : nat.prime p) : nat.coprime p a :=
-begin
-  exact (nat.prime.coprime_iff_not_dvd hp).mpr h,
-end
--/
-/-
-lemma xx (p a : ℤ) (h : ¬p ∣ a) (hp : prime p) : is_coprime p a :=
-begin
-  
-  rw ←int.gcd_eq_one_iff_coprime,
-  simp only [int.gcd],
-  change nat.coprime _ _,
-  rw nat.prime.coprime_iff_not_dvd,
-  {contrapose! h,
-    exact int.nat_abs_dvd_abs_iff.mp h },
-  {exact (int.prime_iff p).mp hp}
---  library_search
-end
-lemma nat.gcd_eq_one_iff_coprime {m n : ℕ} : nat.coprime m n ↔ nat.gcd m n = 1 := iff.rfl
--/
 theorem int.prime.coprime_iff_not_dvd {p n : ℤ} (pp : prime p) : is_coprime p n ↔ ¬ p ∣ n :=
 begin
   rw int.prime_iff at pp,
@@ -617,12 +534,10 @@ lemma int.gcd1_coprime12 (u v : ℤ)
   is_coprime (2 * u) (u - 3 * v) :=
 begin
   apply int.is_coprime_of_dvd',
-  { rintro ⟨h1, h2⟩,
-    simp only [mul_eq_zero, two_ne_zero, false_or] at h1,
-    subst h1,
-    simp only [three_ne_zero, false_or, zero_sub, neg_eq_zero, mul_eq_zero] at h2,
-    subst h2,
-    exact not_coprime_zero_zero huvcoprime },
+  { rintro ⟨-, h2⟩,
+    rw h2 at notdvd_2_2,
+    norm_num at notdvd_2_2,
+    exact notdvd_2_2 },
   intros k hknu hknz hkprime hkdvdleft hkdvdright,
   rw int.prime_iff at hkprime,
   have kne2 : abs k ≠ 2,
@@ -666,7 +581,6 @@ begin
     rw int.abs_eq_nat_abs at kne3,
     norm_cast at kne3 },
 end
-
 
 lemma int.gcd1_coprime13 (u v : ℤ)
   (huvcoprime : is_coprime u v)
@@ -1057,7 +971,7 @@ begin
     exact nat.eq_pow_of_mul_eq_pow ‹_› ‹_› hcoprime''.symm hr },
 
   -- 5.
-  -- todo shadows hq
+  -- todo shadows hq hq
   obtain ⟨u, v, hq, hs, huvcoprime, huvodd⟩ := obscure' q s hq hspos hcoprime'.symm hodd' hcuberight,
   have hu : u ≠ 0,
   { rintro rfl,
@@ -1188,8 +1102,7 @@ begin
 
   -- 7.
   obtain ⟨t, ht⟩ : ∃ t, 2 * v * (u - v) * (u + v) = t ^ 3,
-  {
-    obtain ⟨e, he⟩ := hcubeleft,
+  { obtain ⟨e, he⟩ := hcubeleft,
     obtain ⟨f, hf⟩ := hcuberight,
     have hxxx : 3 ^ 3 * (2 * (u ^ 2 * v - v ^ 3)) = e ^ 3,
     { zify at he,
@@ -1210,8 +1123,7 @@ begin
     ... = ((2 * (u ^ 2 * v - v ^ 3)) * 3 ^ 3) / 3 ^ 3 : by rw mul_comm
     ... = 2 * (u ^ 2 * v - v ^ 3) : int.mul_div_cancel _ (by norm_num : (3 ^ 3 : ℤ) ≠ 0)
     ... = 2 * v * (u ^ 2 - v ^ 2) : by rw [mul_assoc, mul_comm v, mul_sub_right_distrib, pow_succ' v]
-    ... = 2 * v * (u - v) * (u + v) : by { rw pow_two_sub_pow_two, ring }
-  },
+    ... = 2 * v * (u - v) * (u + v) : by { rw pow_two_sub_pow_two, ring } },
 
   obtain ⟨A, B, C, HApos, HBpos, HCpos, HA, HB, HC⟩ : ∃ X Y Z : ℤ,
     X ≠ 0 ∧ Y ≠ 0 ∧ Z ≠ 0 ∧

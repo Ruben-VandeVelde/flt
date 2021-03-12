@@ -687,7 +687,7 @@ begin
     apply (nat.pow_left_strict_mono one_le_two).monotone.ne_of_lt_of_lt_nat 1; norm_num },
   { apply ne_of_gt,
     apply lt_add_of_nonneg_of_lt,
-    apply  (pow_two_nonneg _),
+    apply (pow_two_nonneg _),
     rw [←int.nat_abs_pow_two],
     norm_cast,
     have := int.nat_abs_ne_zero_of_ne_zero hb,
