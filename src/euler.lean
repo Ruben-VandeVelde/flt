@@ -863,22 +863,78 @@ lemma nat_solution_of_int_solution
   (ha : a ≠ 0)
   (hb : b ≠ 0)
   (hc : c ≠ 0)
-  (hu : a ^ 3 * b ^ 3 * c ^ 3 ≤ u)
+  (hu : (a ^ 3 * b ^ 3 * c ^ 3).nat_abs ≤ u)
   (h : a ^ 3 + b ^ 3 = c ^ 3)
   :
   ∃ a' b' c' : ℕ,
     0 < a' ∧ 0 < b' ∧ 0 < c' ∧ a' ^ 3 * b' ^ 3 * c' ^ 3 ≤ u ∧ a' ^ 3 + b' ^ 3 = c' ^ 3 :=
 begin
---  rw [←int.nat_abs_ne_zero, ←pos_iff_ne_zero] at HApos HBpos HCpos,
-/-
-  refine ⟨A.nat_abs, B.nat_abs, C.nat_abs, HApos, HBpos, HCpos, _, _⟩,
-  { rw [←int.nat_abs_pow, ←int.nat_abs_pow, ←int.nat_abs_pow, ←int.nat_abs_mul, ←int.nat_abs_mul,
-      mul_comm, ←mul_assoc (C ^ 3), ←HA, ←HB, ←HC, ←haaa, int.nat_abs_mul, int.nat_abs_of_nat],
-    refl },
-  { rw [←int.nat_abs_pow, ←int.nat_abs_pow, ←int.nat_abs_pow],
-    rw [←HA, ←HB, ←HC, add_comm, huadd_add_usub] },
--/
-  sorry
+  have hu' : a.nat_abs ^ 3 * b.nat_abs ^ 3 * c.nat_abs ^ 3 ≤ u,
+  { rwa [←int.nat_abs_pow, ←int.nat_abs_pow, ←int.nat_abs_pow, ←int.nat_abs_mul, ←int.nat_abs_mul] },
+  have ha': 0 < a.nat_abs := nat.pos_of_ne_zero (int.nat_abs_ne_zero_of_ne_zero ha),
+  have hb': 0 < b.nat_abs := nat.pos_of_ne_zero (int.nat_abs_ne_zero_of_ne_zero hb),
+  have hc': 0 < c.nat_abs := nat.pos_of_ne_zero (int.nat_abs_ne_zero_of_ne_zero hc),
+  cases ha.lt_or_lt with haneg hapos;
+  cases hb.lt_or_lt with hbneg hbpos;
+  cases hc.lt_or_lt with hcneg hcpos,
+  { use [a.nat_abs, b.nat_abs, c.nat_abs, ‹_›, ‹_›, ‹_›, hu'],
+    zify,
+    rw [int.of_nat_nat_abs_of_nonpos haneg.le, neg_pow_bit1],
+    rw [int.of_nat_nat_abs_of_nonpos hbneg.le, neg_pow_bit1],
+    rw [int.of_nat_nat_abs_of_nonpos hcneg.le, neg_pow_bit1],
+    rw [←h, neg_add] },
+  { exfalso,
+    apply lt_irrefl (0 : ℤ),
+    rw ←pow_bit1_neg_iff at haneg hbneg,
+    rw ←pow_bit1_pos_iff at hcpos,
+    calc 0 < c ^ 3 : hcpos
+    ... = a ^ 3 + b ^ 3 : h.symm
+    ... < 0 : add_neg haneg hbneg },
+  { refine ⟨b.nat_abs, c.nat_abs, a.nat_abs, ‹_›, ‹_›, ‹_›, _, _⟩,
+    { convert hu' using 1, ring },
+    zify,
+    rw [int.of_nat_nat_abs_of_nonpos haneg.le, neg_pow_bit1],
+    rw [int.nat_abs_of_nonneg hbpos.le],
+    rw [int.of_nat_nat_abs_of_nonpos hcneg.le, neg_pow_bit1],
+    rw ←h,
+    ring },
+  { refine ⟨a.nat_abs, c.nat_abs, b.nat_abs, ‹_›, ‹_›, ‹_›, _, _⟩,
+    { convert hu' using 1, ring },
+    zify,
+    rw [int.of_nat_nat_abs_of_nonpos haneg.le, neg_pow_bit1],
+    rw [int.nat_abs_of_nonneg hbpos.le],
+    rw [int.nat_abs_of_nonneg hcpos.le],
+    rw ←h,
+    ring },
+  { refine ⟨a.nat_abs, c.nat_abs, b.nat_abs, ‹_›, ‹_›, ‹_›, _, _⟩,
+    { convert hu' using 1, ring },
+    zify,
+    rw [int.nat_abs_of_nonneg hapos.le],
+    rw [int.of_nat_nat_abs_of_nonpos hbneg.le, neg_pow_bit1],
+    rw [int.of_nat_nat_abs_of_nonpos hcneg.le, neg_pow_bit1],
+    rw ←h,
+    ring },
+  { refine ⟨b.nat_abs, c.nat_abs, a.nat_abs, ‹_›, ‹_›, ‹_›, _, _⟩,
+    { convert hu' using 1, ring },
+    zify,
+    rw [int.nat_abs_of_nonneg hapos.le],
+    rw [int.of_nat_nat_abs_of_nonpos hbneg.le, neg_pow_bit1],
+    rw [int.nat_abs_of_nonneg hcpos.le],
+    rw ←h,
+    ring },
+  { exfalso,
+    apply lt_irrefl (0 : ℤ),
+    rw ←pow_bit1_pos_iff at hapos hbpos,
+    rw ←pow_bit1_neg_iff at hcneg,
+    calc 0 < a ^ 3 + b ^ 3 : add_pos hapos hbpos
+    ... = c ^ 3 : h
+    ... < 0 : hcneg },
+  { use [a.nat_abs, b.nat_abs, c.nat_abs, ‹_›, ‹_›, ‹_›, hu'],
+    zify,
+    rw [int.nat_abs_of_nonneg hapos.le],
+    rw [int.nat_abs_of_nonneg hbpos.le],
+    rw [int.nat_abs_of_nonneg hcpos.le],
+    exact h },
 end
 
 lemma descent_gcd1 (a b c p q : ℕ)
