@@ -10,8 +10,6 @@ import ring_theory.int.basic
 import .primes
 import .edwards
 
-import tactic.slim_check
-
 def flt_coprime
   (a b c n : ℕ) :=
   0 < a ∧ 0 < b ∧ 0 < c ∧ 
@@ -637,21 +635,19 @@ lemma int.cube_of_coprime (a b c s : ℤ)
   (hs : a * b * c = s ^ 3) :
   ∃ A B C, A ≠ 0 ∧ B ≠ 0 ∧ C ≠ 0 ∧ a = A ^ 3 ∧ b = B ^ 3 ∧ c = C ^ 3 :=
 begin
-  have odd3 : odd 3,
-  { norm_num },
   obtain ⟨A, HA⟩ : ∃ A, a = A ^ 3,
   { rw [mul_assoc] at hs,
-    apply int.eq_pow_of_mul_eq_pow ha _ _ odd3 hs,
+    apply int.eq_pow_of_mul_eq_pow_bit1 ha _ _ hs,
     { exact mul_ne_zero hb hc },
     { exact is_coprime.mul_right hcoprimeab hcoprimeac } },
   obtain ⟨B, HB⟩ : ∃ B, b = B ^ 3,
   { rw [mul_comm a b, mul_assoc] at hs,
-    apply int.eq_pow_of_mul_eq_pow hb _ _ odd3 hs,
+    apply int.eq_pow_of_mul_eq_pow_bit1 hb _ _ hs,
     { exact mul_ne_zero ha hc },
     { exact is_coprime.mul_right hcoprimeab.symm hcoprimebc } },
   obtain ⟨C, HC⟩ : ∃ C, c = C ^ 3,
   { rw [mul_comm] at hs,
-    apply int.eq_pow_of_mul_eq_pow hc _ _ odd3 hs,
+    apply int.eq_pow_of_mul_eq_pow_bit1 hc _ _ hs,
     { exact mul_ne_zero ha hb },
     { exact is_coprime.mul_right hcoprimeac.symm hcoprimebc.symm } },
   refine ⟨A, B, C, _, _, _, HA, HB, HC⟩; apply ne_zero_pow three_ne_zero,

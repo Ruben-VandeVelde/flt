@@ -817,17 +817,12 @@ begin
   rwa int.associated_iff
 end
 
-lemma int.pow_neg_of_odd {a : ℤ} {n : ℕ} (hn : odd n) : (-a) ^ n = - (a ^ n) :=
-begin
-  sorry
-end
-
-theorem int.eq_pow_of_mul_eq_pow {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
-  (hab : is_coprime a b) {k : ℕ} (hk : odd k) (h : a * b = c ^ k) : ∃ d, a = d ^ k :=
+theorem int.eq_pow_of_mul_eq_pow_bit1 {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
+  (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ (bit1 k)) : ∃ d, a = d ^ (bit1 k) :=
 begin
   obtain ⟨d, hd⟩ := int.associated_pow_of_mul_eq_pow ha hb hab h,
   rw int.associated_iff at hd,
   obtain rfl|rfl := int.nat_abs_eq_nat_abs_iff hd,
   { use d, },
-  { use -d, rw int.pow_neg_of_odd hk },
+  { use -d, rw neg_pow_bit1 },
 end
