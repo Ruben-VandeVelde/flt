@@ -333,7 +333,7 @@ lemma gcd1or3
   (hparity : even p ↔ ¬even q) :
   nat.gcd (2 * p) (p ^ 2 + 3 * q ^ 2) = 1 ∨ nat.gcd (2 * p) (p ^ 2 + 3 * q ^ 2) = 3 :=
 begin
-  let g := nat.gcd (2 * p) (p ^ 2 + 3 * q ^ 2),
+  set g := nat.gcd (2 * p) (p ^ 2 + 3 * q ^ 2) with hg',
   suffices H : ∃ k, g = 3 ^ k ∧ k < 2,
   { obtain ⟨k, hg, hk⟩ := H,
     rcases k with (_|_|_),
@@ -416,10 +416,8 @@ begin
     { rwa [pow_two, nat.mul_dvd_mul_iff_left (by norm_num : 0 < 3)] at this },
     suffices : 3 ^ 2 ∣ p ^ 2 + 3 * q ^ 2,
     { rwa nat.dvd_add_iff_right dvdpsq },
-    refine dvd_trans _ (nat.gcd_dvd_right _ _),
-    exact 2 * p,
-    change 3 ^ 2 ∣ g,
-    rw hg,
+    refine dvd_trans _ (nat.gcd_dvd_right (2 * p) _),
+    rw [←hg', hg],
     apply dvd_mul_right },
 
   exact nat.not_coprime_of_dvd_of_dvd (by norm_num : 1 < 3) hdvdp hdvdq hcoprime,
