@@ -1681,40 +1681,24 @@ begin
     } },
 end
 
-lemma zsqrt3.even_pow_neg (x : ℤ√-3) : (-x) ^ 2 = (x ^ 2) :=
-begin
-  exact neg_square x,
-
-end
-
-lemma zsqrt3.odd_pow_neg (x : ℤ√-3) : (-x) ^ 3 = - (x ^ 3) :=
-begin
-  rw pow_succ _ 2,
-  rw pow_succ _ 2,
-  rw neg_square,
-  simp only [neg_mul_eq_neg_mul_symm],
-end
-
 lemma step5 -- lemma page 54
-  (a b r : ℤ)
-  (hcoprime : is_coprime a b)
-  (hcube : r ^ 3 = a ^ 2 + 3 * b ^ 2)
-  :
-  ∃ p q : ℤ, (⟨a, b⟩ : ℤ√-3) = ⟨p, q⟩ ^ 3 :=
+  (a : ℤ√-3)
+  (r : ℤ)
+  (hcoprime : is_coprime a.re a.im)
+  (hcube : r ^ 3 = a.norm) :
+  ∃ p : ℤ√-3, a = p ^ 3 :=
 begin
-  obtain ⟨f, hf⟩ := step5' a b r hcoprime hcube, 
+  obtain ⟨f, hf⟩ := step5' a.re a.im r hcoprime (hcube.trans (zsqrt3.norm a)),
   obtain ⟨h1, h2⟩ := factorization_prop hcoprime,
   set f' := factorization hcoprime with hf',
+  have xxx : a = ⟨a.re, a.im⟩ := by simp only [zsqrtd.ext, eq_self_iff_true, and_self],
+  rw ←xxx at h1,
   set x := f.prod with hx,
   cases h1,
-  { use [x.re, x.im],
-    have xxx : x = ⟨x.re, x.im⟩ := by simp only [zsqrtd.ext, eq_self_iff_true, and_self],
-    rw ←xxx,
+  { use x,
     rw [h1, hf, multiset.prod_smul] },
-  { use [-x.re, -x.im],
-    have xxx : -x = ⟨-x.re, -x.im⟩ := by simp only [zsqrtd.ext, eq_self_iff_true, and_self, zsqrtd.neg_im, zsqrtd.neg_re],
-    rw ←xxx,
-    rw [h1, hf, multiset.prod_smul, hx, zsqrt3.odd_pow_neg] },
+  { use -x,
+    rw [h1, hf, multiset.prod_smul, hx, neg_pow_bit1] },
 end
 
 lemma step6
@@ -1727,9 +1711,9 @@ lemma step6
     b = 3 * p ^ 2 * q - 3 * q ^ 3
   :=
 begin
-  obtain ⟨p, q, hpq⟩ := step5 a b r hcoprime hcube,
-  use [p, q],
-  simp only [zsqrtd.ext, pow_succ', pow_two, zsqrtd.mul_re, zsqrtd.mul_im] at hpq,
-  obtain ⟨rfl, rfl⟩ := hpq,
+  obtain ⟨p, hp⟩ := step5 ⟨a, b⟩ r hcoprime (hcube.trans (zsqrt3.norm' a b)),
+  use [p.re, p.im],
+  simp only [zsqrtd.ext, pow_succ', pow_two, zsqrtd.mul_re, zsqrtd.mul_im] at hp,
+  obtain ⟨rfl, rfl⟩ := hp,
   split; ring,
 end
