@@ -792,3 +792,17 @@ begin
   { use d, },
   { use -d, rw neg_pow_bit1 },
 end
+
+lemma int.dvd_mul_cancel_prime {p : ℕ} {n k : ℤ}
+  (hne : abs k ≠ p)
+  (hp : nat.prime p)
+  (hk : prime k)
+  (h : k ∣ p * n) : k ∣ n :=
+begin
+  rw int.prime_iff at hk,
+  rw ←int.nat_abs_dvd_abs_iff,
+  apply dvd_mul_cancel_prime _ _ hp hk,
+  { rwa [←int.nat_abs_dvd_abs_iff, int.nat_abs_mul, int.nat_abs_of_nat] at h },
+  { contrapose! hne,
+    rw [int.abs_eq_nat_abs, hne] },
+end
