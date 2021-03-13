@@ -825,15 +825,23 @@ begin
   exacts [this.symm, this],
 end
 
-lemma int.dvd_mul_cancel_prime' {p : ℕ} {k m n : ℤ}
-  (hdvd1 : ¬((p : ℤ) ∣ m))
+lemma int.dvd_mul_cancel_prime' {p k m n : ℤ}
+  (hdvd1 : ¬(p ∣ m))
   (hdvd2 : k ∣ m)
-  (hp : nat.prime p)
+  (hp : prime p)
   (hk : prime k)
   (h : k ∣ p * n) : k ∣ n :=
 begin
-  apply int.dvd_mul_cancel_prime _ hp hk h,
-  rintro hk,
-  rw [int.dvd_iff_abs_dvd, hk] at hdvd2,
-  contradiction
+  have : p ∣ p.nat_abs := int.nat_abs_dvd.mp (dvd_refl _),
+  rw int.prime_iff at hp,
+  apply int.dvd_mul_cancel_prime _ hp hk,
+  { apply dvd_trans h (mul_dvd_mul_right this _), },
+  { rintro hk,
+    apply hdvd1,
+    rw [int.dvd_iff_abs_dvd, hk] at hdvd2,
+    apply dvd_trans this hdvd2 }
 end
+
+-- todo norm_num for prime ℤ
+lemma int.prime_two : prime (2 : ℤ) := nat.prime_iff_prime_int.mp nat.prime_two
+lemma int.prime_three : prime (3 : ℤ) := nat.prime_iff_prime_int.mp nat.prime_three

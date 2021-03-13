@@ -519,18 +519,16 @@ begin
   intros k hknu hknz hkprime hkdvdleft hkdvdright,
   apply hknu,
   apply huvcoprime.is_unit_of_dvd',
-  { exact int.dvd_mul_cancel_prime' notdvd_2_2 hkdvdright nat.prime_two hkprime hkdvdleft },
-  { apply int.dvd_mul_cancel_prime' not_3_dvd_2 hkdvdright nat.prime_three hkprime,
-    apply int.dvd_mul_cancel_prime' notdvd_2_2 hkdvdright nat.prime_two hkprime,
+  { exact int.dvd_mul_cancel_prime' notdvd_2_2 hkdvdright int.prime_two hkprime hkdvdleft },
+  { apply int.dvd_mul_cancel_prime' not_3_dvd_2 hkdvdright int.prime_three hkprime,
+    apply int.dvd_mul_cancel_prime' notdvd_2_2 hkdvdright int.prime_two hkprime,
     convert dvd_sub hkdvdleft (dvd_mul_of_dvd_right hkdvdright 2),
-    norm_num,
     ring },
 end
 
 lemma int.gcd1_coprime13 (u v : ℤ)
   (huvcoprime : is_coprime u v)
   (this : ¬even (u + 3 * v))
-  (not_3_dvd_2 : ¬3 ∣ u - 3 * v)
   (notdvd_3_3 : ¬3 ∣ u + 3 * v) :
   is_coprime (2 * u) (u + 3 * v) :=
 begin
@@ -540,11 +538,10 @@ begin
   intros k hknu hknz hkprime hkdvdleft hkdvdright,
   apply hknu,
   apply huvcoprime.is_unit_of_dvd',
-  { exact int.dvd_mul_cancel_prime' this hkdvdright nat.prime_two hkprime hkdvdleft },
-  { apply int.dvd_mul_cancel_prime' notdvd_3_3 hkdvdright nat.prime_three hkprime,
-    apply int.dvd_mul_cancel_prime' this hkdvdright nat.prime_two hkprime,
+  { exact int.dvd_mul_cancel_prime' this hkdvdright int.prime_two hkprime hkdvdleft },
+  { apply int.dvd_mul_cancel_prime' notdvd_3_3 hkdvdright int.prime_three hkprime,
+    apply int.dvd_mul_cancel_prime' this hkdvdright int.prime_two hkprime,
     convert dvd_sub (dvd_mul_of_dvd_right hkdvdright 2) hkdvdleft,
-    norm_num,
     ring },
 end
 
@@ -560,13 +557,11 @@ begin
   intros k hknu hknz hkprime hkdvdleft hkdvdright,
   apply hknu,
   apply huvcoprime.is_unit_of_dvd',
-  { apply int.dvd_mul_cancel_prime' notdvd_2_2 hkdvdleft nat.prime_two hkprime,
+  { apply int.dvd_mul_cancel_prime' notdvd_2_2 hkdvdleft int.prime_two hkprime,
     convert dvd_add hkdvdleft hkdvdright,
-    norm_num,
     ring },
-  { apply int.dvd_mul_cancel_prime' notdvd_3_3 hkdvdright nat.prime_three hkprime,
-    apply int.dvd_mul_cancel_prime' notdvd_2_2 hkdvdleft nat.prime_two hkprime,
-    norm_num,
+  { apply int.dvd_mul_cancel_prime' notdvd_3_3 hkdvdright int.prime_three hkprime,
+    apply int.dvd_mul_cancel_prime' notdvd_2_2 hkdvdleft int.prime_two hkprime,
     convert dvd_sub hkdvdright hkdvdleft,
     ring },
 end
@@ -864,7 +859,7 @@ begin
     intros k hknu hknz hkprime hkdvdleft hkdvdright,
     apply hknu,
     have hkdvdright' : k ∣ v,
-    { exact int.dvd_mul_cancel_prime' haddodd hkdvdleft nat.prime_two hkprime hkdvdright },
+    { exact int.dvd_mul_cancel_prime' haddodd hkdvdleft int.prime_two hkprime hkdvdright },
 
     apply huvcoprime.is_unit_of_dvd' _ hkdvdright',
     rw [←add_sub_cancel u v],
@@ -877,7 +872,7 @@ begin
     apply hknu,
 
     have hkdvdright' : k ∣ v,
-    { exact int.dvd_mul_cancel_prime' hsubodd hkdvdleft nat.prime_two hkprime hkdvdright },
+    { exact int.dvd_mul_cancel_prime' hsubodd hkdvdleft int.prime_two hkprime hkdvdright },
 
     apply huvcoprime.is_unit_of_dvd' _ hkdvdright',
     rw [←sub_add_cancel u v],
@@ -894,13 +889,11 @@ begin
 
     apply hknu,
     apply huvcoprime.is_unit_of_dvd';
-      apply int.dvd_mul_cancel_prime' haddodd hkdvdleft nat.prime_two hkprime,
+      apply int.dvd_mul_cancel_prime' haddodd hkdvdleft int.prime_two hkprime,
 
     { convert dvd_add hkdvdleft hkdvdright,
-      norm_num,
       ring },
     { convert dvd_sub hkdvdleft hkdvdright,
-      norm_num,
       ring } },
 
   -- 7.
