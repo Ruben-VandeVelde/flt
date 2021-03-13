@@ -640,13 +640,6 @@ begin
   norm_num at hfour
 end
 
-lemma step4_1'_bis
-  {p q : ℤ}
-  (hfour : p ^ 2 + 3 * q ^ 2 = 4)
-  (hq : q ≠ 0) :
-  abs p = 1 ∧ abs q = 1 :=
-spts.four hfour hq
-
 lemma step4_1
   (p q p' q' : ℤ)
   (hcoprime : is_coprime p q)
@@ -662,44 +655,7 @@ begin
   split; refl,
 end
 
-lemma step4_1_bis
-  (p q p' q' : ℤ)
-  (hq : q ≠ 0)
-  (hq' : q' ≠ 0)
-  (hfour : p ^ 2 + 3 * q ^ 2 = 4)
-  (heq : p ^ 2 + 3 * q ^ 2 = p' ^ 2 + 3 * q' ^ 2) :
-  abs p = abs p' ∧ abs q = abs q' :=
-begin
-  obtain ⟨hp, hq⟩ := step4_1'_bis hfour hq,
-  rw heq at hfour,
-  obtain ⟨hp', hq'⟩ := step4_1'_bis hfour hq',
-  rw [hp, hq, hp', hq', and_self],
-end
-
 lemma step4_2
-  (p q p' q' : ℤ)
-  (hcoprime : is_coprime p q)
-  (hcoprime' : is_coprime p' q')
-  (hprime : prime (p ^ 2 + 3 * q ^ 2))
-  (hodd : odd (p ^ 2 + 3 * q ^ 2))
-  (heq : p ^ 2 + 3 * q ^ 2 = p' ^ 2 + 3 * q' ^ 2) :
-  abs p = abs p' ∧ abs q = abs q' :=
-begin
-  obtain ⟨u, v, hcoprime'', (H|H), h1⟩ := step2''' p q p' q' hcoprime (by rw heq) (by rwa ←heq) (by rwa ←heq);
-  { rw heq at h1,
-    have := int.eq_one_of_mul_eq_self_right (spts.not_zero_of_coprime hcoprime') h1.symm,
-    obtain ⟨ha, rfl⟩ := spts.eq_one this,
-    simp only [zero_pow zero_lt_two, add_zero, mul_zero] at this, 
-    clear h1,
-    rw [zsqrtd.ext, zsqrtd.mul_def] at H,
-    dsimp only at H,
-    simp only [add_zero, zero_add, mul_zero] at H,
-    rw [H.1, H.2, abs_mul, abs_mul, ha, mul_one, mul_one],
-    try { rw [abs_neg] },
-    split; refl },
-end
-
-lemma step4_2_bis
   (p q p' q' : ℤ)
   (hcoprime : is_coprime p q)
   (hcoprime' : is_coprime p' q')
