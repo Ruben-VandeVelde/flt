@@ -738,6 +738,63 @@ begin
   { rw [←HA, ←HB, ←HC], ring },
 end
 
+lemma gcd3_coprime
+  {u v : ℤ}
+  (huvcoprime: is_coprime u v)
+  (huvodd : even u ↔ ¬even v) :
+  is_coprime (2 * v) (u + v) ∧ is_coprime (2 * v) (u - v) ∧ is_coprime (u - v) (u + v) :=
+begin
+  have haddodd : ¬even (u + v),
+  { simp [huvodd] with parity_simps },
+  have hsubodd : ¬even (u - v),
+  { simp [huvodd] with parity_simps },
+
+  have haddcoprime : is_coprime (u + v) (2 * v),
+  { apply int.is_coprime_of_dvd',
+    { rintro ⟨h1, -⟩,
+      norm_num [h1] at haddodd },
+    intros k hknu hknz hkprime hkdvdleft hkdvdright,
+    apply hknu,
+    have hkdvdright' : k ∣ v,
+    { exact int.dvd_mul_cancel_prime' haddodd hkdvdleft int.prime_two hkprime hkdvdright },
+
+    apply huvcoprime.is_unit_of_dvd' _ hkdvdright',
+    rw [←add_sub_cancel u v],
+    apply dvd_sub hkdvdleft hkdvdright' },
+  have hsubcoprime : is_coprime (u - v) (2 * v),
+  { apply int.is_coprime_of_dvd',
+    { rintro ⟨h1, -⟩,
+      norm_num [h1] at hsubodd },
+    intros k hknu hknz hkprime hkdvdleft hkdvdright,
+    apply hknu,
+
+    have hkdvdright' : k ∣ v,
+    { exact int.dvd_mul_cancel_prime' hsubodd hkdvdleft int.prime_two hkprime hkdvdright },
+
+    apply huvcoprime.is_unit_of_dvd' _ hkdvdright',
+    rw [←sub_add_cancel u v],
+    exact dvd_add hkdvdleft hkdvdright' },
+  have haddsubcoprime : is_coprime (u + v) (u - v),
+  { apply int.is_coprime_of_dvd',
+    { rintro ⟨h1, -⟩,
+      norm_num [h1] at haddodd },
+    intros k hknu hknz hkprime hkdvdleft hkdvdright,
+    have kne2 : abs k ≠ 2,
+    { rintro hk,
+      rw [int.dvd_iff_abs_dvd, hk] at hkdvdleft,
+      exact haddodd hkdvdleft },
+
+    apply hknu,
+    apply huvcoprime.is_unit_of_dvd';
+      apply int.dvd_mul_cancel_prime' haddodd hkdvdleft int.prime_two hkprime,
+
+    { convert dvd_add hkdvdleft hkdvdright,
+      ring },
+    { convert dvd_sub hkdvdleft hkdvdright,
+      ring } },
+  exact ⟨haddcoprime.symm, hsubcoprime.symm, haddsubcoprime.symm⟩,
+end
+
 lemma descent_gcd3 (a b c p q : ℕ)
   (hp : 0 < p)
   (hq : 0 < q)
@@ -847,54 +904,7 @@ begin
     exact ‹0 < s›.ne.symm hs },
 
   -- 6.
-  have haddodd : ¬even (u + v),
-  { simp [huvodd] with parity_simps },
-  have hsubodd : ¬even (u - v),
-  { simp [huvodd] with parity_simps },
-
-  have haddcoprime : is_coprime (u + v) (2 * v),
-  { apply int.is_coprime_of_dvd',
-    { rintro ⟨h1, -⟩,
-      norm_num [h1] at haddodd },
-    intros k hknu hknz hkprime hkdvdleft hkdvdright,
-    apply hknu,
-    have hkdvdright' : k ∣ v,
-    { exact int.dvd_mul_cancel_prime' haddodd hkdvdleft int.prime_two hkprime hkdvdright },
-
-    apply huvcoprime.is_unit_of_dvd' _ hkdvdright',
-    rw [←add_sub_cancel u v],
-    apply dvd_sub hkdvdleft hkdvdright' },
-  have hsubcoprime : is_coprime (u - v) (2 * v),
-  { apply int.is_coprime_of_dvd',
-    { rintro ⟨h1, -⟩,
-      norm_num [h1] at hsubodd },
-    intros k hknu hknz hkprime hkdvdleft hkdvdright,
-    apply hknu,
-
-    have hkdvdright' : k ∣ v,
-    { exact int.dvd_mul_cancel_prime' hsubodd hkdvdleft int.prime_two hkprime hkdvdright },
-
-    apply huvcoprime.is_unit_of_dvd' _ hkdvdright',
-    rw [←sub_add_cancel u v],
-    exact dvd_add hkdvdleft hkdvdright' },
-  have haddsubcoprime : is_coprime (u + v) (u - v),
-  { apply int.is_coprime_of_dvd',
-    { rintro ⟨h1, -⟩,
-      norm_num [h1] at haddodd },
-    intros k hknu hknz hkprime hkdvdleft hkdvdright,
-    have kne2 : abs k ≠ 2,
-    { rintro hk,
-      rw [int.dvd_iff_abs_dvd, hk] at hkdvdleft,
-      exact haddodd hkdvdleft },
-
-    apply hknu,
-    apply huvcoprime.is_unit_of_dvd';
-      apply int.dvd_mul_cancel_prime' haddodd hkdvdleft int.prime_two hkprime,
-
-    { convert dvd_add hkdvdleft hkdvdright,
-      ring },
-    { convert dvd_sub hkdvdleft hkdvdright,
-      ring } },
+  obtain ⟨haddcoprime, hsubcoprime, haddsubcoprime⟩ := gcd3_coprime huvcoprime huvodd,
 
   -- 7.
   obtain ⟨t, ht⟩ : ∃ t, 2 * v * (u - v) * (u + v) = t ^ 3,
@@ -926,11 +936,11 @@ begin
     2 * v = X ^ 3 ∧ u - v = Y ^ 3 ∧ u + v = Z ^ 3,
   { apply int.cube_of_coprime,
     { exact mul_ne_zero two_ne_zero hv, },
-    { intro H, norm_num [H] at hsubodd },
-    { intro H, norm_num [H] at haddodd },
-    { exact hsubcoprime.symm },
-    { exact haddcoprime.symm },
-    { exact haddsubcoprime.symm },
+    { intro H, rw sub_eq_zero at H, simpa [H] with parity_simps using huvodd, },
+    { intro H, rw add_eq_zero_iff_eq_neg at H, simpa [H] with parity_simps using huvodd },
+    { exact hsubcoprime },
+    { exact haddcoprime },
+    { exact haddsubcoprime },
     { exact ht } },
 
   apply nat_solution_of_int_solution (2 * p) HApos HBpos HCpos,
