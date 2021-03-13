@@ -806,3 +806,34 @@ begin
   { contrapose! hne,
     rw [int.abs_eq_nat_abs, hne] },
 end
+
+theorem int.prime.coprime_iff_not_dvd {p n : ℤ} (pp : prime p) : is_coprime p n ↔ ¬ p ∣ n :=
+begin
+  rw int.prime_iff at pp,
+  rw [←int.nat_abs_dvd_abs_iff, ←nat.prime.coprime_iff_not_dvd pp, ←int.gcd_eq_one_iff_coprime],
+  refl,
+end
+
+lemma int.dvd_iff_abs_dvd {a b : ℤ} : a ∣ b ↔ abs a ∣ b :=
+begin
+  have : associated a (abs a),
+  { rw int.associated_iff,
+    apply int.coe_nat_inj,
+    rw int.nat_abs_of_nonneg (abs_nonneg _),
+    rw int.abs_eq_nat_abs },
+  split; intro h; apply dvd_trans _ h; apply dvd_of_associated,
+  exacts [this.symm, this],
+end
+
+lemma int.dvd_mul_cancel_prime' {p : ℕ} {k m n : ℤ}
+  (hdvd1 : ¬((p : ℤ) ∣ m))
+  (hdvd2 : k ∣ m)
+  (hp : nat.prime p)
+  (hk : prime k)
+  (h : k ∣ p * n) : k ∣ n :=
+begin
+  apply int.dvd_mul_cancel_prime _ hp hk h,
+  rintro hk,
+  rw [int.dvd_iff_abs_dvd, hk] at hdvd2,
+  contradiction
+end
