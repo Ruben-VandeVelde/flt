@@ -159,7 +159,7 @@ lemma step1'
 begin
   obtain ⟨u', v', huv'⟩ := step1 a b hcoprime heven,
   refine ⟨u', v', _, huv', _⟩,
-  { rw [zsqrtd.ext, zsqrtd.ext, zsqrtd.mul_def, zsqrtd.mul_def] at huv',
+  { rw [zsqrtd.ext, zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_re, zsqrtd.mul_im, zsqrtd.mul_im] at huv',
     dsimp only at huv',
     apply is_coprime_of_dvd,
     { rintro ⟨rfl, rfl⟩,
@@ -180,7 +180,7 @@ begin
           assumption },
       exact hcoprime.is_unit_of_dvd' ha hb } },
   { cases huv';
-    { rw [zsqrtd.ext, zsqrtd.mul_def] at huv',
+    { rw [zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_im] at huv',
       dsimp only at huv',
       rw [huv'.1, huv'.2],
       ring } }
@@ -229,7 +229,7 @@ begin
         apply dvd_mul_right } },
     use [u, v],
     left,
-    rw [zsqrtd.mul_def, zsqrtd.ext],
+    rw [zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_im],
     dsimp only,
     simp only [neg_mul_eq_neg_mul_symm, mul_neg_eq_neg_mul_symm, neg_neg, ←sub_eq_add_neg],
     split; apply int.eq_of_mul_eq_mul_left hpprime.ne_zero,
@@ -250,7 +250,7 @@ begin
         apply dvd_mul_right } },
     use [u, v],
     right,
-    rw [zsqrtd.mul_def, zsqrtd.ext],
+    rw [zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_im],
     dsimp only,
     simp only [neg_mul_eq_neg_mul_symm, mul_neg_eq_neg_mul_symm, neg_neg, ←sub_eq_add_neg],
     split; apply int.eq_of_mul_eq_mul_left hpprime.ne_zero,
@@ -303,7 +303,7 @@ begin
     hdvd'',
   obtain ⟨u', v', h⟩ := step2' a b p q hcoprime hdvd hpodd hpprime,
   refine ⟨u', v', _, h, _⟩,
-  { rw [zsqrtd.ext, zsqrtd.ext, zsqrtd.mul_def, zsqrtd.mul_def] at h,
+  { rw [zsqrtd.ext, zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_re, zsqrtd.mul_im, zsqrtd.mul_im] at h,
     dsimp only at h,
     apply is_coprime_of_dvd,
     { rintro ⟨rfl, rfl⟩,
@@ -323,7 +323,7 @@ begin
           try { apply dvd_mul_of_dvd_right };
           assumption },
       exact hcoprime.is_unit_of_dvd' ha hb } },
-  { rw [zsqrtd.ext, zsqrtd.ext, zsqrtd.mul_def, zsqrtd.mul_def] at h,
+  { rw [zsqrtd.ext, zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_re, zsqrtd.mul_im, zsqrtd.mul_im] at h,
     dsimp only at h,
     obtain ⟨rfl, rfl⟩|⟨rfl, rfl⟩ := h; ring },
 end
@@ -384,7 +384,7 @@ lemma step2''
 begin
   obtain ⟨u, v, q, r, hp, huv', hqnonneg, hrnonneg⟩ := step2 a b p hcoprime hdvd hpodd hpprime,
   refine ⟨u, v, q, r, _, hp, _, huv', hqnonneg, hrnonneg⟩,
-  { rw [zsqrtd.ext, zsqrtd.ext, zsqrtd.mul_def, zsqrtd.mul_def] at huv',
+  { rw [zsqrtd.ext, zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_re, zsqrtd.mul_im, zsqrtd.mul_im] at huv',
     dsimp only at huv',
     apply is_coprime_of_dvd,
     { rintro ⟨rfl, rfl⟩,
@@ -404,7 +404,7 @@ begin
           try { apply dvd_mul_of_dvd_right };
           assumption },
       exact hcoprime.is_unit_of_dvd' ha hb } },
-  { rw [zsqrtd.ext, zsqrtd.ext, zsqrtd.mul_def, zsqrtd.mul_def] at huv',
+  { rw [zsqrtd.ext, zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_re, zsqrtd.mul_im, zsqrtd.mul_im] at huv',
     dsimp only at huv',
     rw hp,
     obtain ⟨rfl, rfl⟩|⟨rfl, rfl⟩ := huv'; ring }
@@ -440,22 +440,14 @@ begin
     {refine ⟨u, v, h1, h2, _⟩, { rwa hp }},
     {refine ⟨u, v, h1, _, _⟩, { simp only [neg_neg], rwa or_comm, }, { rwa hp }},
     {refine ⟨-u, -v, h1.neg_neg, _, _⟩, { rw or_comm, convert h2 using 2;
-      {
-
-        rw zsqrtd.mul_def,
-        rw zsqrtd.mul_def,
-        rw zsqrtd.ext,
+      { rw [zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_re, zsqrtd.mul_im, zsqrtd.mul_im],
       dsimp only,
       simp,
       },
     
      }, { rwa [hp, neg_pow_bit0, neg_pow_bit0], }},
     {refine ⟨-u, -v, h1.neg_neg, _, _⟩, { convert h2 using 2;
-      {
-
-        rw zsqrtd.mul_def,
-        rw zsqrtd.mul_def,
-        rw zsqrtd.ext,
+      { rw [zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_re, zsqrtd.mul_im, zsqrtd.mul_im],
       dsimp only,
       simp,
       },
@@ -662,8 +654,7 @@ begin
     have := int.eq_one_of_mul_eq_self_right (spts.not_zero_of_coprime hcoprime') h1.symm,
     obtain ⟨ha, rfl⟩ := spts.eq_one this,
     simp only [zero_pow zero_lt_two, add_zero, mul_zero] at this, 
-    clear h1,
-    rw [zsqrtd.ext, zsqrtd.mul_def] at H,
+    rw [zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_im] at H,
     dsimp only at H,
     simp only [add_zero, zero_add, mul_zero] at H,
     rw [H.1, H.2, abs_mul, abs_mul, ha, mul_one, mul_one],
@@ -1739,9 +1730,7 @@ lemma step6
 begin
   obtain ⟨p, q, hpq⟩ := step5 a b r hcoprime hcube,
   use [p, q],
-  rw zsqrtd.ext at hpq,
-  rw [pow_succ', pow_two, zsqrtd.mul_def, zsqrtd.mul_def] at hpq,
-  dsimp at hpq,
+  simp only [zsqrtd.ext, pow_succ', pow_two, zsqrtd.mul_re, zsqrtd.mul_im] at hpq,
   obtain ⟨rfl, rfl⟩ := hpq,
   split; ring,
 end

@@ -44,5 +44,3 @@ end
 
 lemma zsqrtd.is_unit_iff_norm_is_unit {d : ℤ} (z : ℤ√d) : is_unit z ↔ is_unit z.norm :=
 by rw [int.is_unit_iff_nat_abs, zsqrtd.norm_eq_one_iff]
-
-lemma zsqrtd.mul_def {d x y x' y' : ℤ} : (⟨x, y⟩ :  ℤ√d) * ⟨x', y'⟩ = ⟨x * x' + d * y * y', x * y' + y * x'⟩ := rfl
