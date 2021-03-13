@@ -688,9 +688,9 @@ begin
   interval_cases using hmin hmax,
   { exact hp.ne_zero rfl, },
   { exact hp.ne_one rfl },
-  { norm_num at hodd, exact hodd },
+  { norm_num at hodd },
   { norm_num at h },
-  { norm_num at hodd, exact hodd },
+  { norm_num at hodd },
 end
 
 lemma norm_not_dvd_four_of_odd_prime {p : ℤ√-3} (hp : prime p.norm) (hodd: odd p.norm) :
@@ -1104,8 +1104,7 @@ begin
     exact nat.prime_iff_prime_int.mpr hprime },
   { rw multiset.filter_eq_nil,
     rintros a ha ⟨rfl, hodd⟩,
-    norm_num at hodd,
-    exact hodd },
+    norm_num at hodd },
 end
 
 lemma even_and_odd_factors' (x : ℤ) :
