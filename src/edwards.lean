@@ -1446,35 +1446,47 @@ begin
     exact ⟨hr, hi⟩ },
 end 
 
-lemma associated'_iff_eq
+lemma eq_or_eq_conj_of_associated_of_re_zero
+  {x A : ℤ√-3}
+  (hx : x.re = 0)
+  (h : associated x A) :
+  x = A ∨ x = A.conj :=
+begin
+  obtain ⟨u, hu⟩ := h,
+  obtain ⟨v, hv1, hv2⟩ := zsqrt3.coe_of_is_unit' (is_unit_unit u),
+  have hA : A.re = 0,
+  { simp only [←hu, hv1, hx, add_zero, zero_mul, zsqrtd.mul_re, mul_zero, zsqrtd.coe_int_im] },
+  cases int.abs_iff v with habsv habsv; rw habsv at hv2,
+  { simp only [hv1, hv2, mul_one, int.cast_one] at hu,
+    simp only [←hu, true_or, eq_self_iff_true] },
+  { rw neg_eq_iff_neg_eq at hv2,
+    simp only [hv1, ←hv2, mul_one, int.cast_one, mul_neg_eq_neg_mul_symm, int.cast_neg] at hu,
+    simp only [zsqrtd.ext, hx, ←hu, zsqrtd.conj_re, eq_self_iff_true, zsqrtd.neg_im, zsqrtd.neg_re,
+      or_true, and_self, neg_neg, neg_zero, zsqrtd.conj_im] }
+end
+
+lemma eq_or_eq_conj_iff_associated'_of_nonneg
   {x A : ℤ√-3}
   (hx : 0 ≤ x.re)
-  (hA : 0 ≤ A.re)
-  (h : x ≠ A.conj) :
-  x = A ↔ associated' x A :=
+  (hA : 0 ≤ A.re) :
+  associated' x A ↔ (x = A ∨ x = A.conj) :=
 begin
   split,
-  { rintro rfl, refl },
   { rintro (⟨u, hu⟩|⟨u, hu⟩); obtain ⟨v, hv1, hv2⟩ := zsqrt3.coe_of_is_unit' (is_unit_unit u),
     -- associated x A
-    { rw hv1 at hu,
-      cases int.abs_iff v with habsv habsv,
-      { rw habsv at hv2,
-        simp only [hv2, mul_one, int.cast_one] at hu,
-        exact hu },
-      { exfalso,
-        rw [habsv, neg_eq_iff_neg_eq] at hv2,
-        simp only [←hv2, mul_one, int.cast_one, mul_neg_eq_neg_mul_symm, int.cast_neg] at hu,
-        by_cases hxre : x.re = 0,
-        { apply h,
-          rw [←hu, zsqrtd.ext],
-          simp only [hxre, zsqrtd.conj_re, eq_self_iff_true, zsqrtd.neg_im, zsqrtd.neg_re, and_self,
-            neg_neg, neg_zero, zsqrtd.conj_im] },
-        { apply lt_irrefl (0 : ℤ),
+    { by_cases hxre : x.re = 0,
+      { apply eq_or_eq_conj_of_associated_of_re_zero hxre ⟨u, hu⟩ },
+      { rw hv1 at hu,
+        cases int.abs_iff v with habsv habsv,
+        { left,
+          rw [←hu, ←habsv, hv2, int.cast_one, mul_one] },
+        { exfalso,
+          rw [habsv, neg_eq_iff_neg_eq] at hv2,
+          simp only [←hv2, mul_one, int.cast_one, mul_neg_eq_neg_mul_symm, int.cast_neg] at hu,
+          apply lt_irrefl (0 : ℤ),
           calc 0 < A.re : _
           ... = -x.re : _
           ... < 0 : _,
-
           { apply lt_of_le_of_ne hA,
             rw ←hu,
             simp only [zsqrtd.neg_re, ne.def, zero_eq_neg, hxre, not_false_iff] },
@@ -1483,17 +1495,13 @@ begin
             exact lt_of_le_of_ne hx (ne.symm hxre) } } } },
 
     -- associated x A.conj
-    { rw hv1 at hu,
-      cases int.abs_iff v with habsv habsv,
-      { exfalso,
-        apply h,
-        rw [←hu, ←habsv, hv2, int.cast_one, mul_one] },
-      { by_cases hxre : x.re = 0,
-        { rw [habsv, neg_eq_iff_neg_eq] at hv2,
-          simp only [←hv2, zsqrtd.ext, zsqrtd.coe_int_re, zsqrtd.mul_im, zero_add, zsqrtd.mul_re,
-            mul_zero, zsqrtd.coe_int_im, zsqrtd.conj_re, zsqrtd.conj_im, hxre, mul_one,
-            zsqrtd.neg_im, mul_neg_eq_neg_mul_symm, zsqrtd.neg_re, neg_inj, neg_zero] at hu,
-          rwa [zsqrtd.ext, hxre] },
+    { by_cases hxre : x.re = 0,
+      { convert (eq_or_eq_conj_of_associated_of_re_zero hxre ⟨u, hu⟩).symm,
+        rw zsqrtd.conj_conj },
+      { rw hv1 at hu,
+        cases int.abs_iff v with habsv habsv,
+        { right,
+          rw [←hu, ←habsv, hv2, int.cast_one, mul_one] },
         { exfalso,
           { rw [habsv, neg_eq_iff_neg_eq] at hv2,
             simp only [←hv2, mul_one, int.cast_one, mul_neg_eq_neg_mul_symm, int.cast_neg] at hu,
@@ -1509,8 +1517,18 @@ begin
               simp only [zsqrtd.conj_re, zsqrtd.neg_re] },
             { simp only [neg_neg_iff_pos],
               apply lt_of_le_of_ne hx (ne.symm hxre) } } } } } },
+  { rintro (rfl|rfl),
+    { refl },
+    { right, refl } },
 end
 
+lemma associated'_iff_eq
+  {x A : ℤ√-3}
+  (hx : 0 ≤ x.re)
+  (hA : 0 ≤ A.re)
+  (h : x ≠ A.conj) :
+  x = A ↔ associated' x A :=
+by simp only [eq_or_eq_conj_iff_associated'_of_nonneg hx hA, h, or_false]
 
 lemma step5' -- lemma page 54
   (a b r : ℤ)
