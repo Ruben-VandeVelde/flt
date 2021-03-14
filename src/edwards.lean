@@ -271,9 +271,7 @@ end
 lemma step2'
   (a b : ℤ)
   (p q : ℤ)
-  (hcoprime : is_coprime a b)
   (hdvd : (p ^ 2 + 3 * q ^ 2) ∣ (a ^ 2 + 3 * b ^ 2))
-  (hpodd : odd (p ^ 2 + 3 * q ^ 2))
   (hpprime : prime (p ^ 2 + 3 * q ^ 2))
   :
   ∃ u v,
@@ -349,7 +347,6 @@ lemma step2'''
   (p q : ℤ)
   (hcoprime : is_coprime a b)
   (hdvd : (p ^ 2 + 3 * q ^ 2) ∣ (a ^ 2 + 3 * b ^ 2))
-  (hpodd : odd (p ^ 2 + 3 * q ^ 2))
   (hpprime : prime (p ^ 2 + 3 * q ^ 2))
   :
   ∃ u v,
@@ -357,7 +354,7 @@ lemma step2'''
     ((⟨a, b⟩ : ℤ√-3) = ⟨p, q⟩ * ⟨u, v⟩ ∨ (⟨a, b⟩ : ℤ√-3) = ⟨p, -q⟩ * ⟨u, v⟩) ∧
     (a ^ 2 + 3 * b ^ 2) = (p ^ 2 + 3 * q ^ 2) * (u ^ 2 + 3 * v ^ 2)  :=
 begin
-  obtain ⟨u', v', h⟩ := step2' a b p q hcoprime hdvd hpodd hpprime,
+  obtain ⟨u', v', h⟩ := step2' a b p q hdvd hpprime,
   refine ⟨u', v', _, h, _⟩,
   { rw [zsqrtd.ext, zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_re, zsqrtd.mul_im, zsqrtd.mul_im] at h,
     dsimp only at h,
@@ -429,7 +426,7 @@ begin
           simp only [neg_mul_eq_neg_mul_symm, eq_self_iff_true, mul_neg_eq_neg_mul_symm, and_self,
             neg_neg] } },
       { rwa [hp, neg_pow_bit0, neg_pow_bit0] } } },
-  { apply step2''' _ _ _ _ hcoprime hdvd hpodd hpprime }
+  { apply step2''' _ _ _ _ hcoprime hdvd hpprime }
 end
 
 -- todo: unused, but try to use in step3 below
