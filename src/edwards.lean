@@ -1554,19 +1554,22 @@ lemma associated'_iff_eq
 by simp only [eq_or_eq_conj_iff_associated'_of_nonneg hx hA, h, or_false]
 
 lemma step5' -- lemma page 54
-  (a b r : ℤ)
-  (hcoprime : is_coprime a b)
-  (hcube : r ^ 3 = a ^ 2 + 3 * b ^ 2) :
+  (a : ℤ√-3)
+  (r : ℤ)
+  (hcoprime : is_coprime a.re a.im)
+  (hcube : r ^ 3 = a.norm) :
   ∃ g : multiset ℤ√-3, factorization hcoprime = 3 •ℕ g :=
 begin
   obtain ⟨h1, h2⟩ := factorization_prop hcoprime,
   set f := factorization hcoprime with hf,
-  have h1' : f.prod = ⟨a, b⟩ ∨ f.prod = -⟨a, b⟩,
+  have xxx : a = ⟨a.re, a.im⟩ := by simp only [zsqrtd.ext, eq_self_iff_true, and_self],
+  rw ←xxx at h1,
+  have h1' : f.prod = a ∨ f.prod = -a,
   { cases h1,
     { left, rw h1, },
     { right, rw h1, simp only [neg_neg] } },
   set f' := multiset.map zsqrtd.norm f with hf',
-  have heqnsmulthree : factors_odd_prime_or_four (a ^ 2 + 3 * b ^ 2) = 
+  have heqnsmulthree : factors_odd_prime_or_four a.norm =
     3 •ℕ factors_odd_prime_or_four r,
   { rw ←hcube,
     apply factors_odd_prime_or_four.pow,
@@ -1574,15 +1577,16 @@ begin
     { rw nat.even_mul at this,
       apply this.resolve_left,
       norm_num },
-    rw [←even_factor_exp.pow r 3, hcube],
-    exact factors_2_even' a b hcoprime },
+    rw [←even_factor_exp.pow r 3, hcube, zsqrt3.norm],
+    exact factors_2_even' a.re a.im hcoprime },
 
-  have heqprod : a ^ 2 + 3 * b ^ 2 = f.prod.norm,
-  { cases h1; rw [zsqrt3.norm', h1],
+  have heqprod : a.norm = f.prod.norm,
+  { cases h1; rw [h1],
     rw zsqrtd.norm_neg },
 
-  have : f' = factors_odd_prime_or_four (a ^ 2 + 3 * b ^ 2),
-  { apply factors_odd_prime_or_four.unique hcoprime,
+  have : f' = factors_odd_prime_or_four a.norm,
+  { rw zsqrt3.norm,
+    apply factors_odd_prime_or_four.unique hcoprime,
     { intros x hx,
       obtain ⟨y, hy, rfl⟩ := multiset.mem_map.mp hx,
       exact (h2 y hy).2.2 },
@@ -1590,7 +1594,7 @@ begin
       obtain ⟨y, hy, rfl⟩ := multiset.mem_map.mp hx,
       apply zsqrtd.norm_nonneg,
       norm_num },
-    { rw [prod_map_norm, heqprod] } },
+    { rw [←zsqrt3.norm, prod_map_norm, heqprod] } },
   rw [heqnsmulthree, hf'] at this,
 
   apply multiset.xxy,
@@ -1611,9 +1615,7 @@ begin
     split; intro H,
     { symmetry,
       exact associated'.norm_eq H },
-    { set ab : ℤ√-3 := ⟨a, b⟩,
-      have : is_coprime ab.re ab.im := hcoprime,
-      apply factorization.associated'_of_norm_eq this hx HA H.symm } },
+    { exact factorization.associated'_of_norm_eq hcoprime hx HA H.symm } },
 
   dsimp only [multiset.count],
   convert this using 1,
@@ -1643,7 +1645,7 @@ lemma step5 -- lemma page 54
   (hcube : r ^ 3 = a.norm) :
   ∃ p : ℤ√-3, a = p ^ 3 :=
 begin
-  obtain ⟨f, hf⟩ := step5' a.re a.im r hcoprime (hcube.trans (zsqrt3.norm a)),
+  obtain ⟨f, hf⟩ := step5' a r hcoprime hcube,
   obtain ⟨h1, h2⟩ := factorization_prop hcoprime,
   set f' := factorization hcoprime with hf',
   have xxx : a = ⟨a.re, a.im⟩ := by simp only [zsqrtd.ext, eq_self_iff_true, and_self],
