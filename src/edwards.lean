@@ -268,81 +268,7 @@ begin
       ring } }
 end
 
-lemma step2'
-  (a b : ℤ)
-  (p q : ℤ)
-  (hdvd : (p ^ 2 + 3 * q ^ 2) ∣ (a ^ 2 + 3 * b ^ 2))
-  (hpprime : prime (p ^ 2 + 3 * q ^ 2))
-  :
-  ∃ u v,
-    (⟨a, b⟩ : ℤ√-3) = ⟨p, q⟩ * ⟨u, v⟩ ∨ 
-    (⟨a, b⟩ : ℤ√-3) = ⟨p, -q⟩ * ⟨u, v⟩ :=
-begin
-  obtain ⟨f, hf⟩ := hdvd,
-  have : ((p * b - a * q) * (p * b + a * q) : ℤ) = b ^ 2 * (p ^ 2 + 3 * q ^ 2) - q ^ 2 * (a ^ 2 + 3 * b ^ 2),
-  { ring },
-  have : ((p * b - a * q) * (p * b + a * q) : ℤ) = (p ^ 2 + 3 * q ^ 2) * (b ^ 2 - q ^ 2 * f),
-  { rw this,
-    rw hf,
-    ring },
-  have h0 : p ^ 2 + 3 * q ^ 2 ∣ p * b - a * q ∨
-         p ^ 2 + 3 * q ^ 2 ∣ p * b + a * q,
-  { apply int.prime.dvd_mul'' hpprime,
-    rw this,
-    apply dvd_mul_right },
-  have h1 : (p ^ 2 + 3 * q ^ 2) * (a ^ 2 + 3 * b ^ 2) =
-            (p * a - 3 * q * b) ^ 2 + 3 * (p * b + a * q) ^ 2,
-  { ring },
-
-  have h1' : (p ^ 2 + 3 * q ^ 2) * (a ^ 2 + 3 * b ^ 2) =
-             (p * a + 3 * q * b) ^ 2 + 3 * (p * b - a * q) ^ 2,
-  { ring },
-  cases h0 with h0 h0,
-  { obtain ⟨v, hv⟩ := h0,
-    obtain ⟨u, hu⟩ : (p ^ 2 + 3 * q ^ 2) ∣ (p * a + 3 * q * b),
-    { apply @prime.dvd_of_dvd_pow _ _ _ hpprime _ 2,
-      rw dvd_add_iff_left,
-      { rw ←h1', exact dvd_mul_right _ _},
-      { apply dvd_mul_of_dvd_right,
-        rw hv,
-        apply dvd_pow _ two_ne_zero,
-        apply dvd_mul_right } },
-    use [u, v],
-    left,
-    rw [zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_im],
-    dsimp only,
-    simp only [neg_mul_eq_neg_mul_symm, mul_neg_eq_neg_mul_symm, neg_neg, ←sub_eq_add_neg],
-    split; apply int.eq_of_mul_eq_mul_left hpprime.ne_zero,
-    { calc (p ^ 2 + 3 * q ^ 2) * a
-          = p * (p * a + 3 * q * b) - 3 * q * (p * b - a * q) : by ring
-      ... = _ : by { rw [hu, hv], ring } },
-    { calc (p ^ 2 + 3 * q ^ 2) * b
-          = p * (p * b - a * q) + q * (p * a + 3 * q * b) : by ring
-      ... = _ : by { rw [hu, hv], ring } } },
-  { obtain ⟨v, hv⟩ := h0,
-    obtain ⟨u, hu⟩ : (p ^ 2 + 3 * q ^ 2) ∣ (p * a - 3 * q * b),
-    { apply @prime.dvd_of_dvd_pow _ _ _ hpprime _ 2,
-      rw dvd_add_iff_left,
-      { rw ←h1, exact dvd_mul_right _ _},
-      { apply dvd_mul_of_dvd_right,
-        rw hv,
-        apply dvd_pow _ two_ne_zero,
-        apply dvd_mul_right } },
-    use [u, v],
-    right,
-    rw [zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_im],
-    dsimp only,
-    simp only [neg_mul_eq_neg_mul_symm, mul_neg_eq_neg_mul_symm, neg_neg, ←sub_eq_add_neg],
-    split; apply int.eq_of_mul_eq_mul_left hpprime.ne_zero,
-    { calc (p ^ 2 + 3 * q ^ 2) * a
-          = p * (p * a - 3 * q * b) + 3 * q * (p * b + a * q) : by ring
-      ... = _ : by { rw [hu, hv], ring } },
-    { calc (p ^ 2 + 3 * q ^ 2) * b
-          = p * (p * b + a * q) - q * (p * a - 3 * q * b) : by ring
-      ... = _ : by { rw [hu, hv], ring } } },
-end
-
-lemma step2'''
+lemma step2
   (a b : ℤ)
   (p q : ℤ)
   (hcoprime : is_coprime a b)
@@ -354,8 +280,8 @@ lemma step2'''
     ((⟨a, b⟩ : ℤ√-3) = ⟨p, q⟩ * ⟨u, v⟩ ∨ (⟨a, b⟩ : ℤ√-3) = ⟨p, -q⟩ * ⟨u, v⟩) ∧
     (a ^ 2 + 3 * b ^ 2) = (p ^ 2 + 3 * q ^ 2) * (u ^ 2 + 3 * v ^ 2)  :=
 begin
-  obtain ⟨u', v', h⟩ := step2' a b p q hdvd hpprime,
-  refine ⟨u', v', _, h, _⟩,
+  obtain ⟨u', v', h, h'⟩ := spts.mul_of_dvd a b p q hdvd hpprime,
+  refine ⟨u', v', _, h, h'.symm⟩,
   { rw [zsqrtd.ext, zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_re, zsqrtd.mul_im, zsqrtd.mul_im] at h,
     dsimp only at h,
     apply is_coprime_of_dvd,
@@ -375,10 +301,7 @@ begin
           try { apply dvd_add };
           try { apply dvd_mul_of_dvd_right };
           assumption },
-      exact hcoprime.is_unit_of_dvd' ha hb } },
-  { rw [zsqrtd.ext, zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_re, zsqrtd.mul_im, zsqrtd.mul_im] at h,
-    dsimp only at h,
-    obtain ⟨rfl, rfl⟩|⟨rfl, rfl⟩ := h; ring },
+      exact hcoprime.is_unit_of_dvd' ha hb } }
 end
 
 lemma step1_2
@@ -426,7 +349,7 @@ begin
           simp only [neg_mul_eq_neg_mul_symm, eq_self_iff_true, mul_neg_eq_neg_mul_symm, and_self,
             neg_neg] } },
       { rwa [hp, neg_pow_bit0, neg_pow_bit0] } } },
-  { apply step2''' _ _ _ _ hcoprime hdvd hpprime }
+  { apply step2 _ _ _ _ hcoprime hdvd hpprime }
 end
 
 -- todo: unused, but try to use in step3 below

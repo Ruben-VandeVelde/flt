@@ -7,6 +7,7 @@ import algebra.gcd_monoid
 import tactic
 import data.nat.modeq
 import ring_theory.int.basic
+import data.zsqrtd.basic
 import .primes
 
 lemma factors2
@@ -217,71 +218,105 @@ begin
   ring,
 end
 
--- todo: mostly duplicated in step2'.
+lemma spts.mul_of_dvd'
+  (a b : ℤ)
+  (p q : ℤ)
+  (hdvd : (p ^ 2 + 3 * q ^ 2) ∣ (a ^ 2 + 3 * b ^ 2))
+  (hpprime : prime (p ^ 2 + 3 * q ^ 2)) :
+  ∃ u v,
+    (⟨a, b⟩ : ℤ√-3) = ⟨p, q⟩ * ⟨u, v⟩ ∨
+    (⟨a, b⟩ : ℤ√-3) = ⟨p, -q⟩ * ⟨u, v⟩ :=
+begin
+  obtain ⟨f, hf⟩ := hdvd,
+  have : ((p * b - a * q) * (p * b + a * q) : ℤ) = b ^ 2 * (p ^ 2 + 3 * q ^ 2) - q ^ 2 * (a ^ 2 + 3 * b ^ 2),
+  { ring },
+  have : ((p * b - a * q) * (p * b + a * q) : ℤ) = (p ^ 2 + 3 * q ^ 2) * (b ^ 2 - q ^ 2 * f),
+  { rw this,
+    rw hf,
+    ring },
+  have h0 : p ^ 2 + 3 * q ^ 2 ∣ p * b - a * q ∨
+         p ^ 2 + 3 * q ^ 2 ∣ p * b + a * q,
+  { apply int.prime.dvd_mul'' hpprime,
+    rw this,
+    apply dvd_mul_right },
+  have h1 : (p ^ 2 + 3 * q ^ 2) * (a ^ 2 + 3 * b ^ 2) =
+            (p * a - 3 * q * b) ^ 2 + 3 * (p * b + a * q) ^ 2,
+  { ring },
+
+  have h1' : (p ^ 2 + 3 * q ^ 2) * (a ^ 2 + 3 * b ^ 2) =
+             (p * a + 3 * q * b) ^ 2 + 3 * (p * b - a * q) ^ 2,
+  { ring },
+  cases h0 with h0 h0,
+  { obtain ⟨v, hv⟩ := h0,
+    obtain ⟨u, hu⟩ : (p ^ 2 + 3 * q ^ 2) ∣ (p * a + 3 * q * b),
+    { apply @prime.dvd_of_dvd_pow _ _ _ hpprime _ 2,
+      rw dvd_add_iff_left,
+      { rw ←h1', exact dvd_mul_right _ _},
+      { apply dvd_mul_of_dvd_right,
+        rw hv,
+        apply dvd_pow _ two_ne_zero,
+        apply dvd_mul_right } },
+    use [u, v],
+    left,
+    rw [zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_im],
+    dsimp only,
+    simp only [neg_mul_eq_neg_mul_symm, mul_neg_eq_neg_mul_symm, neg_neg, ←sub_eq_add_neg],
+    split; apply int.eq_of_mul_eq_mul_left hpprime.ne_zero,
+    { calc (p ^ 2 + 3 * q ^ 2) * a
+          = p * (p * a + 3 * q * b) - 3 * q * (p * b - a * q) : by ring
+      ... = _ : by { rw [hu, hv], ring } },
+    { calc (p ^ 2 + 3 * q ^ 2) * b
+          = p * (p * b - a * q) + q * (p * a + 3 * q * b) : by ring
+      ... = _ : by { rw [hu, hv], ring } } },
+  { obtain ⟨v, hv⟩ := h0,
+    obtain ⟨u, hu⟩ : (p ^ 2 + 3 * q ^ 2) ∣ (p * a - 3 * q * b),
+    { apply @prime.dvd_of_dvd_pow _ _ _ hpprime _ 2,
+      rw dvd_add_iff_left,
+      { rw ←h1, exact dvd_mul_right _ _},
+      { apply dvd_mul_of_dvd_right,
+        rw hv,
+        apply dvd_pow _ two_ne_zero,
+        apply dvd_mul_right } },
+    use [u, v],
+    right,
+    rw [zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_im],
+    dsimp only,
+    simp only [neg_mul_eq_neg_mul_symm, mul_neg_eq_neg_mul_symm, neg_neg, ←sub_eq_add_neg],
+    split; apply int.eq_of_mul_eq_mul_left hpprime.ne_zero,
+    { calc (p ^ 2 + 3 * q ^ 2) * a
+          = p * (p * a - 3 * q * b) + 3 * q * (p * b + a * q) : by ring
+      ... = _ : by { rw [hu, hv], ring } },
+    { calc (p ^ 2 + 3 * q ^ 2) * b
+          = p * (p * b + a * q) - q * (p * a - 3 * q * b) : by ring
+      ... = _ : by { rw [hu, hv], ring } } },
+end
+
+lemma spts.mul_of_dvd
+  (a b : ℤ)
+  (p q : ℤ)
+  (hdvd : (p ^ 2 + 3 * q ^ 2) ∣ (a ^ 2 + 3 * b ^ 2))
+  (hpprime : prime (p ^ 2 + 3 * q ^ 2)) :
+  ∃ u v,
+    ((⟨a, b⟩ : ℤ√-3) = ⟨p, q⟩ * ⟨u, v⟩ ∨ (⟨a, b⟩ : ℤ√-3) = ⟨p, -q⟩ * ⟨u, v⟩) ∧
+    (p ^ 2 + 3 * q ^ 2) * (u ^ 2 + 3 * v ^ 2) = a ^ 2 + 3 * b ^ 2 :=
+begin
+  obtain ⟨u, v, huv⟩ := spts.mul_of_dvd' a b p q hdvd hpprime,
+  use [u, v, huv],
+  simp only [zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_im] at huv,
+  obtain ⟨rfl, rfl⟩|⟨rfl, rfl⟩ := huv; ring
+end
+
 lemma sq_plus_three_sq_prime_dvd (p q a b: ℕ)
   (hprime : nat.prime (p ^ 2 + 3 * q ^ 2))
   (h : p ^ 2 + 3 * q ^ 2 ∣ a ^ 2 + 3 * b ^ 2) :
   ∃ c d, (p ^ 2 + 3 * q ^ 2) * (c ^ 2 + 3 * d ^ 2) = a ^ 2 + 3 * b ^ 2 :=
 begin
-  obtain ⟨f, hf⟩ := h,
-  rw hf,
-  have : ((p * b - a * q) * (p * b + a * q) : ℤ) = b ^ 2 * (p ^ 2 + 3 * q ^ 2) - q ^ 2 * (a ^ 2 + 3 * b ^ 2),
-  { ring },
-  have : ((p * b - a * q) * (p * b + a * q) : ℤ) = (p ^ 2 + 3 * q ^ 2) * (b ^ 2 - q ^ 2 * f),
-  { rw this,
-    zify at hf,
-    rw hf,
-    ring },
-  have h0 : p ^ 2 + 3 * q ^ 2 ∣ (p * b - a * q : ℤ).nat_abs ∨
-         p ^ 2 + 3 * q ^ 2 ∣ (p * b + a * q : ℤ).nat_abs,
-  { apply int.prime.dvd_mul hprime,
-    rw this,
-    norm_cast,
-    apply dvd_mul_right },
-  have h1 : (p ^ 2 + 3 * q ^ 2) * (a ^ 2 + 3 * b ^ 2) =
-            (p * a - 3 * q * b : ℤ).nat_abs ^ 2 + 3 * (p * b + a * q : ℤ).nat_abs ^ 2,
-  { zify,
-    rw int.nat_abs_pow_two,
-    rw int.nat_abs_pow_two,
-    ring },
-  have h1' : (p ^ 2 + 3 * q ^ 2) * (a ^ 2 + 3 * b ^ 2) =
-             (p * a + 3 * q * b : ℤ).nat_abs ^ 2 + 3 * (p * b - a * q : ℤ).nat_abs ^ 2,
-  { zify,
-    rw int.nat_abs_pow_two,
-    rw int.nat_abs_pow_two,
-    ring },
-  cases h0 with h0 h0,
-  swap,
-  { obtain ⟨d, hd⟩ := h0,
-    obtain ⟨c, hc⟩ : (p ^ 2 + 3 * q ^ 2) ∣ (p * a - 3 * q * b : ℤ).nat_abs,
-    { apply @nat.prime.dvd_of_dvd_pow _ _ 2 hprime,
-      rw nat.dvd_add_iff_left,
-      { rw ←h1, exact dvd_mul_right _ _},
-      { apply dvd_mul_of_dvd_right,
-        rw ←int.coe_nat_dvd,
-        rw hd,
-        rw int.coe_nat_dvd,
-        apply dvd_pow _ two_ne_zero,
-        apply dvd_mul_right } },
-    use [c, d],
-    apply nat.eq_of_mul_eq_mul_left hprime.pos,
-    rw [←hf, h1, hc, hd],
-    ring },
-  { obtain ⟨d, hd⟩ := h0,
-    obtain ⟨c, hc⟩ : (p ^ 2 + 3 * q ^ 2) ∣ (p * a + 3 * q * b : ℤ).nat_abs,
-    { apply @nat.prime.dvd_of_dvd_pow _ _ 2 hprime,
-      rw nat.dvd_add_iff_left,
-      { rw ←h1', exact dvd_mul_right _ _},
-      { apply dvd_mul_of_dvd_right,
-        rw ←int.coe_nat_dvd,
-        rw hd,
-        rw int.coe_nat_dvd,
-        apply dvd_pow _ two_ne_zero,
-        apply dvd_mul_right } },
-    use [c, d],
-    apply nat.eq_of_mul_eq_mul_left hprime.pos,
-    rw [←hf, h1', hc, hd],
-    ring },
+  obtain ⟨u, v, -, huv⟩ := spts.mul_of_dvd a b p q _ _,
+  { use [u.nat_abs, v.nat_abs],
+    zify,
+    simp only [←huv, int.nat_abs_pow_two] },
+  { norm_cast, exact h },
+  { rw nat.prime_iff_prime_int at hprime, convert hprime }
 end
 
 lemma factors'
