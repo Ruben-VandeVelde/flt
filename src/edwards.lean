@@ -357,32 +357,6 @@ lemma step2'''
     ((⟨a, b⟩ : ℤ√-3) = ⟨p, q⟩ * ⟨u, v⟩ ∨ (⟨a, b⟩ : ℤ√-3) = ⟨p, -q⟩ * ⟨u, v⟩) ∧
     (a ^ 2 + 3 * b ^ 2) = (p ^ 2 + 3 * q ^ 2) * (u ^ 2 + 3 * v ^ 2)  :=
 begin
-  set P' := (p ^ 2 + 3 * q ^ 2).nat_abs with hP',
-  have hdvd' : P' ∣ a.nat_abs ^ 2 + 3 * b.nat_abs ^ 2,
-  { convert int.nat_abs_dvd_abs_iff.mpr hdvd,
-    zify,
-    rw [int.nat_abs_pow_two, int.nat_abs_pow_two],
-    rw [int.nat_abs_of_nonneg (spts.nonneg _ _)], },
-  have hodd : odd P',
-  { rwa [hP', int.nat_abs_odd] },
-  have hprime' : nat.prime P',
-  { rwa [hP', ←int.prime_iff] },
-
-  have hprime'' : nat.prime (p.nat_abs ^ 2 + 3 * q.nat_abs ^ 2),
-  { convert hprime',
-    zify,
-    rw [int.nat_abs_pow_two, int.nat_abs_pow_two, hP'],
-    rw [int.nat_abs_of_nonneg (spts.nonneg _ _)] },
-  have hdvd'' : p.nat_abs ^ 2 + 3 * q.nat_abs ^ 2 ∣ a.nat_abs ^ 2 + 3 * b.nat_abs ^ 2,
-  { rw ←int.nat_abs_dvd_abs_iff at hdvd,
-    convert hdvd;
-    { zify,
-      rw [int.nat_abs_pow_two, int.nat_abs_pow_two],
-      rw [int.nat_abs_of_nonneg (spts.nonneg _ _)] } },
-
-  obtain ⟨u, v, huv⟩ := sq_plus_three_sq_prime_dvd p.nat_abs q.nat_abs a.nat_abs b.nat_abs
-    hprime''
-    hdvd'',
   obtain ⟨u', v', h⟩ := step2' a b p q hcoprime hdvd hpodd hpprime,
   refine ⟨u', v', _, h, _⟩,
   { rw [zsqrtd.ext, zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_re, zsqrtd.mul_im, zsqrtd.mul_im] at h,
