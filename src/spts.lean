@@ -217,6 +217,7 @@ begin
   ring,
 end
 
+-- todo: mostly duplicated in step2'.
 lemma sq_plus_three_sq_prime_dvd (p q a b: ℕ)
   (hprime : nat.prime (p ^ 2 + 3 * q ^ 2))
   (h : p ^ 2 + 3 * q ^ 2 ∣ a ^ 2 + 3 * b ^ 2) :
