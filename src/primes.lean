@@ -636,7 +636,7 @@ variables {α : Type*} {β : Type*} {γ : Type*} {δ : Type*}
 variables [comm_cancel_monoid_with_zero α]
 
 
-lemma not_prime_pow {x : α} {n : ℕ} (hn : 1 < n) : ¬ prime (x ^ n) :=
+lemma pow_not_prime {x : α} {n : ℕ} (hn : 1 < n) : ¬ prime (x ^ n) :=
 λ hp, hp.not_unit $ is_unit.pow _ $ of_irreducible_pow hn $ irreducible_of_prime hp
 
 end

@@ -169,6 +169,21 @@ begin
       assumption } }
 end
 
+lemma odd_prime_or_four.im_ne_zero
+  {p q : ℤ}
+  (h: odd_prime_or_four (p ^ 2 + 3 * q ^ 2))
+  (hcoprime: is_coprime p q) :
+  q ≠ 0 :=
+begin
+  rintro rfl,
+  simp only [zero_pow, zero_lt_two, add_zero, mul_zero] at h,
+  obtain h|⟨hp, hodd⟩ := h,
+  { rw [is_coprime_zero_right, int.is_unit_iff_abs] at hcoprime,
+    rw [←abs_pow_two, hcoprime] at h,
+    norm_num at h },
+  { exact pow_not_prime one_lt_two hp }
+end
+
 lemma step1a
   (a b : ℤ)
   (hcoprime : is_coprime a b)
@@ -564,31 +579,16 @@ begin
         { exact hgfactors pq ind } } } },
 end
 
-lemma step4_1
+lemma step4_3
   (p q p' q' : ℤ)
   (hcoprime : is_coprime p q)
   (hcoprime' : is_coprime p' q')
-  (hfour : p ^ 2 + 3 * q ^ 2 = 4)
+  (h : odd_prime_or_four (p ^ 2 + 3 * q ^ 2))
   (heq : p ^ 2 + 3 * q ^ 2 = p' ^ 2 + 3 * q' ^ 2) :
   abs p = abs p' ∧ abs q = abs q' :=
 begin
-  obtain ⟨hp, hq⟩ := spts.four_of_coprime hcoprime hfour,
-  rw heq at hfour,
-  obtain ⟨hp', hq'⟩ := spts.four_of_coprime hcoprime' hfour,
-  rw [hp, hq, hp', hq'],
-  split; refl,
-end
-
-lemma step4_2
-  (p q p' q' : ℤ)
-  (hcoprime : is_coprime p q)
-  (hcoprime' : is_coprime p' q')
-  (hprime : prime (p ^ 2 + 3 * q ^ 2))
-  (hodd : odd (p ^ 2 + 3 * q ^ 2))
-  (heq : p ^ 2 + 3 * q ^ 2 = p' ^ 2 + 3 * q' ^ 2) :
-  abs p = abs p' ∧ abs q = abs q' :=
-begin
-  obtain ⟨u, v, hcoprime'', (H|H), h1⟩ := step2''' p q p' q' hcoprime (by rw heq) (by rwa ←heq) (by rwa ←heq);
+  obtain ⟨u, v, hcoprime'', (H|H), h1⟩ := step1_2 p q p' q' hcoprime (by rw heq) (by rwa ←heq)
+    (odd_prime_or_four.im_ne_zero (by rwa heq at h) hcoprime');
   { rw heq at h1,
     have := int.eq_one_of_mul_eq_self_right (spts.not_zero_of_coprime hcoprime') h1.symm,
     obtain ⟨ha, rfl⟩ := spts.eq_one this,
@@ -599,19 +599,6 @@ begin
     rw [H.1, H.2, abs_mul, abs_mul, ha, mul_one, mul_one],
     try { rw [abs_neg] },
     split; refl },
-end
-
-lemma step4_3
-  (p q p' q' : ℤ)
-  (hcoprime : is_coprime p q)
-  (hcoprime' : is_coprime p' q')
-  (h : odd_prime_or_four (p ^ 2 + 3 * q ^ 2))
-  (heq : p ^ 2 + 3 * q ^ 2 = p' ^ 2 + 3 * q' ^ 2) :
-  abs p = abs p' ∧ abs q = abs q' :=
-begin
-  obtain h|⟨hp, hodd⟩ := h,
-  { apply step4_1; assumption },
-  { apply step4_2; assumption }
 end
 
 lemma prod_map_norm {s : multiset ℤ√-3} :
