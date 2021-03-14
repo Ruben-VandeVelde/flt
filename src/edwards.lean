@@ -1011,6 +1011,20 @@ begin
     rw [neg_eq_iff_neg_eq, eq_comm], rw [zsqrtd.ext, zsqrtd.neg_im, zsqrtd.neg_re], exact ⟨h1, h2⟩ },
 end
 
+lemma factorization.associated'_of_norm_eq
+  {a b c : ℤ√-3} (h : is_coprime a.re a.im)
+  (hbmem : b ∈ factorization h) (hcmem : c ∈ factorization h)
+  (hnorm : b.norm = c.norm) :
+  associated' b c :=
+begin
+  apply associated'_of_associated_norm,
+  { rw hnorm },
+  { exact factorization.coprime_of_mem h hbmem },
+  { exact factorization.coprime_of_mem h hcmem },
+  { rw ←zsqrt3.norm,
+    exact ((factorization_prop h).2 b hbmem).2.2 },
+end
+
 lemma prod_norm_eq_prod_mul_prod_conj {d : ℤ} (f : multiset ℤ√d) :
   f.prod * (f.map zsqrtd.conj).prod = (f.map zsqrtd.norm).prod :=
 begin
@@ -1588,23 +1602,6 @@ begin
   { rw [hf', this, multiset.count_smul],
     apply dvd_mul_right },
 
-  have hcoprime' : ∀ A  : ℤ√-3, A ∈ f → is_coprime A.re A.im,
-  { intros A HA,
-    set ab : ℤ√-3 := ⟨a, b⟩,
-    have : is_coprime ab.re ab.im := hcoprime,
-    exact factorization.coprime_of_mem this HA },
-
-  have hassociated : ∀ A B : ℤ√-3, A ∈ f → B ∈ f → A.norm = B.norm → associated' A B,
-  { intros A B HA HB H,
-    have HA' := h2 A HA,
-    have HB' := h2 B HB,
-    apply associated'_of_associated_norm,
-    { rw H },
-    { exact hcoprime' A HA },
-    { exact hcoprime' B HB },
-    { rw ←zsqrt3.norm,
-      exact HA'.2.2, } },
-
   classical,
   have : 3 ∣ multiset.countp (associated' x) f,
   { rw multiset.count_map at this,
@@ -1614,7 +1611,9 @@ begin
     split; intro H,
     { symmetry,
       exact associated'.norm_eq H },
-    { apply hassociated x A hx HA H.symm } }, 
+    { set ab : ℤ√-3 := ⟨a, b⟩,
+      have : is_coprime ab.re ab.im := hcoprime,
+      apply factorization.associated'_of_norm_eq this hx HA H.symm } },
 
   dsimp only [multiset.count],
   convert this using 1,
