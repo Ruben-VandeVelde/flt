@@ -422,25 +422,24 @@ begin
     subst p;
     subst q,
     
-    {refine ⟨u, v, h1, h2, _⟩, { rwa hp }},
-    {refine ⟨u, v, h1, _, _⟩, { simp only [neg_neg], rwa or_comm, }, { rwa hp }},
-    {refine ⟨-u, -v, h1.neg_neg, _, _⟩, { rw or_comm, convert h2 using 2;
-      { rw [zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_re, zsqrtd.mul_im, zsqrtd.mul_im],
-      dsimp only,
-      simp,
-      },
-    
-     }, { rwa [hp, neg_pow_bit0, neg_pow_bit0], }},
-    {refine ⟨-u, -v, h1.neg_neg, _, _⟩, { convert h2 using 2;
-      { rw [zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_re, zsqrtd.mul_im, zsqrtd.mul_im],
-      dsimp only,
-      simp,
-      },
-    
-     }, { rwa [hp, neg_pow_bit0, neg_pow_bit0], }},
-    
-    
-     },
+    { refine ⟨u, v, h1, h2, _⟩,
+      { rwa hp } },
+    { refine ⟨u, v, h1, _, _⟩,
+      { simp only [neg_neg], rwa or_comm, },
+      { rwa hp } },
+    { refine ⟨-u, -v, h1.neg_neg, _, _⟩,
+      { rw or_comm,
+        convert h2 using 2;
+        { rw [zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_re, zsqrtd.mul_im, zsqrtd.mul_im],
+          simp only [neg_mul_eq_neg_mul_symm, eq_self_iff_true, mul_neg_eq_neg_mul_symm, and_self,
+            neg_neg] } },
+      { rwa [hp, neg_pow_bit0, neg_pow_bit0] } },
+    { refine ⟨-u, -v, h1.neg_neg, _, _⟩,
+      { convert h2 using 2;
+        { rw [zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_re, zsqrtd.mul_im, zsqrtd.mul_im],
+          simp only [neg_mul_eq_neg_mul_symm, eq_self_iff_true, mul_neg_eq_neg_mul_symm, and_self,
+            neg_neg] } },
+      { rwa [hp, neg_pow_bit0, neg_pow_bit0] } } },
   { apply step2''' _ _ _ _ hcoprime hdvd hpodd hpprime }
 end
 
