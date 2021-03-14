@@ -565,19 +565,6 @@ begin
         { exact hgfactors pq ind } } } },
 end
 
-lemma step4_1'
-  {p q : ℤ}
-  (hcoprime : is_coprime p q)
-  (hfour : p ^ 2 + 3 * q ^ 2 = 4) :
-  abs p = 1 ∧ abs q = 1 :=
-begin
-  apply spts.four hfour,
-  rintro rfl,
-  rw [is_coprime_zero_right, int.is_unit_iff_abs] at hcoprime,
-  rw [zero_pow zero_lt_two, mul_zero, add_zero, ←int.nat_abs_pow_two, ←int.abs_eq_nat_abs, hcoprime] at hfour,
-  norm_num at hfour
-end
-
 lemma step4_1
   (p q p' q' : ℤ)
   (hcoprime : is_coprime p q)
@@ -586,9 +573,9 @@ lemma step4_1
   (heq : p ^ 2 + 3 * q ^ 2 = p' ^ 2 + 3 * q' ^ 2) :
   abs p = abs p' ∧ abs q = abs q' :=
 begin
-  obtain ⟨hp, hq⟩ := step4_1' hcoprime hfour,
+  obtain ⟨hp, hq⟩ := spts.four_of_coprime hcoprime hfour,
   rw heq at hfour,
-  obtain ⟨hp', hq'⟩ := step4_1' hcoprime' hfour,
+  obtain ⟨hp', hq'⟩ := spts.four_of_coprime hcoprime' hfour,
   rw [hp, hq, hp', hq'],
   split; refl,
 end
