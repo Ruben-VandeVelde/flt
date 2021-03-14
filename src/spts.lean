@@ -587,26 +587,6 @@ begin
     exact hnform },
 end
 
-lemma int.factors
-  (a b : ℤ)
-  (x : nat)
-  (hcoprime : int.gcd a b = 1)
-  (hodd : ¬even x)
-  (hfactor : (x:int) ∣ (a ^ 2 + 3 * b ^ 2)) :
-  ∃ c d, x = c ^ 2 + 3 * d ^ 2 :=
-begin
-  rw ←int.nat_abs_dvd at hfactor,
-  obtain ⟨c, d, hcd⟩ := factors a.nat_abs b.nat_abs x _ _ _,
-  use [c, d, hcd],
-
-  exact hcoprime,
-  exact hodd,
-  simp only [int.nat_abs_of_nat] at hfactor,
-  rw [←int.nat_abs_pow_two a, ←int.nat_abs_pow_two b] at hfactor,
-  norm_cast at hfactor,
-  assumption
-end
-
 theorem spts.eq_one
   {a b : ℤ}
   (h : a^2 + 3 * b ^ 2 = 1) :

@@ -95,11 +95,78 @@ begin
   { exact h.ne_zero }
 end
 
+lemma odd_prime_or_four.ne_one {z : ℤ} (h : odd_prime_or_four z) : z ≠ 1 :=
+begin
+  obtain rfl|⟨h, -⟩ := h,
+  { norm_num },
+  { exact h.ne_one }
+end
+
+lemma odd_prime_or_four.one_lt_abs {z : ℤ} (h : odd_prime_or_four z) : 1 < abs z :=
+begin
+  obtain rfl|⟨h, -⟩ := h,
+  { rw int.abs_eq_nat_abs, norm_cast, norm_num },
+  { rw int.abs_eq_nat_abs,
+    rw int.prime_iff at h,
+    norm_cast,
+    exact h.one_lt, }
+end
+
 lemma odd_prime_or_four.not_unit {z : ℤ} (h : odd_prime_or_four z) : ¬ is_unit z :=
 begin
   obtain rfl|⟨h, -⟩ := h,
   { rw is_unit_iff_dvd_one, norm_num },
   { exact h.not_unit }
+end
+
+lemma odd_prime_or_four.exists_and_dvd
+  {n : ℕ} (n2 : 2 < n) : ∃ p, p ∣ n ∧ odd_prime_or_four p :=
+begin
+  obtain ⟨k, h2⟩|⟨p, hp, hdvd, hodd⟩ := exists_odd_prime_and_dvd_or_two_pow n2.le,
+  { refine ⟨4, _, _⟩,
+    { use 2 ^ (k - 2),
+
+      have h3 : 2 ≤ k,
+      { rw h2 at n2,
+        apply l0 n2 },
+
+      calc n
+          = 2 ^ k : h2
+      ... = 2 ^ 2 * 2 ^ (k - 2) : (pow_mul_pow_sub _ h3).symm
+      ... = 4 * 2 ^ (k - 2) : by norm_num },
+    { left, refl } },
+  { rw nat.prime_iff_prime_int at hp,
+    rw ←int.coe_nat_odd at hodd,
+    exact ⟨p, hdvd, or.inr ⟨hp, hodd⟩⟩ },
+end
+
+lemma odd_prime_or_four.factors
+  (a b x : ℤ)
+  (hcoprime : is_coprime a b)
+  (hx : odd_prime_or_four x)
+  (hfactor : (x:int) ∣ (a ^ 2 + 3 * b ^ 2)) :
+  ∃ c d, abs x = c ^ 2 + 3 * d ^ 2 ∧ 0 ≤ c ∧ 0 < d :=
+begin
+  obtain rfl|⟨hprime, hodd⟩ := hx,
+  { use [1, 1], norm_num },
+  { rw ←int.nat_abs_dvd at hfactor,
+    obtain ⟨c, d, hcd⟩ := factors a.nat_abs b.nat_abs x.nat_abs _ _ _,
+    refine ⟨c, d, _, _, _⟩,
+    { rw int.abs_eq_nat_abs,
+      norm_cast,
+      assumption },
+    { exact int.coe_zero_le c },
+    { apply lt_of_le_of_ne (int.coe_zero_le d),
+      norm_cast,
+      rintro rfl,
+      simp only [zero_lt_two, zero_pow, add_zero, mul_zero] at hcd,
+      rw [int.prime_iff, hcd] at hprime,
+      exact nat.prime.pow_not_prime le_rfl hprime },
+    { rwa ←int.gcd_eq_one_iff_coprime at hcoprime, },
+    { rwa [int.nat_abs_even, ←int.odd_iff_not_even] },
+    { rw [←int.nat_abs_pow_two a, ←int.nat_abs_pow_two b] at hfactor,
+      norm_cast at hfactor,
+      assumption } }
 end
 
 lemma step1a
@@ -328,88 +395,6 @@ begin
     obtain ⟨rfl, rfl⟩|⟨rfl, rfl⟩ := h; ring },
 end
 
-lemma step2
-  (a b : ℤ)
-  (p : ℕ)
-  (hcoprime : is_coprime a b)
-  (hdvd : (p : ℤ) ∣ (a ^ 2 + 3 * b ^ 2))
-  (hpodd : odd p)
-  (hpprime : nat.prime p)
-  :
-  ∃ u v q r,
-    (p : ℤ) = q ^ 2 + 3 * r ^ 2 ∧
-    ((⟨a, b⟩ : ℤ√-3) = ⟨q, r⟩ * ⟨u, v⟩ ∨ 
-     (⟨a, b⟩ : ℤ√-3) = ⟨q, -r⟩ * ⟨u, v⟩) ∧
-    0 ≤ q ∧ 
-    0 ≤ r :=
-begin
-  have hdvd' : p ∣ a.nat_abs ^ 2 + 3 * b.nat_abs ^ 2,
-  { rw [←int.nat_abs_pow_two a, ←int.nat_abs_pow_two b] at hdvd,
-    norm_cast at hdvd,
-    assumption },
-
-  obtain ⟨q, r, hp⟩ := factors a.nat_abs b.nat_abs p _ _ hdvd',
-  obtain ⟨u, v, huv⟩ := sq_plus_three_sq_prime_dvd q r a.nat_abs b.nat_abs
-    (by rwa hp at hpprime)
-    (by rwa hp at hdvd'),
-  obtain ⟨u', v', h⟩ := step2' a b q r hcoprime _ _ _,
-  refine ⟨u', v', q, r, _, h, int.coe_nat_nonneg _, int.coe_nat_nonneg _⟩,
-  { norm_cast, exact hp },
-  { zify at huv,
-    use (u ^ 2 + 3 * v ^ 2),
-    rw huv,
-    simp only [int.nat_abs_pow_two] },
-  { norm_cast, rwa ←hp },
-  { norm_cast, rwa [←nat.prime_iff_prime_int, ←hp], },
-  { rwa ←int.gcd_eq_one_iff_coprime at hcoprime },
-  { rwa ←nat.odd_iff_not_even }
-end
-
-lemma step2''
-  {a b : ℤ}
-  {p : ℕ}
-  (hcoprime : is_coprime a b)
-  (hdvd : (p : ℤ) ∣ (a ^ 2 + 3 * b ^ 2))
-  (hpodd : odd p)
-  (hpprime : nat.prime p)
-  :
-  ∃ u v q r,
-    is_coprime u v ∧
-    (p : ℤ) = q ^ 2 + 3 * r ^ 2 ∧
-    (a ^ 2 + 3 * b ^ 2) = p * (u ^ 2 + 3 * v ^ 2) ∧
-    ((⟨a, b⟩ : ℤ√-3) = ⟨q, r⟩ * ⟨u, v⟩ ∨ 
-     (⟨a, b⟩ : ℤ√-3) = ⟨q, -r⟩ * ⟨u, v⟩) ∧
-    0 ≤ q ∧ 
-    0 ≤ r :=
-begin
-  obtain ⟨u, v, q, r, hp, huv', hqnonneg, hrnonneg⟩ := step2 a b p hcoprime hdvd hpodd hpprime,
-  refine ⟨u, v, q, r, _, hp, _, huv', hqnonneg, hrnonneg⟩,
-  { rw [zsqrtd.ext, zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_re, zsqrtd.mul_im, zsqrtd.mul_im] at huv',
-    dsimp only at huv',
-    apply is_coprime_of_dvd,
-    { rintro ⟨rfl, rfl⟩,
-      simp only [add_zero, mul_zero, or_self] at huv',
-      obtain ⟨rfl, rfl⟩ := huv',
-      exact not_coprime_zero_zero hcoprime },
-    { intros z hz hznezero hzdvdu hzdvdv,
-      apply hz,
-      simp only [neg_mul_eq_neg_mul_symm, mul_one, one_mul, mul_neg_eq_neg_mul_symm, neg_neg,
-        ←sub_eq_add_neg] at huv',
-      obtain ⟨ha, hb⟩ : z ∣ a ∧ z ∣ b,
-      { obtain ⟨hu, hv⟩ | ⟨hu, hv⟩ := huv';
-          rw [hu, hv];
-          split;
-          try { apply dvd_sub };
-          try { apply dvd_add };
-          try { apply dvd_mul_of_dvd_right };
-          assumption },
-      exact hcoprime.is_unit_of_dvd' ha hb } },
-  { rw [zsqrtd.ext, zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_re, zsqrtd.mul_im, zsqrtd.mul_im] at huv',
-    dsimp only at huv',
-    rw hp,
-    obtain ⟨rfl, rfl⟩|⟨rfl, rfl⟩ := huv'; ring }
-end
-
 lemma step1_2
   (a b : ℤ)
   (p q : ℤ)
@@ -459,6 +444,7 @@ begin
   { apply step2''' _ _ _ _ hcoprime hdvd hpodd hpprime }
 end
 
+-- todo: unused, but try to use in step3 below
 lemma step1_2'
   (a : ℤ√-3)
   (p : ℤ√-3)
@@ -545,71 +531,38 @@ begin
     have : 2 < n,
     { zify,
       rwa [←hn] },
-    obtain ⟨p, hpdvd, (rfl|⟨hpprime, hpodd⟩)⟩ := exists_prime_and_dvd' this,
-    -- 4 divides
-    { have : even (a ^ 2 + 3 * b ^ 2),
-      { rw hn,
-        norm_cast,
-        apply dvd_trans _ hpdvd,
-        norm_num },
-      obtain ⟨u, v, huvcoprime, huv, huvdvd⟩ := step1' a b hcoprime this,
-      have descent : (u ^ 2 + 3 * v ^ 2).nat_abs < n,
-      { rw ←hn',
-        apply int.nat_abs_lt_nat_abs_of_nonneg_of_lt (spts.nonneg _ _),
-        rw huvdvd,
-        apply int.lt_mul_self (spts.pos_of_coprime huvcoprime),
-        norm_num },
-      obtain ⟨g, hgprod, hgfactors⟩ := ih (u ^ 2 + 3 * v ^ 2).nat_abs descent huvcoprime
-        (int.nat_abs_of_nonneg (spts.nonneg _ _)).symm,
-      cases huv;
-      [use ⟨1, 1⟩ ::ₘ g, use ⟨1, -1⟩ ::ₘ g];
-      { split,
-        { rw huv,
-          cases hgprod; rw [multiset.prod_cons, hgprod],
-          { left, refl },    
-          { right, simp only [mul_neg_eq_neg_mul_symm], },            
-        },
-        { rintros pq hpq,
-          rw multiset.mem_cons at hpq,
-          obtain rfl|ind := hpq,
-          { refine ⟨_, _, or.inl ((zsqrt3.norm _).trans _)⟩; norm_num },
-          { exact hgfactors pq ind } } } },
-    -- odd prime
-    { rw ←nat.odd_iff at hpodd, -- TODO fix exists_prime_and_dvd'
-      rw [←int.coe_nat_dvd, ←hn] at hpdvd,
-      obtain ⟨u, v, q, r, huvcoprime, hp, huvdvd, huv, hqnonneg, hrnonneg⟩ := step2'' hcoprime hpdvd hpodd hpprime,
-      have descent : (u ^ 2 + 3 * v ^ 2).nat_abs < n,
-      { rw ←hn',
-        apply int.nat_abs_lt_nat_abs_of_nonneg_of_lt (spts.nonneg _ _),
-        rw huvdvd,
-        apply int.lt_mul_self (spts.pos_of_coprime huvcoprime),
-        norm_cast,
-        exact hpprime.one_lt },
-      obtain ⟨g, hgprod, hgfactors⟩ := ih (u ^ 2 + 3 * v ^ 2).nat_abs descent huvcoprime
-        (int.nat_abs_of_nonneg (spts.nonneg _ _)).symm,
-      cases huv;
-      [use ⟨q, r⟩ ::ₘ g, use ⟨q, -r⟩ ::ₘ g];
-      { split,
-        { rw huv,
-          cases hgprod; rw [multiset.prod_cons, hgprod],
-          { left, refl },    
-          { right, simp only [mul_neg_eq_neg_mul_symm], },            
-        },
-        { rintros pq hpq,
-          rw multiset.mem_cons at hpq,
-          obtain rfl|ind := hpq,
-          { rw [nat.prime_iff_prime_int, hp] at hpprime,
-            rw [zsqrt3.norm],
-            try { rw neg_square },
-            -- TODO: eq_or_eq_neg_of_pow_two_eq_pow_two for abs
-            dsimp only,
-            refine ⟨hqnonneg, _, or.inr ⟨hpprime, _⟩⟩,
-            { try { rw neg_ne_zero, },
-              rintro rfl,
-              simp only [zero_pow zero_lt_two, add_zero, mul_zero] at hpprime,
-              apply not_prime_pow one_lt_two hpprime, },
-            { rwa [←hp, int.coe_nat_odd] } },
-          { exact hgfactors pq ind } } } } },
+    obtain ⟨p, hpdvd, hp⟩ := odd_prime_or_four.exists_and_dvd this,
+    rw [←int.coe_nat_dvd, ←hn] at hpdvd,
+    obtain ⟨q, r, hcd, hc, hd⟩ := odd_prime_or_four.factors a b p hcoprime hp hpdvd,
+    rw abs_of_nonneg (int.coe_nat_nonneg _) at hcd,
+    rw hcd at hpdvd hp,
+    obtain ⟨u, v, huvcoprime, huv, huvdvd⟩ := step1_2 a b q r hcoprime hpdvd hp hd.ne.symm,
+    have descent : (u ^ 2 + 3 * v ^ 2).nat_abs < n,
+    { rw ←hn',
+      apply int.nat_abs_lt_nat_abs_of_nonneg_of_lt (spts.nonneg _ _),
+      rw huvdvd,
+      apply int.lt_mul_self (spts.pos_of_coprime huvcoprime),
+      rw ←abs_of_nonneg (spts.nonneg q r),
+      exact hp.one_lt_abs },
+    obtain ⟨g, hgprod, hgfactors⟩ := ih (u ^ 2 + 3 * v ^ 2).nat_abs descent huvcoprime
+      (int.nat_abs_of_nonneg (spts.nonneg _ _)).symm,
+    cases huv;
+    [use ⟨q, r⟩ ::ₘ g, use ⟨q, -r⟩ ::ₘ g];
+    { split,
+      { rw huv,
+        cases hgprod; rw [multiset.prod_cons, hgprod],
+        { left, refl },
+        { right, simp only [mul_neg_eq_neg_mul_symm] } },
+      { rintros pq hpq,
+        rw multiset.mem_cons at hpq,
+        obtain rfl|ind := hpq,
+        { rw [zsqrt3.norm],
+          try { rw neg_square },
+          dsimp only,
+          refine ⟨hc, _, hp⟩,
+          try { rw neg_ne_zero },
+          exact hd.ne.symm },
+        { exact hgfactors pq ind } } } },
 end
 
 lemma step4_1'
