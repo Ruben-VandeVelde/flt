@@ -45,11 +45,10 @@ end
 lemma zsqrtd.is_unit_iff_norm_is_unit {d : ℤ} (z : ℤ√d) : is_unit z ↔ is_unit z.norm :=
 by rw [int.is_unit_iff_nat_abs, zsqrtd.norm_eq_one_iff]
 
--- TODO generalize n
-lemma zsqrtd.int_dvd_iff (z : ℤ) (a : ℤ√-3) : ↑z ∣ a ↔ z ∣ a.re ∧ z ∣ a.im :=
+lemma zsqrtd.int_dvd_iff {d : ℤ} (z : ℤ) (a : ℤ√d) : ↑z ∣ a ↔ z ∣ a.re ∧ z ∣ a.im :=
 begin
   split,
-  { rintro ⟨d, rfl⟩,
+  { rintro ⟨x, rfl⟩,
     simp only [add_zero, zsqrtd.coe_int_re, zero_mul, zsqrtd.mul_im, dvd_mul_right, and_self,
       zsqrtd.mul_re, mul_zero, zsqrtd.coe_int_im] },
   { rintro ⟨⟨r, hr⟩, ⟨i, hi⟩⟩,
