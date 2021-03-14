@@ -1304,36 +1304,6 @@ begin
   },
 end
 
-lemma multiset.xxz
-  {α β : Type*}
-  [decidable_eq α]
-  {f : α → β}
-  {s : multiset α}
-  (a : α)
-  (h' : (∀ b ∈ s, b = a))
-  (h : ∀ x ∈ s, 3 ∣ multiset.count x s) :
-  ∃ t : multiset α, s = 3 •ℕ t :=
-begin
-  by_cases ha : a ∈ s,
-  { have h1 := multiset.eq_repeat_of_mem h',
-    have h2 : multiset.card s = multiset.count a s,
-    { conv_rhs { rw h1 },
-      rw multiset.count_repeat_self },
-    obtain ⟨n, hn⟩ := h a ha,
-    rw hn at h2,
-    use multiset.repeat a n,
-    rw h1,
-    rw multiset.nsmul_repeat,
-    congr,
-    exact h2 },
-  { use 0,
-    simp only [nsmul_zero],
-    apply multiset.eq_zero_of_forall_not_mem,
-    intros b hb,
-    obtain rfl := h' b hb,
-    contradiction },
-end
-
 lemma multiset.xxy
   {α : Type*}
   [decidable_eq α]
