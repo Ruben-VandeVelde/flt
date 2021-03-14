@@ -898,6 +898,28 @@ lemma factorization_prop
       odd_prime_or_four pq.norm :=
 classical.some_spec (step3 hcoprime)
 
+lemma factorization.coprime_of_mem
+  {a b : ℤ√-3} (h : is_coprime a.re a.im) (hmem : b ∈ factorization h) :
+  is_coprime b.re b.im :=
+begin
+  obtain ⟨h1, h2⟩ := factorization_prop h,
+  set f := factorization h,
+  apply is_coprime_of_dvd,
+  { rintro ⟨-, H⟩,
+    exact (h2 b hmem).2.1 H },
+  { intros z hznu hznz hzr hzi,
+    apply hznu,
+    obtain ⟨d, hd⟩ : (z : ℤ√-3) ∣ f.prod,
+    { apply dvd_trans _ (multiset.dvd_prod hmem),
+      rw zsqrtd.int_dvd_iff,
+      exact ⟨hzr, hzi⟩ },
+    simp only [hd, zsqrtd.ext, add_zero, zsqrtd.coe_int_re, zero_mul, zsqrtd.neg_im, zsqrtd.neg_re,
+      zsqrtd.mul_im, zsqrtd.mul_re, mul_zero, zsqrtd.coe_int_im, int.neg_mul_eq_mul_neg] at h1,
+    apply is_coprime.is_unit_of_dvd' h,
+    { cases h1; rw [h1.1]; apply dvd_mul_right },
+    { cases h1; rw [h1.2]; apply dvd_mul_right } } ,
+end
+
 lemma no_conj
   (s : multiset ℤ√-3)
   {p : ℤ√-3}
@@ -1433,19 +1455,6 @@ begin
   exact multiset.of_mem_filter hx,
 end
 
--- TODO generalize n
-lemma zsqrtd.int_dvd_iff (z : ℤ) (a : ℤ√-3) : ↑z ∣ a ↔ z ∣ a.re ∧ z ∣ a.im :=
-begin
-  split,
-  { rintro ⟨d, rfl⟩,
-    simp only [add_zero, zsqrtd.coe_int_re, zero_mul, zsqrtd.mul_im, dvd_mul_right, and_self,
-      zsqrtd.mul_re, mul_zero, zsqrtd.coe_int_im] },
-  { rintro ⟨⟨r, hr⟩, ⟨i, hi⟩⟩,
-    use ⟨r, i⟩,
-    rw [zsqrtd.ext, zsqrtd.smul_val],
-    exact ⟨hr, hi⟩ },
-end 
-
 lemma eq_or_eq_conj_of_associated_of_re_zero
   {x A : ℤ√-3}
   (hx : x.re = 0)
@@ -1581,21 +1590,9 @@ begin
 
   have hcoprime' : ∀ A  : ℤ√-3, A ∈ f → is_coprime A.re A.im,
   { intros A HA,
-    have hdvd : A ∣ f.prod := multiset.dvd_prod HA, 
-    apply is_coprime_of_dvd,
-    { rintro ⟨-, H⟩,
-      exact (h2 A HA).2.1 H },
-    { intros z hznu hznz hzr hzi,
-      apply hznu,
-      obtain ⟨d, hd⟩ : (z : ℤ√-3) ∣ f.prod,
-      { apply dvd_trans _ hdvd,
-        rw zsqrtd.int_dvd_iff,
-        exact ⟨hzr, hzi⟩ },
-      rw hd at h1,
-      have : (z : ℤ√-3) ∣ ⟨a, b⟩,
-      { cases h1; rw h1; simp only [dvd_neg, dvd_mul_right] },
-      rw zsqrtd.int_dvd_iff at this,
-      exact is_coprime.is_unit_of_dvd' hcoprime this.1 this.2 } },
+    set ab : ℤ√-3 := ⟨a, b⟩,
+    have : is_coprime ab.re ab.im := hcoprime,
+    exact factorization.coprime_of_mem this HA },
 
   have hassociated : ∀ A B : ℤ√-3, A ∈ f → B ∈ f → A.norm = B.norm → associated' A B,
   { intros A B HA HB H,
