@@ -777,7 +777,7 @@ end
 lemma associated'_of_associated_norm {x y : ℤ√-3} (h : associated (zsqrtd.norm x) (zsqrtd.norm y))
   (hx : is_coprime x.re x.im)
   (hy : is_coprime y.re y.im)
-  (h' : odd_prime_or_four (x.re ^ 2 + 3 * x.im ^ 2)) :
+  (h' : odd_prime_or_four x.norm) :
   associated' x y :=
 begin
   by_cases hx' : x = 0,
@@ -802,6 +802,7 @@ begin
       apply zsqrtd.norm_nonneg,
       norm_num } },
   rw [this, mul_one, zsqrt3.norm, zsqrt3.norm] at hu,
+  rw zsqrt3.norm at h',
   have := step4_3 x.re x.im y.re y.im hx hy h' hu,
   cases int.abs_eq_abs_iff this.1 with h1 h1;
   cases int.abs_eq_abs_iff this.2 with h2 h2,
@@ -825,8 +826,7 @@ begin
   { rw hnorm },
   { exact factorization.coprime_of_mem h hbmem },
   { exact factorization.coprime_of_mem h hcmem },
-  { rw ←zsqrt3.norm,
-    exact ((factorization_prop h).2 b hbmem).2.2 },
+  { exact ((factorization_prop h).2 b hbmem).2.2 },
 end
 
 lemma prod_norm_eq_prod_mul_prod_conj {d : ℤ} (f : multiset ℤ√d) :
@@ -882,7 +882,7 @@ begin
     apply associated'_of_associated_norm hxy,
     { exact hf' x hx },
     { exact hg' y hy },
-    { rw ←zsqrt3.norm, exact hf x hx } },
+    { exact hf x hx } },
 
   refine multiset.rel.mono' p _,
   rw ←multiset.rel_map_iff,
