@@ -790,6 +790,18 @@ begin
   cases h; simp only [zsqrtd.norm_eq_of_associated (by norm_num) h, zsqrtd.norm_conj],
 end
 
+lemma associated'_of_abs_eq {x y : ℤ√-3} (hre : abs x.re = abs y.re) (him : abs x.im = abs y.im) :
+  associated' x y :=
+begin
+  cases int.abs_eq_abs_iff hre with h1 h1;
+  cases int.abs_eq_abs_iff him with h2 h2;
+  [{ left, use 1}, {right, use 1}, {right, use -1}, {left, use -1}];
+  simp only [units.coe_one, mul_one, units.coe_neg_one, mul_neg_one, zsqrtd.ext, zsqrtd.neg_im,
+    zsqrtd.neg_re, h1, h2, neg_neg, zsqrtd.conj_re, zsqrtd.conj_im];
+  split;
+  refl,
+end
+
 lemma associated'_of_associated_norm {x y : ℤ√-3} (h : associated (zsqrtd.norm x) (zsqrtd.norm y))
   (hx : is_coprime x.re x.im)
   (hy : is_coprime y.re y.im)
@@ -802,17 +814,8 @@ begin
     exact eq_of_associated_of_nonneg h (zsqrtd.norm_nonneg hd _) (zsqrtd.norm_nonneg hd _) },
   rw [zsqrt3.norm, zsqrt3.norm] at heq,
   rw zsqrt3.norm at h',
-  have := step4_3 x.re x.im y.re y.im hx hy h' heq,
-  cases int.abs_eq_abs_iff this.1 with h1 h1;
-  cases int.abs_eq_abs_iff this.2 with h2 h2,
-  { left, use 1, simp only [mul_one, units.coe_one], rw zsqrtd.ext, exact ⟨h1, h2⟩ },
-  { right, use 1, simp only [mul_one, units.coe_one], rw [zsqrtd.ext, zsqrtd.conj_re, zsqrtd.conj_im], exact ⟨h1, h2⟩ },
-  { right, use -1, simp only [mul_one, units.coe_neg_one, mul_neg_eq_neg_mul_symm],
-    rw [zsqrtd.ext, zsqrtd.conj_re, zsqrtd.conj_im],
-    simp only [zsqrtd.neg_im, zsqrtd.neg_re, neg_inj],
-    rwa [neg_eq_iff_neg_eq, eq_comm], exact ⟨h1, h2⟩ },
-  { left, use -1, simp only [mul_one, units.coe_neg_one, mul_neg_eq_neg_mul_symm],
-    rw [neg_eq_iff_neg_eq, eq_comm], rw [zsqrtd.ext, zsqrtd.neg_im, zsqrtd.neg_re], exact ⟨h1, h2⟩ },
+  obtain ⟨hre, him⟩ := step4_3 x.re x.im y.re y.im hx hy h' heq,
+  exact associated'_of_abs_eq hre him,
 end
 
 lemma factorization.associated'_of_norm_eq
