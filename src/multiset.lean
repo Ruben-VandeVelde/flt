@@ -156,3 +156,10 @@ begin
 end
 
 end
+
+section
+variables {α : Type*} {β : Type*} {γ : Type*} {δ : Type*} {r : γ → δ → Prop}
+lemma multiset.rel_map_iff {s : multiset α} {t : multiset β} {f : α → γ} {g : β → δ} :
+  multiset.rel r (s.map f) (t.map g) ↔ multiset.rel (λa b, r (f a) (g b)) s t :=
+by rw [multiset.rel_map_left, multiset.rel_map_right]
+end

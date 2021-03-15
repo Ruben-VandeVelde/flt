@@ -867,47 +867,31 @@ begin
     { apply lt_of_le_of_ne ha, symmetry, exact ha' } }
 end
 
-lemma factors_unique : ∀{f g : multiset ℤ√-3},
-  (∀x∈f, odd_prime_or_four (zsqrtd.norm x)) →
-  (∀x∈f, is_coprime (zsqrtd.re x) (zsqrtd.im x)) →
-  (∀x∈g, odd_prime_or_four (zsqrtd.norm x)) →
-  (∀x∈g, is_coprime (zsqrtd.re x) (zsqrtd.im x)) →
-  (associated f.prod g.prod) →
+lemma factors_unique
+  {f g : multiset ℤ√-3}
+  (hf : ∀x∈f, odd_prime_or_four (zsqrtd.norm x))
+  (hf' : ∀x∈f, is_coprime (zsqrtd.re x) (zsqrtd.im x))
+  (hg : ∀x∈g, odd_prime_or_four (zsqrtd.norm x))
+  (hg' : ∀x∈g, is_coprime (zsqrtd.re x) (zsqrtd.im x))
+  (h : associated f.prod g.prod) :
   multiset.rel associated' f g :=
-by {
-  intros f g hf hf' hg hg' h,
-  have : f.prod.norm  = g.prod.norm,
-  {
-    apply eq_of_associated_of_nonneg _ (zsqrtd.norm_nonneg _ _) (zsqrtd.norm_nonneg _ _),
-    obtain ⟨u, hu⟩ := h,
-    rw ←hu,
-    simp only [zsqrtd.norm_mul],
-    have := is_unit_unit u,
-    rw zsqrtd.is_unit_iff_norm_is_unit at this,
-    obtain ⟨u', hu'⟩ := this,
-    use [u'],
-    rw hu',
-
-    norm_num,
-    norm_num,
-  },
-  have : associated f.prod.norm g.prod.norm,
-  { rw this },
-  have := factors_unique_prod hf hg this,
-  have p : ∀
-    (x : ℤ√-3) (hx : x ∈ f)
-    (y : ℤ√-3) (hy : y ∈ g),
-      associated x.norm y.norm → associated' x y,
-  { intros x hx y hy h,
-    apply associated'_of_associated_norm h,
+begin
+  have p : ∀ (x : ℤ√-3) (hx : x ∈ f) (y : ℤ√-3) (hy : y ∈ g),
+    associated x.norm y.norm → associated' x y,
+  { intros x hx y hy hxy,
+    apply associated'_of_associated_norm hxy,
     { exact hf' x hx },
     { exact hg' y hy },
     { rw ←zsqrt3.norm, exact hf x hx } },
 
   refine multiset.rel.mono' p _,
-  -- TODO lemma multiset.rel_map_iff
-  rwa [multiset.rel_map_left, multiset.rel_map_right] at this,
-}
+  rw ←multiset.rel_map_iff,
+  apply factors_unique_prod hf hg,
+  have hd : (-3 : ℤ) ≤ 0,
+  { norm_num },
+  obtain ⟨u, hu⟩ := h,
+  rw [←hu, zsqrtd.norm_mul, (zsqrtd.norm_eq_one_iff' hd u).mpr (is_unit_unit u), mul_one],
+end
 
 noncomputable def odd_factors (x : ℤ) := multiset.filter odd (unique_factorization_monoid.factors x)
 
