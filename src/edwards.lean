@@ -762,6 +762,22 @@ begin
       zsqrtd.mul_im, zsqrtd.coe_int_im] },
 end
 
+lemma eq_of_associated_of_nonneg {a b : ℤ} (h : associated a b) (ha : 0 ≤ a) (hb : 0 ≤ b) : a = b :=
+begin
+  by_cases ha' : a = 0,
+  { subst a, replace h := associated.symm h, rw [associated_zero_iff_eq_zero] at h, exact h.symm },
+  { obtain ⟨u, hu⟩ := h,
+    rw ←hu,
+    have := is_unit_unit u,
+    rw int.is_unit_iff_abs at this,
+    rw abs_of_nonneg _ at this,
+    rw [this, mul_one],
+
+    apply nonneg_of_mul_nonneg_left,
+    { rwa hu },
+    { apply lt_of_le_of_ne ha, symmetry, exact ha' } }
+end
+
 def associated' (x y : ℤ√-3) : Prop := associated x y ∨  associated x y.conj
 
 @[refl] theorem associated'.refl (x : ℤ√-3) : associated' x x := or.inl (by refl)
@@ -780,30 +796,13 @@ lemma associated'_of_associated_norm {x y : ℤ√-3} (h : associated (zsqrtd.no
   (h' : odd_prime_or_four x.norm) :
   associated' x y :=
 begin
-  by_cases hx' : x = 0,
-  { subst x,
-    simp only [zsqrtd.norm_zero] at h,
-    obtain ⟨u, hu⟩ := h,
-    rw zero_mul at hu,
-    rw eq_comm at hu,
-    rw zsqrt3.norm_eq_zero_iff at hu,
-    rw hu },
-  rw [←zsqrt3.norm_eq_zero_iff, ←ne.def] at hx',
-  obtain ⟨u, hu⟩ := h,
-  have := is_unit_unit u,
-  rw int.is_unit_iff_abs at this,
-  have : (u : ℤ) = 1,
-  { rw ←this,
-    symmetry,
-    apply abs_of_nonneg,
-    apply nonneg_of_mul_nonneg_left,
-    { rw hu, apply zsqrtd.norm_nonneg, norm_num },
-    { apply lt_of_le_of_ne _ hx'.symm,
-      apply zsqrtd.norm_nonneg,
-      norm_num } },
-  rw [this, mul_one, zsqrt3.norm, zsqrt3.norm] at hu,
+  have heq : x.norm = y.norm,
+  { have hd : (-3 : ℤ) ≤ 0,
+    { norm_num },
+    exact eq_of_associated_of_nonneg h (zsqrtd.norm_nonneg hd _) (zsqrtd.norm_nonneg hd _) },
+  rw [zsqrt3.norm, zsqrt3.norm] at heq,
   rw zsqrt3.norm at h',
-  have := step4_3 x.re x.im y.re y.im hx hy h' hu,
+  have := step4_3 x.re x.im y.re y.im hx hy h' heq,
   cases int.abs_eq_abs_iff this.1 with h1 h1;
   cases int.abs_eq_abs_iff this.2 with h2 h2,
   { left, use 1, simp only [mul_one, units.coe_one], rw zsqrtd.ext, exact ⟨h1, h2⟩ },
@@ -849,22 +848,6 @@ begin
     simp only [multiset.map_cons, multiset.prod_cons, int.cast_mul, zsqrtd.conj_mul],
     rw [zsqrtd.norm_eq_mul_conj, ←ih],
     ring },
-end
-
-lemma eq_of_associated_of_nonneg {a b : ℤ} (h : associated a b) (ha : 0 ≤ a) (hb : 0 ≤ b) : a = b :=
-begin
-  by_cases ha' : a = 0,
-  { subst a, replace h := associated.symm h, rw [associated_zero_iff_eq_zero] at h, exact h.symm },
-  { obtain ⟨u, hu⟩ := h,
-    rw ←hu,
-    have := is_unit_unit u,
-    rw int.is_unit_iff_abs at this,
-    rw abs_of_nonneg _ at this,
-    rw [this, mul_one],
-
-    apply nonneg_of_mul_nonneg_left,
-    { rwa hu },
-    { apply lt_of_le_of_ne ha, symmetry, exact ha' } }
 end
 
 lemma factors_unique
