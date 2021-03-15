@@ -323,15 +323,12 @@ lemma factors'
   (a b f g : ℕ)
   (hodd : ¬even f)
   (hgpos : 0 < g)
-  (hfactor : f * g = (a ^ 2 + 3 * b ^ 2))
-  (hnotform : ¬∃p q, f = p ^ 2 + 3 * q ^ 2)
-  :
-  ∃ f',
-    f' ∣ g ∧
-    ¬even f' ∧
-    ¬∃p q, f' = p ^ 2 + 3 * q ^ 2 :=
+  (hfactor : f * g = a ^ 2 + 3 * b ^ 2)
+  (hnotform : ∀ (f' : ℕ),
+                f' ∣ g →
+                ¬even f' → (∃ (p q : ℕ), f' = p ^ 2 + 3 * q ^ 2)) :
+  ∃ (p q : ℕ), f = p ^ 2 + 3 * q ^ 2 :=
 begin
-  contrapose! hnotform,
   revert g a b,
   intro g',
   apply g'.strong_induction_on _,
@@ -595,10 +592,7 @@ begin
   { apply nat.eq_of_mul_eq_mul_right (pow_pos hgpos 2),
     rw [←h5, hz],
     ring },
-
-  contrapose! IH,
   have h6' : z ∣ C ^ 2 + 3 * D ^ 2 := h6 ▸ dvd_mul_left z x,
-  have h6'' : x ∣ C ^ 2 + 3 * D ^ 2 := h6 ▸ dvd_mul_right x z,
 
   have h7 : C ^ 2 + 3 * D ^ 2 ≠ 0,
   { contrapose! hcoprime with H,
@@ -612,15 +606,13 @@ begin
     rintro rfl,
     rw ←h6 at h7,
     norm_num at h7 },
-  obtain ⟨w, hwdvd, hwodd, hnform⟩ := factors' C D x z hodd h8 h6 (by { push_neg, exact IH }),
-  refine ⟨w, _, C, D, HCDcoprime, hwodd, _, _⟩,
+  apply factors' C D x z hodd h8 h6,
+  intros w hwdvd hwodd,
+  refine IH w _ C D HCDcoprime hwodd (dvd_trans hwdvd h6'),
   { calc w
         ≤ z : nat.le_of_dvd h8 hwdvd
     ... ≤ y : by { rw hz, exact nat.le_mul_of_pos_left (pow_pos hgpos 2) }
     ... < x : h3 },
-  { exact dvd_trans hwdvd h6' },
-  { push_neg at hnform,
-    exact hnform },
 end
 
 theorem spts.eq_one
