@@ -16,11 +16,10 @@ lemma factors2
   ∃ c d, a ^ 2 + 3 * b ^ 2 = 4 * (c ^ 2 + 3 * d ^ 2) :=
 begin
   have hparity : even a ↔ even b,
-  { simp [two_ne_zero] with parity_simps at heven, assumption },
+  { simpa [two_ne_zero] with parity_simps using heven },
 
   by_cases h : even a,
-  {
-    obtain ⟨d, hd⟩ := hparity.mp h,
+  { obtain ⟨d, hd⟩ := hparity.mp h,
     obtain ⟨c, hc⟩ := h,
     use [c, d],
     rw [hc, hd],
@@ -32,15 +31,11 @@ begin
     { apply int.four_dvd_add_or_sub_of_odd,
       { rwa [←nat.odd_iff_not_even, ←int.coe_nat_odd] at h },
       { rwa [←nat.odd_iff_not_even, ←int.coe_nat_odd] at this } },
-    have h4coe : (4 : ℤ) = ((4 : ℕ) : ℤ),
-    { refl },
     cases h4,
-    { obtain ⟨v, hv⟩ := h4,
-      obtain ⟨u, hu⟩ : (4 : ℤ) ∣ a - 3 * b,
-      { have : (a - 3 * b : ℤ) = a + b - 4 * b,
-        { ring },
-        rw this,
-        apply dvd_sub ⟨v, hv⟩ (dvd_mul_right _ _) },
+    { obtain ⟨u, hu⟩ : (4 : ℤ) ∣ a - 3 * b,
+      { convert dvd_sub h4 (dvd_mul_right 4 b) using 1,
+        ring },
+      obtain ⟨v, hv⟩ := h4,
       use [u.nat_abs, v.nat_abs],
       apply nat.eq_of_mul_eq_mul_left (by norm_num : 0 < 4),
       zify,
@@ -49,12 +44,10 @@ begin
           = (a - 3 * b) ^ 2 + 3 * (a + b) ^ 2 : by ring
       ... = (4 * u) ^ 2 + 3 * (4 * v) ^ 2 : by rw [hu, hv]
       ... = 4 * (4 * (u ^ 2 + 3 * v ^ 2)) : by ring },
-    { obtain ⟨v, hv⟩ := h4,
-      obtain ⟨u, hu⟩ : (4 : ℤ) ∣ a + 3 * b,
-      { have : (a + 3 * b : ℤ) = a - b + 4 * b,
-        { ring },
-        rw this,
-        apply dvd_add ⟨v, hv⟩ (dvd_mul_right _ _) },
+    { obtain ⟨u, hu⟩ : (4 : ℤ) ∣ a + 3 * b,
+      { convert dvd_add h4 (dvd_mul_right 4 b) using 1,
+        ring },
+      obtain ⟨v, hv⟩ := h4,
       use [u.nat_abs, v.nat_abs],
       apply nat.eq_of_mul_eq_mul_left (by norm_num : 0 < 4),
       zify,
@@ -62,8 +55,7 @@ begin
       calc (4 * (a ^ 2 + 3 * b ^ 2) : ℤ)
           = (a + 3 * b) ^ 2 + 3 * (a - b) ^ 2 : by ring
       ... = (4 * u) ^ 2 + 3 * (4 * v) ^ 2 : by rw [hu, hv]
-      ... = 4 * (4 * (u ^ 2 + 3 * v ^ 2)) : by ring }
-  }
+      ... = 4 * (4 * (u ^ 2 + 3 * v ^ 2)) : by ring } }
 end
 
 lemma int.sq_plus_three_sq_eq_zero_iff {a b : ℤ} : a ^ 2 + 3 * b ^ 2 = 0 ↔ a = 0 ∧ b = 0 :=
@@ -96,39 +88,32 @@ lemma spts.mul_of_dvd'
     (⟨a, b⟩ : ℤ√-3) = ⟨p, -q⟩ * ⟨u, v⟩ :=
 begin
   obtain ⟨f, hf⟩ := hdvd,
-  have : ((p * b - a * q) * (p * b + a * q) : ℤ) = b ^ 2 * (p ^ 2 + 3 * q ^ 2) - q ^ 2 * (a ^ 2 + 3 * b ^ 2),
-  { ring },
-  have : ((p * b - a * q) * (p * b + a * q) : ℤ) = (p ^ 2 + 3 * q ^ 2) * (b ^ 2 - q ^ 2 * f),
-  { rw this,
-    rw hf,
-    ring },
   have h0 : p ^ 2 + 3 * q ^ 2 ∣ p * b - a * q ∨
          p ^ 2 + 3 * q ^ 2 ∣ p * b + a * q,
   { apply int.prime.dvd_mul'' hpprime,
-    rw this,
-    apply dvd_mul_right },
-  have h1 : (p ^ 2 + 3 * q ^ 2) * (a ^ 2 + 3 * b ^ 2) =
-            (p * a - 3 * q * b) ^ 2 + 3 * (p * b + a * q) ^ 2,
-  { ring },
+    convert dvd_mul_right (p ^ 2 + 3 * q ^ 2) (b ^ 2 - q ^ 2 * f) using 1,
+    calc (p * b - a * q) * (p * b + a * q)
+        = b ^ 2 * (p ^ 2 + 3 * q ^ 2) - q ^ 2 * ((p ^ 2 + 3 * q ^ 2) * f) : by { rw ←hf, ring }
+    ... = _ : by ring },
 
-  have h1' : (p ^ 2 + 3 * q ^ 2) * (a ^ 2 + 3 * b ^ 2) =
-             (p * a + 3 * q * b) ^ 2 + 3 * (p * b - a * q) ^ 2,
-  { ring },
   cases h0 with h0 h0,
   { obtain ⟨v, hv⟩ := h0,
     obtain ⟨u, hu⟩ : (p ^ 2 + 3 * q ^ 2) ∣ (p * a + 3 * q * b),
     { apply @prime.dvd_of_dvd_pow _ _ _ hpprime _ 2,
       rw dvd_add_iff_left,
-      { rw ←h1', exact dvd_mul_right _ _},
+      { have h1 : (p ^ 2 + 3 * q ^ 2) * (a ^ 2 + 3 * b ^ 2) =
+          (p * a + 3 * q * b) ^ 2 + 3 * (p * b - a * q) ^ 2,
+        { ring },
+        rw ←h1,
+        exact dvd_mul_right _ _},
       { apply dvd_mul_of_dvd_right,
         rw hv,
         apply dvd_pow _ two_ne_zero,
         apply dvd_mul_right } },
     use [u, v],
     left,
-    rw [zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_im],
-    dsimp only,
-    simp only [neg_mul_eq_neg_mul_symm, mul_neg_eq_neg_mul_symm, neg_neg, ←sub_eq_add_neg],
+    simp only [zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_im, neg_mul_eq_neg_mul_symm,
+      mul_neg_eq_neg_mul_symm, neg_neg, ←sub_eq_add_neg],
     split; apply int.eq_of_mul_eq_mul_left hpprime.ne_zero,
     { calc (p ^ 2 + 3 * q ^ 2) * a
           = p * (p * a + 3 * q * b) - 3 * q * (p * b - a * q) : by ring
@@ -140,16 +125,19 @@ begin
     obtain ⟨u, hu⟩ : (p ^ 2 + 3 * q ^ 2) ∣ (p * a - 3 * q * b),
     { apply @prime.dvd_of_dvd_pow _ _ _ hpprime _ 2,
       rw dvd_add_iff_left,
-      { rw ←h1, exact dvd_mul_right _ _},
+      { have h1 : (p ^ 2 + 3 * q ^ 2) * (a ^ 2 + 3 * b ^ 2) =
+          (p * a - 3 * q * b) ^ 2 + 3 * (p * b + a * q) ^ 2,
+        { ring },
+        rw ←h1,
+        exact dvd_mul_right _ _},
       { apply dvd_mul_of_dvd_right,
         rw hv,
         apply dvd_pow _ two_ne_zero,
         apply dvd_mul_right } },
     use [u, v],
     right,
-    rw [zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_im],
-    dsimp only,
-    simp only [neg_mul_eq_neg_mul_symm, mul_neg_eq_neg_mul_symm, neg_neg, ←sub_eq_add_neg],
+    simp only [zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_im, neg_mul_eq_neg_mul_symm,
+      mul_neg_eq_neg_mul_symm, neg_neg, ←sub_eq_add_neg],
     split; apply int.eq_of_mul_eq_mul_left hpprime.ne_zero,
     { calc (p ^ 2 + 3 * q ^ 2) * a
           = p * (p * a - 3 * q * b) + 3 * q * (p * b + a * q) : by ring
