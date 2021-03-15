@@ -72,15 +72,6 @@ begin
   { exact int.is_unit_iff_abs.mp (is_unit_unit u) },
 end
 
-lemma zsqrt3.norm_unit {z : ℤ√-3} (h : is_unit z) : z.norm = 1 :=
-(zsqrtd.norm_eq_one_iff' (by norm_num) z).mpr h
-
-lemma zsqrt3.norm_unit' {z : units ℤ√-3} : (z : ℤ√-3).norm = 1 :=
-begin
-  have := is_unit_unit z,
-  exact zsqrt3.norm_unit this,
-end
-
 def odd_prime_or_four (z : ℤ) : Prop :=
   z = 4 ∨ (prime z ∧ odd z)
 
@@ -783,7 +774,7 @@ begin
   cases h;
     obtain ⟨u, hu⟩ := h;
     [skip, rw ←zsqrtd.norm_conj y];
-    rw [←hu, zsqrtd.norm_mul, zsqrt3.norm_unit (is_unit_unit u), mul_one],
+    rw [←hu, zsqrtd.norm_mul, (zsqrtd.norm_eq_one_iff' (by norm_num) _).mpr (is_unit_unit u), mul_one],
 end
 
 lemma associated'_of_associated_norm {x y : ℤ√-3} (h : associated (zsqrtd.norm x) (zsqrtd.norm y))
