@@ -881,6 +881,8 @@ end
 
 noncomputable def odd_factors (x : ℤ) := multiset.filter odd (unique_factorization_monoid.factors x)
 
+lemma odd_factors.zero : odd_factors 0 = 0 := rfl
+
 lemma odd_factors.not_two_mem (x : ℤ) : (2 : ℤ) ∉ odd_factors x :=
 begin
   simp only [odd_factors, int.even_bit0, not_true, not_false_iff, int.odd_iff_not_even,
@@ -891,13 +893,14 @@ noncomputable def even_factor_exp (x : ℤ) := multiset.count 2 (unique_factoriz
 
 lemma even_factor_exp.def (x : ℤ) : even_factor_exp x = multiset.count 2 (unique_factorization_monoid.factors x) := rfl
 
+lemma even_factor_exp.zero : even_factor_exp 0 = 0 := rfl
+
 lemma even_and_odd_factors'' (x : ℤ) :
   unique_factorization_monoid.factors x = (unique_factorization_monoid.factors x).filter (eq 2) + odd_factors x :=
 begin
   by_cases hx : x = 0,
-  { -- todo: lemma even_factor_exp 0 = 0, odd_factors 0 = 0
-    simp only [hx, odd_factors, multiset.filter_zero, add_zero,
-      unique_factorization_monoid.factors_zero] },
+  { rw [hx, unique_factorization_monoid.factors_zero, odd_factors.zero, multiset.filter_zero,
+    add_zero] },
   simp [even_factor_exp, odd_factors],
   rw multiset.filter_add_filter,
   convert (add_zero _).symm,
