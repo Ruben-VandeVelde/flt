@@ -477,7 +477,6 @@ begin
   { subst h,
     refine ⟨1, 0, _⟩,
     ring },
-  obtain ⟨f, hf⟩ := hfactor,
   have h0' : 0 < x,
   { rw pos_iff_ne_zero,
     rintro rfl,
@@ -506,8 +505,7 @@ begin
     apply dvd_sub,
     { rw ←h1,
       norm_cast,
-      rw hf,
-      exact dvd_mul_right _ _ },
+      exact hfactor },
     { exact dvd_mul_right _ _ }
   },
 
