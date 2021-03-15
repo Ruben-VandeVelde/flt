@@ -56,3 +56,7 @@ begin
     rw [zsqrtd.ext, zsqrtd.smul_val],
     exact ⟨hr, hi⟩ },
 end
+
+lemma zsqrtd.norm_eq_one_iff' {d : ℤ} (hd : d ≤ 0) (z : ℤ√d) : z.norm = 1 ↔ is_unit z :=
+by rw [←zsqrtd.norm_eq_one_iff, ←int.coe_nat_inj', int.nat_abs_of_nonneg (zsqrtd.norm_nonneg hd z),
+  int.coe_nat_one]

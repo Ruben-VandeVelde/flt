@@ -73,11 +73,7 @@ begin
 end
 
 lemma zsqrt3.norm_unit {z : ℤ√-3} (h : is_unit z) : z.norm = 1 :=
-begin
-  rw zsqrt3.is_unit_iff at h,
-  rw [zsqrt3.norm, ←abs_pow_two, ←abs_pow_two, h.1, h.2],
-  norm_num,
-end
+(zsqrtd.norm_eq_one_iff' (by norm_num) z).mpr h
 
 lemma zsqrt3.norm_unit' {z : units ℤ√-3} : (z : ℤ√-3).norm = 1 :=
 begin
