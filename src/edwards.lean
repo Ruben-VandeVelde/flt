@@ -771,10 +771,7 @@ lemma associated'.norm_eq
   (h : associated' x y) :
   x.norm = y.norm :=
 begin
-  cases h;
-    obtain ⟨u, hu⟩ := h;
-    [skip, rw ←zsqrtd.norm_conj y];
-    rw [←hu, zsqrtd.norm_mul, (zsqrtd.norm_eq_one_iff' (by norm_num) _).mpr (is_unit_unit u), mul_one],
+  cases h; simp only [zsqrtd.norm_eq_of_associated (by norm_num) h, zsqrtd.norm_conj],
 end
 
 lemma associated'_of_associated_norm {x y : ℤ√-3} (h : associated (zsqrtd.norm x) (zsqrtd.norm y))

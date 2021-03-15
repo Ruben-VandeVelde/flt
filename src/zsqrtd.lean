@@ -60,3 +60,10 @@ end
 lemma zsqrtd.norm_eq_one_iff' {d : ℤ} (hd : d ≤ 0) (z : ℤ√d) : z.norm = 1 ↔ is_unit z :=
 by rw [←zsqrtd.norm_eq_one_iff, ←int.coe_nat_inj', int.nat_abs_of_nonneg (zsqrtd.norm_nonneg hd z),
   int.coe_nat_one]
+
+lemma zsqrtd.norm_eq_of_associated {d : ℤ} (hd : d ≤ 0) {x y : ℤ√d} (h : associated x y) :
+  x.norm = y.norm :=
+begin
+  obtain ⟨u, rfl⟩ := h,
+  rw [zsqrtd.norm_mul, (zsqrtd.norm_eq_one_iff' hd _).mpr (is_unit_unit u), mul_one],
+end
