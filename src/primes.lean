@@ -645,14 +645,6 @@ end
 lemma int.of_nat_is_unit {n : ℕ} : is_unit (n : ℤ) ↔ is_unit n :=
 by rw [nat.is_unit_iff, is_unit_int, int.nat_abs_of_nat]
 
-lemma int.prime.dvd_mul''  {m n p : ℤ}
-  (hp : prime p) (h : p ∣ m * n) : p ∣ m ∨ p ∣ n :=
-begin
-  rw int.prime_iff at hp,
-  rwa [←int.nat_abs_dvd_abs_iff, ←int.nat_abs_dvd_abs_iff, ←hp.dvd_mul , ←int.nat_abs_mul,
-    int.nat_abs_dvd_abs_iff],
-end
-
 lemma two_not_cube (r : ℕ) : r ^ 3 ≠ 2 :=
 begin
   have : 1 ≤ 3,

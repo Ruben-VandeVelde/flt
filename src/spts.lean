@@ -90,7 +90,7 @@ begin
   obtain ⟨f, hf⟩ := hdvd,
   have h0 : p ^ 2 + 3 * q ^ 2 ∣ p * b - a * q ∨
          p ^ 2 + 3 * q ^ 2 ∣ p * b + a * q,
-  { apply int.prime.dvd_mul'' hpprime,
+  { apply prime.div_or_div hpprime,
     convert dvd_mul_right (p ^ 2 + 3 * q ^ 2) (b ^ 2 - q ^ 2 * f) using 1,
     calc (p * b - a * q) * (p * b + a * q)
         = b ^ 2 * (p ^ 2 + 3 * q ^ 2) - q ^ 2 * ((p ^ 2 + 3 * q ^ 2) * f) : by { rw ←hf, ring }
