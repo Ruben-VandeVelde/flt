@@ -1128,7 +1128,7 @@ end
 lemma even_factor_exp.pow (z : ℤ) (n : ℕ) : even_factor_exp (z ^ n) = n * even_factor_exp z :=
 begin
   simp only [even_factor_exp],
-  rw [unique_factorization_monoid.factors_pow, multiset.count_smul]
+  rw [unique_factorization_monoid.factors_pow, multiset.count_nsmul]
 end
 
 lemma factors_odd_prime_or_four.pow
@@ -1289,7 +1289,7 @@ begin
   have h2x := h2 x hx,
 
   have : 3 ∣ multiset.count x.norm f',
-  { rw [hf', this, multiset.count_smul],
+  { rw [hf', this, multiset.count_nsmul],
     apply dvd_mul_right },
 
   classical,
@@ -1339,9 +1339,9 @@ begin
   set x := f.prod with hx,
   cases h1,
   { use x,
-    rw [h1, hf, multiset.prod_smul] },
+    rw [h1, hf, multiset.prod_nsmul] },
   { use -x,
-    rw [h1, hf, multiset.prod_smul, hx, neg_pow_bit1] },
+    rw [h1, hf, multiset.prod_nsmul, hx, neg_pow_bit1] },
 end
 
 lemma step6
