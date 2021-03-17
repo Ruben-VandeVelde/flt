@@ -1155,67 +1155,6 @@ begin
   },
 end
 
-lemma multiset.xxy
-  {α : Type*}
-  [decidable_eq α]
-  (s : multiset α)
-  (h : ∀ x ∈ s, 3 ∣ multiset.count x s) :
-  ∃ t : multiset α, s = 3 •ℕ t :=
-begin
-  revert h,
-  refine s.strong_induction_on _,
-  intros s ih h,
-  change ∀ v, _ at ih,
-  by_cases ht : s = 0,
-  { use 0, simp only [nsmul_zero, ht] },
-  obtain ⟨b, hb⟩ := multiset.exists_mem_of_ne_zero ht,
-
-  set q := s.filter (ne b) with hq,
-  have : q < s,
-  { rw hq, apply lt_of_le_of_ne, simp only [multiset.filter_le],
-    intro H,
-    rw multiset.filter_eq_self at H,
-    exact H b hb rfl },
-  obtain ⟨r, hr⟩ := ih q this _,
-
-  set d := multiset.repeat b (multiset.count b s) with hd,
-
-  have hd' : d = s.filter (eq b),
-  { rw hd,
-  
-    ext a,
-    rw multiset.count_repeat,
-    split_ifs with ha,
-    { subst a,
-      rw multiset.count_filter_of_pos rfl, },
-    { rw multiset.count_filter_of_neg (ne.symm ha) } },
-
-  have : s = d + q,
-  { rw [hd', hq],
-    rw multiset.filter_add_filter,
-    convert (add_zero _).symm,
-    { rw multiset.filter_eq_self, exact λ x hx, em _ },
-    { rw multiset.filter_eq_nil,
-      rintros x hx ⟨h1, h2⟩,
-      exact h2 h1 } },
-
-  rw hr at this,
-  obtain ⟨k, hk⟩ := h b hb,
-  rw hk at hd,
-  rw ←multiset.nsmul_repeat at hd,
-  rw hd at this,
-  rw ←nsmul_add at this,
-  exact ⟨_, this⟩,
-
-  intros x hx,
-  rw hq,
-  rw multiset.count_filter_of_pos,
-  apply h,
-  rw hq at hx,
-  exact multiset.mem_of_mem_filter hx,
-  exact multiset.of_mem_filter hx,
-end
-
 lemma eq_or_eq_conj_of_associated_of_re_zero
   {x A : ℤ√-3}
   (hx : x.re = 0)
@@ -1344,7 +1283,7 @@ begin
     { rw [←zsqrt3.norm, prod_map_norm, heqprod] } },
   rw [heqnsmulthree, hf'] at this,
 
-  apply multiset.xxy,
+  apply multiset.exists_nsmul_of_dvd,
 
   intros x hx,
   have h2x := h2 x hx,

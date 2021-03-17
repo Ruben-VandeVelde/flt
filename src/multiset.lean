@@ -163,3 +163,72 @@ lemma multiset.rel_map_iff {s : multiset α} {t : multiset β} {f : α → γ} {
   multiset.rel r (s.map f) (t.map g) ↔ multiset.rel (λa b, r (f a) (g b)) s t :=
 by rw [multiset.rel_map_left, multiset.rel_map_right]
 end
+
+lemma multiset.filter_eq
+  {α : Type*}
+  [decidable_eq α]
+  (s : multiset α)
+  (b : α) :
+  s.filter (eq b) = multiset.repeat b (multiset.count b s) :=
+begin
+  ext a,
+  rw multiset.count_repeat,
+  split_ifs with ha,
+  { subst a,
+    rw multiset.count_filter_of_pos rfl, },
+  { rw multiset.count_filter_of_neg (ne.symm ha) }
+end
+
+lemma multiset.induction_on_repeat
+  {α : Type*}
+  [decidable_eq α]
+  (s : multiset α)
+  (P : multiset α → Prop)
+  (h0 : P 0)
+  (hnext : ∀ t {a}, a ∈ s → P t → P (t + multiset.repeat a (s.count a))) :
+  P s :=
+begin
+  revert hnext,
+  refine s.strong_induction_on _,
+  clear s,
+  intros s ih hnext,
+  by_cases hs : s = 0,
+  { simp only [hs, h0] },
+  { obtain ⟨b, hb⟩ := multiset.exists_mem_of_ne_zero hs,
+    rw ←multiset.filter_add_not (ne b) s,
+    simp only [ne.def, not_not, multiset.filter_eq],
+    convert hnext (multiset.filter (ne b) s) hb _,
+    apply ih,
+    { apply lt_of_le_of_ne (multiset.filter_le _ _),
+      intro H,
+      rw multiset.filter_eq_self at H,
+      exact H b hb rfl },
+    { intros t a h1 h2,
+      rw multiset.count_filter_of_pos (multiset.of_mem_filter h1),
+      exact hnext _ (multiset.mem_of_mem_filter h1) h2 } }
+end
+
+lemma multiset.exists_nsmul_of_dvd
+  {α : Type*}
+  [decidable_eq α]
+  (s : multiset α)
+  (k : ℕ)
+  (h : ∀ x ∈ s, k ∣ multiset.count x s) :
+  ∃ t : multiset α, s = k •ℕ t :=
+begin
+  obtain (rfl|hk) := (zero_le k).eq_or_lt,
+  { use 0,
+    simp only [nsmul_zero],
+    apply multiset.eq_zero_of_forall_not_mem,
+    intros x hx,
+    have := h x hx,
+    rw zero_dvd_iff at this,
+    rw [←multiset.count_pos, this] at hx,
+    exact lt_irrefl 0 hx },
+  { refine s.induction_on_repeat _ _ _,
+    { use 0, simp only [nsmul_zero, h] },
+    { rintros t a ha ⟨u, hu⟩,
+      use u + multiset.repeat a (s.count a / k),
+      obtain ⟨n, hn⟩ := h a ha,
+      rw [nsmul_add, multiset.nsmul_repeat, hu, hn, nat.mul_div_right _ hk] } }
+end
