@@ -519,10 +519,7 @@ lemma int.prime_iff (a : ℤ) : prime a ↔ nat.prime a.nat_abs :=
 begin
   rw nat.prime_iff_prime_int,
   apply prime_iff_of_associated,
-  rw ←dvd_dvd_iff_associated,
-  split,
-  { rw int.coe_nat_dvd_right },
-  { rw int.nat_abs_dvd }
+  exact associated_of_dvd_dvd (int.coe_nat_dvd_right.mpr (dvd_refl _)) (int.nat_abs_dvd.mpr (dvd_refl _)),
 end
 
 lemma int.factor_div (a: ℤ) (x : ℕ)
@@ -680,8 +677,7 @@ lemma int.is_unit_iff_nat_abs {x : ℤ} : is_unit x ↔ x.nat_abs = 1 :=
 begin
   split; intro h,
   { obtain ⟨u, rfl⟩ := h,
-    obtain (rfl|rfl) := int.units_eq_one_or u;
-      simp only [units.coe_one, int.nat_abs_neg, units.coe_neg_one, int.nat_abs_one] },
+    rw int.units_nat_abs },
   { rw [is_unit_iff_dvd_one, ←int.nat_abs_dvd_abs_iff, h, int.nat_abs_one] }
 end
 
@@ -724,6 +720,23 @@ lemma int.nat_abs_eq_nat_abs_iff {a b : ℤ} (h : a.nat_abs = b.nat_abs) : a = b
 begin
   apply int.abs_eq_abs_iff,
   rwa [int.abs_eq_nat_abs, int.abs_eq_nat_abs, int.coe_nat_inj'],
+end
+
+lemma int.nat_abs_eq_nat_abs_iff' {a b : ℤ} : a.nat_abs = b.nat_abs ↔ a = b ∨ a = -b :=
+begin
+  split,
+  { intro h,
+    apply_fun coe at h,
+    cases int.nat_abs_eq a with ha ha;
+    cases int.nat_abs_eq b with hb hb;
+    rw [ha, hb],
+    { left, exact h },
+    { right, rwa neg_neg },
+    { right, rw h },
+    { left, rw h } },
+  { rintro (rfl|rfl),
+    { refl },
+    { exact int.nat_abs_neg b } },
 end
 
 theorem int.exists_prime_and_dvd {n : ℤ} (n2 : 2 ≤ n.nat_abs) : ∃ p, prime p ∧ p ∣ n :=
