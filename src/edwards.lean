@@ -1005,7 +1005,7 @@ begin
   rw int.factors_eq,
   have : [2, 2] ~ nat.factors (int.nat_abs 4),
   { apply nat.factors_unique,
-    { norm_num, norm_cast },
+    { norm_num },
     intros p hp,
     convert nat.prime_two,
     rw [list.mem_cons_iff, list.mem_cons_iff] at hp,

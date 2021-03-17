@@ -491,7 +491,6 @@ begin
     by_cases hb : abs b = 0,
     { norm_num [hb] },
     { apply ne_of_gt,
-      rw gt_iff_lt,
       have : 1 ≤ abs b,
       { apply le_of_not_gt,
         intro hb',
