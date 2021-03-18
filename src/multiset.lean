@@ -15,19 +15,24 @@ begin
     apply h _ (multiset.mem_cons_of_mem ha') _ (multiset.mem_cons_of_mem hb') h' }
 end
 
+lemma multiset.filter_eq
+  {α : Type*}
+  [decidable_eq α]
+  (s : multiset α)
+  (b : α) :
+  s.filter (eq b) = multiset.repeat b (multiset.count b s) :=
+begin
+  ext a,
+  rw multiset.count_repeat,
+  split_ifs with ha,
+  { subst a,
+    rw multiset.count_filter_of_pos rfl, },
+  { rw multiset.count_filter_of_neg (ne.symm ha) }
+end
+
 lemma multiset.pow_count [comm_monoid α] (a : α) [decidable_eq α] :
   a ^ (multiset.count a s) = (multiset.filter (eq a) s).prod :=
-begin
-  rw ←multiset.prod_repeat,
-  congr,
-  symmetry,
-  rw multiset.eq_repeat,
-  split,
-  { rw [←multiset.countp_eq_card_filter],
-    refl },
-  { intros b hb, 
-    exact (multiset.of_mem_filter hb).symm },
-end
+by rw [multiset.filter_eq, multiset.prod_repeat]
 
 lemma multiset.prod_nonneg [ordered_comm_semiring α] (f : multiset α) (h : ∀ a ∈ f, (0 : α) ≤ a) : 0 ≤ f.prod :=
 begin
@@ -53,8 +58,6 @@ begin
   rw multiset.mem_nsmul hn at hb,
   exact multiset.eq_of_mem_repeat hb,
 end
-
--- multiset.count_smul → multiset.count_nsmul
 
 lemma multiset.nsmul_cons (n : ℕ) (a : α) : n •ℕ (a ::ₘ s) = n •ℕ (↑[a]) +  n •ℕ s :=
 begin
@@ -162,21 +165,6 @@ variables {α : Type*} {β : Type*} {γ : Type*} {δ : Type*} {r : γ → δ →
 lemma multiset.rel_map_iff {s : multiset α} {t : multiset β} {f : α → γ} {g : β → δ} :
   multiset.rel r (s.map f) (t.map g) ↔ multiset.rel (λa b, r (f a) (g b)) s t :=
 by rw [multiset.rel_map_left, multiset.rel_map_right]
-end
-
-lemma multiset.filter_eq
-  {α : Type*}
-  [decidable_eq α]
-  (s : multiset α)
-  (b : α) :
-  s.filter (eq b) = multiset.repeat b (multiset.count b s) :=
-begin
-  ext a,
-  rw multiset.count_repeat,
-  split_ifs with ha,
-  { subst a,
-    rw multiset.count_filter_of_pos rfl, },
-  { rw multiset.count_filter_of_neg (ne.symm ha) }
 end
 
 lemma multiset.induction_on_repeat
