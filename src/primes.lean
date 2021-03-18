@@ -640,6 +640,15 @@ begin
   apply monotone.ne_of_lt_of_lt_nat (nat.pow_left_strict_mono this).monotone 1; norm_num,
 end
 
+lemma int.two_not_cube (r : ℤ) : r ^ 3 ≠ 2 :=
+begin
+  intro H,
+  apply two_not_cube r.nat_abs,
+  rw ←int.nat_abs_pow,
+  rw H,
+  norm_num,
+end
+
 lemma int.lt_mul_self {a b : ℤ} (ha : 0 < a) (hb : 1 < b) : a < b * a :=
 begin
   convert int.mul_lt_mul hb le_rfl ha (le_trans zero_le_one hb.le),
@@ -779,7 +788,7 @@ begin
   rwa int.associated_iff
 end
 
-theorem int.eq_pow_of_mul_eq_pow_bit1 {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
+theorem int.eq_pow_of_mul_eq_pow_bit1_left {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
   (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ (bit1 k)) : ∃ d, a = d ^ (bit1 k) :=
 begin
   obtain ⟨d, hd⟩ := int.associated_pow_of_mul_eq_pow ha hb hab h,
@@ -789,8 +798,18 @@ begin
   { use -d, rw neg_pow_bit1 },
 end
 
+theorem int.eq_pow_of_mul_eq_pow_bit1 {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
+  (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ (bit1 k)) :
+  (∃ d, a = d ^ (bit1 k)) ∧ (∃ e, b = e ^ (bit1 k)) :=
+begin
+  split,
+  { exact int.eq_pow_of_mul_eq_pow_bit1_left ha hb hab h },
+  { rw mul_comm at h,
+    exact int.eq_pow_of_mul_eq_pow_bit1_left hb ha hab.symm h }
+end
+
 lemma int.dvd_mul_cancel_prime {p : ℕ} {n k : ℤ}
-  (hne : abs k ≠ p)
+  (hne : abs k ≠ p) -- todo nat_abs
   (hp : nat.prime p)
   (hk : prime k)
   (h : k ∣ p * n) : k ∣ n :=

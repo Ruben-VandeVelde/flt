@@ -533,6 +533,20 @@ lemma spts.pos_of_coprime
   0 < a ^ 2 + 3 * b ^ 2 :=
 lt_of_le_of_ne (spts.nonneg _ _) (spts.not_zero_of_coprime hcoprime).symm
 
+lemma spts.one_lt_of_right_ne_zero
+  {a b : ℤ}
+  (hb : b ≠ 0) :
+  1 < a ^ 2 + 3 * b ^ 2 :=
+begin
+  apply lt_of_le_of_ne,
+  { rw [←int.sub_one_lt_iff, sub_self],
+    apply lt_of_le_of_ne (spts.nonneg _ _),
+    rw [ne_comm, ne.def, int.sq_plus_three_sq_eq_zero_iff, not_and_distrib],
+    exact or.inr hb },
+  { intro H,
+    exact hb (spts.eq_one H.symm).2 }
+end
+
 lemma spts.not_two
   (a b : ℤ) :
   a ^ 2 + 3 * b ^ 2 ≠ 2 :=

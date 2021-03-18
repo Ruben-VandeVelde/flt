@@ -10,69 +10,92 @@ import ring_theory.int.basic
 import .primes
 import .edwards
 
+def flt_solution
+  (n : ℕ)
+  (a b c : ℤ) :=
+  a ≠ 0 ∧ b ≠ 0 ∧ c ≠ 0 ∧
+  a ^ n + b ^ n = c ^ n
+
 def flt_coprime
-  (a b c n : ℕ) :=
-  0 < a ∧ 0 < b ∧ 0 < c ∧ 
-  a ^ n + b ^ n = c ^ n ∧ 
-  nat.coprime a b ∧
-  nat.coprime a c ∧
-  nat.coprime b c
+  (n : ℕ)
+  (a b c : ℤ) :=
+  flt_solution n a b c ∧
+  is_coprime a b ∧
+  is_coprime a c ∧
+  is_coprime b c
+
+lemma flt_coprime.symm {n a b c} (h : flt_coprime n a b c) : flt_coprime n b a c :=
+begin
+  obtain ⟨⟨hapos, hbpos, hcpos, h⟩, habcoprime, haccoprime, hbccoprime⟩ := h,
+  rw add_comm at h,
+  exact ⟨⟨hbpos, hapos, hcpos, h⟩, habcoprime.symm, hbccoprime, haccoprime⟩,
+end
 
 lemma exists_coprime
-  (a b c n : ℕ)
-  (hpos : 0 < a ∧ 0 < b ∧ 0 < c)
+  (n : ℕ)
+  (a b c : ℤ)
+  (ha' : a ≠ 0)
+  (hb' : b ≠ 0)
+  (hc' : c ≠ 0)
   (hn : 0 < n)
   (h : a ^ n + b ^ n = c ^ n) :
-  ∃ a' b' c', a' ≤ a ∧ b' ≤ b ∧ c' ≤ c ∧ flt_coprime a' b' c' n :=
+  ∃ a' b' c' : ℤ,
+    a'.nat_abs ≤ a.nat_abs ∧ b'.nat_abs ≤ b.nat_abs ∧ c'.nat_abs ≤ c.nat_abs ∧
+    flt_coprime n a' b' c' :=
 begin
-  obtain ⟨hapos, hbpos, hcpos⟩ := hpos,
-  let d := nat.gcd a b,
-  obtain ⟨ha : d ∣ a, hb : d ∣ b⟩ := nat.gcd_dvd a b,
-  have hc : d ∣ c,
-  { rw [←nat.pow_dvd_pow_iff hn, ←h],
-    apply dvd_add; rw nat.pow_dvd_pow_iff hn; assumption },
-  have hdpos : 0 < d := nat.gcd_pos_of_pos_left _ hapos,
+  set d := int.gcd a b with hd',
+  have ha : ↑d ∣ a := int.gcd_dvd_left a b,
+  have hb : ↑d ∣ b := int.gcd_dvd_right a b,
+  have hc : ↑d ∣ c,
+  { rw [←int.pow_dvd_pow_iff hn, ←h],
+    apply dvd_add; rwa int.pow_dvd_pow_iff hn },
+  have hdpos : 0 < d := int.gcd_pos_of_non_zero_left _ ha',
+  have hd := int.coe_nat_ne_zero_iff_pos.mpr hdpos,
   have hsoln : (a / d) ^ n + (b / d) ^ n = (c / d) ^ n,
-  { apply nat.eq_of_mul_eq_mul_right (pow_pos hdpos n),
+  { apply int.eq_of_mul_eq_mul_right (pow_ne_zero n hd),
     calc ((a / d) ^ n + (b / d) ^ n) * d ^ n
         = (a / d * d) ^ n  + (b / d * d) ^ n : by rw [add_mul, mul_pow (a / d), mul_pow (b / d)]
-    ... = a ^ n + b ^ n : by rw [nat.div_mul_cancel ha, nat.div_mul_cancel hb]
+    ... = a ^ n + b ^ n : by rw [int.div_mul_cancel ha, int.div_mul_cancel hb]
     ... = c ^ n : h
-    ... = (c / d * d) ^ n : by rw [nat.div_mul_cancel hc]
+    ... = (c / d * d) ^ n : by rw [int.div_mul_cancel hc]
     ... = (c / d) ^ n * d ^ n : by rw mul_pow },
   have hsoln' : (b / d) ^ n + (a / d) ^ n = (c / d) ^ n,
   { rwa add_comm at hsoln },
-  have hcoprime_div : nat.coprime (a / d) (b / d) := nat.coprime_div_gcd_div_gcd hdpos,
+  have hcoprime_div : is_coprime (a / d) (b / d) := int.coprime_div_gcd_div_gcd hdpos.ne.symm,
   exact ⟨
     a / d,
     b / d,
     c / d,
-    nat.div_le_self a d,
-    nat.div_le_self b d,
-    nat.div_le_self c d,
-    nat.div_pos (nat.le_of_dvd hapos ha) hdpos,
-    nat.div_pos (nat.le_of_dvd hbpos hb) hdpos,
-    nat.div_pos (nat.le_of_dvd hcpos hc) hdpos,
-    hsoln,
+    (int.nat_abs_div _ _ ha).trans_le (nat.div_le_self _ _),
+    (int.nat_abs_div _ _ hb).trans_le (nat.div_le_self _ _),
+    (int.nat_abs_div _ _ hc).trans_le (nat.div_le_self _ _),
+    ⟨
+      int.div_ne_zero_of_dvd ha' hd ha,
+      int.div_ne_zero_of_dvd hb' hd hb,
+      int.div_ne_zero_of_dvd hc' hd hc,
+      hsoln
+    ⟩,
     hcoprime_div,
-    nat.coprime_add_self_pow hn hsoln hcoprime_div,
-    nat.coprime_add_self_pow hn hsoln' hcoprime_div.symm
+    coprime_add_self_pow hn hsoln hcoprime_div,
+    coprime_add_self_pow hn hsoln' hcoprime_div.symm
   ⟩
 end
 
-lemma descent1a {a b c : ℕ}
+lemma descent1a {a b c : ℤ}
   (h : a ^ 3 + b ^ 3 = c ^ 3)
-  (habcoprime : a.coprime b)
-  (haccoprime : a.coprime c)
-  (hbccoprime : b.coprime c) :
+  (habcoprime : is_coprime a b)
+  (haccoprime : is_coprime a c)
+  (hbccoprime : is_coprime b c) :
   (even a ∧ ¬even b ∧ ¬even c ∨
    ¬even a ∧ even b ∧ ¬even c) ∨
   ¬even a ∧ ¬even b ∧ even c :=
 begin
-  have contra : ∀ {x y}, nat.coprime x y → even x → even y → false,
+  have contra : ∀ {x y : ℤ}, is_coprime x y → even x → even y → false,
   { intros x y hcoprime hx hy,
-    have : 2 ∣ nat.gcd x y := nat.dvd_gcd hx hy,
-    rw hcoprime.gcd_eq_one at this,
+    rw even_iff_two_dvd at hx hy,
+    have := int.dvd_gcd hx hy,
+    rw ←int.gcd_eq_one_iff_coprime at hcoprime,
+    rw hcoprime at this,
     norm_num at this },
   by_cases haparity : even a;
   by_cases hbparity : even b;
@@ -86,33 +109,43 @@ begin
   { tauto },
   { exfalso,
     apply hcparity,
-    rw [←nat.even_pow' three_ne_zero, ←h],
+    rw [←int.even_pow' three_ne_zero, ←h],
     simp [haparity, hbparity, three_ne_zero] with parity_simps },
 end
 
-lemma descent1left {a b c : ℕ}
-  (hapos : 0 < a)
-  (hbpos : 0 < b)
-  (hcpos : 0 < c)
-  (h : a ^ 3 + b ^ 3 = c ^ 3)
-  (habcoprime : a.coprime b)
-  (haccoprime : a.coprime c)
-  (hbccoprime : b.coprime c)
+lemma flt_not_add_self {a b c : ℤ} (ha : a ≠ 0) (h : a ^ 3 + b ^ 3 = c ^ 3) : a ≠ b :=
+begin
+  rintro rfl,
+  rw ←mul_two at h,
+  apply int.two_not_cube (c/a),
+  rw int.div_pow,
+  { rw [←h, mul_comm, int.mul_div_cancel],
+    apply pow_ne_zero,
+    exact ha },
+
+  { rw [←int.pow_dvd_pow_iff (by norm_num : 0 < 3), ←h],
+    apply dvd_mul_right },
+end
+
+lemma descent1left {a b c : ℤ}
+  (h : flt_coprime 3 a b c)
   (ha : even a)
   (hb : ¬even b)
   (hc : ¬even c) :
-  ∃ (p q : ℕ),
-    0 < p ∧
-      0 < q ∧
-        p.gcd q = 1 ∧
+  ∃ (p q : ℤ),
+    p ≠ 0 ∧
+      q ≠ 0 ∧
+        is_coprime p q ∧
           (even p ↔ ¬even q) ∧
             (2 * p * (p ^ 2 + 3 * q ^ 2) = a ^ 3 ∨
                2 * p * (p ^ 2 + 3 * q ^ 2) = b ^ 3 ∨
                  2 * p * (p ^ 2 + 3 * q ^ 2) = c ^ 3) :=
 begin
-  obtain ⟨p, hp⟩ : even (c - b : ℤ),
+  obtain ⟨⟨hapos, hbpos, hcpos, h⟩, habcoprime, haccoprime, hbccoprime⟩ := h,
+
+  obtain ⟨p, hp⟩ : even (c - b),
   { simp [hb, hc] with parity_simps},
-  obtain ⟨q, hq⟩ : even (c + b : ℤ),
+  obtain ⟨q, hq⟩ : even (c + b),
   { simp [hb, hc] with parity_simps},
   have hadd : p + q = c,
   { apply int.eq_of_mul_eq_mul_left two_ne_zero,
@@ -122,114 +155,63 @@ begin
   { apply int.eq_of_mul_eq_mul_left two_ne_zero,
     rw [mul_sub, ←hp, ←hq],
     ring },
-  have hqpos : 0 < q,
-  { apply pos_of_mul_pos_left,
-    { rw ←hq,
-      norm_cast,
-      apply nat.add_pos_left hcpos },
-    { norm_num } },
-
-  have : p ≠ 0,
+  have hpnezero : p ≠ 0,
   { have : c ≠ b,
     { rintro rfl,
       conv_rhs at h { rw [←zero_add (c ^ 3)] },
       rw [add_left_inj] at h,
-      exact ne_of_gt hapos (pow_eq_zero h) },
+      exact hapos (pow_eq_zero h) },
     rintro rfl,
     rw mul_zero at hp,
     rw sub_eq_zero at hp,
-    norm_cast at hp },
+    exact this hp },
 
-  have hppos : 0 < p,
-  { apply pos_of_mul_pos_left,
-    { rw ←hp,
-      rw sub_pos,
-      norm_cast,
-      rw ←nat.pow_lt_iff_lt_left (by norm_num : 1 ≤ 3),
-      rw ←h,
-      apply nat.lt_add_of_pos_left,
-      apply pow_pos,
-      exact hapos },
-    { norm_num } },
+  have hqnezero : q ≠ 0,
+  { rintro rfl,
+    simp only [add_zero, zero_sub] at hadd hsub,
+    rw [←hadd, ←hsub, neg_pow_bit1, ←sub_eq_add_neg, sub_eq_iff_eq_add] at h,
+    exact flt_not_add_self hpnezero h.symm rfl },
 
-  refine ⟨p.nat_abs, q.nat_abs, _, _, _, _, _⟩,
-  { rw pos_iff_ne_zero,
-    rw int.nat_abs_ne_zero,
-    assumption, },
-  { rw pos_iff_ne_zero,
-    rw int.nat_abs_ne_zero,
-    apply ne_of_gt,
-    assumption, },
-  { rw [←nat.dvd_one, ←hbccoprime.gcd_eq_one],
-    apply nat.dvd_gcd; rw ←int.coe_nat_dvd,
-    { rw ← hsub,
-      apply dvd_sub; rw int.coe_nat_dvd_left,
-      { apply nat.gcd_dvd_right },
-      { apply nat.gcd_dvd_left } },
-    { rw ← hadd,
-      apply dvd_add; rw int.coe_nat_dvd_left,
-      { apply nat.gcd_dvd_left },
-      { apply nat.gcd_dvd_right } } },
+  refine ⟨p, q, hpnezero, hqnezero, _, _, _⟩,
+  { apply is_coprime_of_dvd,
+    { exact not_and_of_not_or_not (or.inl hpnezero) },
+    intros z hznu hznz hzp hzq,
+    apply hznu,
+    apply hbccoprime.is_unit_of_dvd',
+    { rw ←hsub,
+      exact dvd_sub hzq hzp },
+    { rw ←hadd,
+      exact dvd_add hzp hzq } },
   { have : ¬even (p + q),
-    { rwa [hadd, int.even_coe_nat] },
-    simp with parity_simps at this ⊢,
-    tauto },
+    { rwa [hadd] },
+    split; intro H; simpa [H] with parity_simps using this },
   { left,
-    zify,
-    zify at h,
-    rw eq_sub_of_add_eq h,
-    rw [←hadd, ←hsub],
-    have : p = p.nat_abs,
-    { lift p to ℕ using hppos.le,
-      rw [int.nat_abs_of_nat] },
-    rw ←this,
-    have : q = q.nat_abs,
-    { lift q to ℕ using hqpos.le,
-      rw [int.nat_abs_of_nat] },
-    rw ←this,
+    rw [eq_sub_of_add_eq h, ←hadd, ←hsub],
     ring },
 end
 
-lemma flt_not_add_self {a b c : ℕ} (hapos : 0 < a) (h : a ^ 3 + b ^ 3 = c ^ 3) : a ≠ b :=
-begin
-  rintro rfl,
-  rw ←mul_two at h,
-  apply two_not_cube (c/a),
-  rw div_pow',
-  { rw [←h, mul_comm, nat.mul_div_cancel],
-    exact pow_pos hapos 3 },
-
-  { rw [←nat.pow_dvd_pow_iff (by norm_num : 0 < 3), ←h],
-    apply dvd_mul_right },
-end
-
-lemma descent1 (a b c : ℕ)
-  (h : flt_coprime a b c 3) :
-  ∃ (p q : ℕ),
-    0 < p ∧
-    0 < q ∧
-    p.gcd q = 1 ∧
+lemma descent1 (a b c : ℤ)
+  (h : flt_coprime 3 a b c) :
+  ∃ (p q : ℤ),
+    p ≠ 0 ∧
+    q ≠ 0 ∧
+    is_coprime p q ∧
     (even p ↔ ¬even q) ∧
     (2 * p * (p ^ 2 + 3 * q ^ 2) = a ^ 3 ∨
      2 * p * (p ^ 2 + 3 * q ^ 2) = b ^ 3 ∨
      2 * p * (p ^ 2 + 3 * q ^ 2) = c ^ 3) :=
 begin
-  obtain ⟨hapos, hbpos, hcpos, h, habcoprime, haccoprime, hbccoprime⟩ := h,
-  have := descent1a h habcoprime haccoprime hbccoprime,
-  cases this,
-  { cases this,
-    { rcases this with ⟨ha, hb, hc⟩,
-      exact descent1left hapos hbpos hcpos h habcoprime haccoprime hbccoprime ha hb hc },
-    { rw add_comm at h,
-      rcases this with ⟨ha, hb, hc⟩,
-      have := descent1left hbpos hapos hcpos h habcoprime.symm hbccoprime haccoprime hb ha hc,
-      obtain ⟨p, q, hp, hq, hcoprime, hodd, hcube⟩ := this,
-      refine ⟨p, q, hp, hq, hcoprime, hodd, _⟩,
-      tauto } },
-  { rcases this with ⟨ha, hb, hc⟩,
-    obtain ⟨p, hp⟩ : even (a + b : ℤ),
+  have h' := h,
+  obtain ⟨⟨hapos, hbpos, hcpos, h⟩, habcoprime, haccoprime, hbccoprime⟩ := h,
+
+  obtain (⟨ha, hb, hc⟩|⟨ha, hb, hc⟩)|⟨ha, hb, hc⟩ := descent1a h habcoprime haccoprime hbccoprime,
+  { exact descent1left h' ha hb hc },
+  { obtain ⟨p, q, hp, hq, hcoprime, hodd, hcube⟩ := descent1left h'.symm hb ha hc,
+    refine ⟨p, q, hp, hq, hcoprime, hodd, _⟩,
+    rwa or.left_comm },
+  { obtain ⟨p, hp⟩ : even (a + b),
     { simp [ha, hb] with parity_simps},
-    obtain ⟨q, hq⟩ : even (a - b : ℤ),
+    obtain ⟨q, hq⟩ : even (a - b),
     { simp [ha, hb] with parity_simps},
     have hadd : p + q = a,
     { apply int.eq_of_mul_eq_mul_left two_ne_zero,
@@ -239,56 +221,34 @@ begin
     { apply int.eq_of_mul_eq_mul_left two_ne_zero,
       rw [mul_sub, ←hp, ←hq],
       ring },
-    have : p ≠ 0,
+    have hpnezero : p ≠ 0,
     { rintro rfl,
-      rw [mul_zero, ←int.coe_nat_zero, ←int.coe_nat_add, int.coe_nat_eq_coe_nat_iff] at hp,
-      exact ne_of_gt hapos (nat.eq_zero_of_add_eq_zero_right hp) },
-    have : int.gcd p q = 1,
-    { rw [←nat.dvd_one, ←habcoprime.gcd_eq_one],
-      apply nat.dvd_gcd; rw ←int.coe_nat_dvd,
-      { rw ← hadd,
-        apply dvd_add; rw int.coe_nat_dvd_left,
-        { apply nat.gcd_dvd_left },
-        { apply nat.gcd_dvd_right } },
-      { rw ← hsub,
-        apply dvd_sub; rw int.coe_nat_dvd_left,
-        { apply nat.gcd_dvd_left },
-        { apply nat.gcd_dvd_right } } },
-    have : 0 < p,
-    { refine pos_of_mul_pos_left _ zero_lt_two.le,
-      { rw ←hp,
-        norm_cast,
-        apply nat.add_pos_left hapos } },
-    have : p = p.nat_abs,
-    { rw ←int.abs_eq_nat_abs,
-      symmetry,
-      apply abs_of_nonneg,
-      exact this.le },
-    have : q ≠ 0,
+      apply hcpos,
+      rw [mul_zero, add_eq_zero_iff_eq_neg] at hp,
+      rwa [hp, neg_pow_bit1, add_left_neg, eq_comm, pow_eq_zero_iff] at h,
+      norm_num },
+    refine ⟨p, q, hpnezero, _, _, _, _⟩,
     { rintro rfl,
       apply flt_not_add_self hapos h,
-      rwa [mul_zero, sub_eq_zero, int.coe_nat_inj'] at hq },
-    refine ⟨p.nat_abs, q.nat_abs, _, _, _, _, _⟩,
-    { rw pos_iff_ne_zero,
-      rw int.nat_abs_ne_zero,
-      apply ne_of_gt,
-      assumption, },
-    { rw pos_iff_ne_zero,
-      rw int.nat_abs_ne_zero,
-      assumption, },
-    { assumption },
+      rw [←hadd, ←hsub, add_zero, sub_zero] },
+    { apply is_coprime_of_dvd,
+      { exact not_and_of_not_or_not (or.inl hpnezero) },
+      intros z hznu hznz hzp hzq,
+      apply hznu,
+      apply habcoprime.is_unit_of_dvd',
+      { rw ←hadd,
+        exact dvd_add hzp hzq },
+      { rw ←hsub,
+        exact dvd_sub hzp hzq } },
     { have : ¬even (p + q),
-      { rwa [hadd, int.even_coe_nat] },
-      simp with parity_simps at this ⊢,
-      tauto },
+      { rwa [hadd] },
+      split; intro H; simpa [H] with parity_simps using this },
     { right, right,
-      rw  ←h,
-      zify,
-      rw [←‹p = _›, int.nat_abs_square q, ←hadd, ←hsub],
+      rw [←h, ←hadd, ←hsub],
       ring } },
 end
 
-lemma descent11 {a b c d : ℕ} (h : d = a ∨ d = b ∨ d = c) : d ∣ (a * b * c) :=
+lemma descent11 {a b c d : ℤ} (h : d = a ∨ d = b ∨ d = c) : d ∣ (a * b * c) :=
 begin
   rcases h with rfl | rfl | rfl,
   { apply dvd_mul_of_dvd_left, apply dvd_mul_right },
@@ -296,44 +256,51 @@ begin
   { apply dvd_mul_left }
 end
 
-lemma descent12 {a b c d : ℕ} (ha : 0 < a) (hb : 0 < b) (hc : 0 < c)
- (h : d = a ∨ d = b ∨ d = c) : d ≤ (a * b * c) :=
-nat.le_of_dvd (mul_pos (mul_pos ha hb) hc) (descent11 h)
-
-lemma descent2 (a b c : ℕ)
-  (h : flt_coprime a b c 3) :
-  ∃ (p q : ℕ),
-    0 < p ∧
-    0 < q ∧
-    p.gcd q = 1 ∧
+lemma descent2 (a b c : ℤ)
+  (h : flt_coprime 3 a b c) :
+  ∃ (p q : ℤ),
+    p ≠ 0 ∧
+    q ≠ 0 ∧
+    is_coprime p q ∧
     (even p ↔ ¬even q) ∧
     (2 * p * (p ^ 2 + 3 * q ^ 2) = a ^ 3 ∨
      2 * p * (p ^ 2 + 3 * q ^ 2) = b ^ 3 ∨
      2 * p * (p ^ 2 + 3 * q ^ 2) = c ^ 3) ∧
-    (2 * p < a ^ 3 * b ^ 3 * c ^ 3) :=
+    ((2 * p).nat_abs < (a ^ 3 * b ^ 3 * c ^ 3).nat_abs) :=
 begin
   obtain ⟨p, q, hp, hq, hcoprime, hodd, hcube⟩ := descent1 a b c h,
   refine ⟨p, q, hp, hq, hcoprime, hodd, hcube, _⟩,
 
-  obtain ⟨hapos, hbpos, hcpos, h, habcoprime, haccoprime, hbccoprime⟩ := h,
-  apply lt_of_lt_of_le,
-  swap,
-  { refine descent12 _ _ _ hcube;
-    rwa ←nat.pos_pow_iff zero_lt_three },
-  { apply lt_mul_of_one_lt_right,
-    { linarith },
-    { rw nat.pos_pow_iff zero_lt_two at hp hq,
-      linarith } }
+  obtain ⟨⟨hapos, hbpos, hcpos, h⟩, habcoprime, haccoprime, hbccoprime⟩ := h,
+  have : (2 * p).nat_abs < (2 * p * (p ^ 2 + 3 * q ^ 2)).nat_abs,
+  { rw [int.nat_abs_mul (2 * p)],
+    apply lt_mul_of_one_lt_right,
+    { rw [pos_iff_ne_zero, int.nat_abs_ne_zero],
+      exact mul_ne_zero two_ne_zero hp },
+    { zify,
+      rw int.nat_abs_of_nonneg (spts.nonneg _ _),
+      exact spts.one_lt_of_right_ne_zero hq  } },
+  apply lt_of_lt_of_le this,
+  { apply nat.le_of_dvd,
+    { rw pos_iff_ne_zero,
+      intro H,
+      rw [int.nat_abs_mul, int.nat_abs_mul, mul_eq_zero, mul_eq_zero] at H,
+      obtain (H|H)|H := H;
+      { rw [int.nat_abs_eq_zero, pow_eq_zero_iff] at H,
+        contradiction,
+        norm_num } },
+    { rw int.nat_abs_dvd_abs_iff,
+      exact descent11 hcube } }
 end
 
 lemma gcd1or3
-  (p q : ℕ)
-  (hp : 0 < p) (hq : 0 < q)
-  (hcoprime : nat.coprime p q)
+  (p q : ℤ)
+  (hp : p ≠ 0) (hq : q ≠ 0)
+  (hcoprime : is_coprime p q)
   (hparity : even p ↔ ¬even q) :
-  nat.gcd (2 * p) (p ^ 2 + 3 * q ^ 2) = 1 ∨ nat.gcd (2 * p) (p ^ 2 + 3 * q ^ 2) = 3 :=
+  int.gcd (2 * p) (p ^ 2 + 3 * q ^ 2) = 1 ∨ int.gcd (2 * p) (p ^ 2 + 3 * q ^ 2) = 3 :=
 begin
-  set g := nat.gcd (2 * p) (p ^ 2 + 3 * q ^ 2) with hg',
+  set g := int.gcd (2 * p) (p ^ 2 + 3 * q ^ 2) with hg',
   suffices H : ∃ k, g = 3 ^ k ∧ k < 2,
   { obtain ⟨k, hg, hk⟩ := H,
     rcases k with (_|_|_),
@@ -342,91 +309,100 @@ begin
     { change k + 2 < 2 at hk,
       linarith } },
 
-  have basic : ∀ f, nat.prime f → f ∣ 2 * p → f ∣ (p ^ 2 + 3 * q ^ 2) → f = 3,
+  have basic : ∀ f, nat.prime f → (f : ℤ) ∣ 2 * p → (f : ℤ) ∣ (p ^ 2 + 3 * q ^ 2) → f = 3,
   { intros d hdprime hdleft hdright,
+    by_contra hne3,
+    rw ←ne.def at hne3,
+    apply (nat.prime_iff_prime_int.mp hdprime).not_unit,
+
     have hne2 : d ≠ 2,
     { rintro rfl,
       change even _ at hdright,
-      simp [hparity, two_ne_zero] with parity_simps at hdright,
-      assumption },
+      simpa [hparity, two_ne_zero] with parity_simps using hdright },
     have : 2 < d := lt_of_le_of_ne (hdprime.two_le) hne2.symm,
-    by_contra hne3,
-    change d ≠ 3 at hne3,
     have : 3 < d := lt_of_le_of_ne (this) hne3.symm,
     obtain ⟨P, hP⟩ := hdleft,
     obtain ⟨Q, hQ⟩ := hdright,
     obtain ⟨H, hH⟩ : 2 ∣ P,
     { have H := dvd_mul_right 2 p,
-      rw [hP, nat.prime.dvd_mul nat.prime_two] at H,
-      cases H,
-      { rw nat.dvd_prime hdprime at H,
-        cases H,
-        { norm_num at H },
-        { exfalso,
-          exact hne2 H.symm } },
-      { assumption } },
+      rw [hP] at H,
+      apply (prime.div_or_div int.prime_two H).resolve_left,
+      rw ←int.nat_abs_dvd,
+      rw int.coe_nat_dvd,
+      change ¬(2 ∣ d),
+      rw ←nat.prime_two.coprime_iff_not_dvd,
+      rw nat.coprime_primes nat.prime_two hdprime,
+      exact hne2.symm },
     have : p = d * H,
-    { rw [←nat.mul_right_inj zero_lt_two, hP, hH],
-      ring },
+    { rw [←mul_right_inj', hP, hH],
+      ring,
+      exact two_ne_zero },
     have : 3 * q ^ 2 = d * (Q - d * H ^ 2),
     { calc 3 * q ^ 2
-          = d * Q - p ^ 2 : (nat.sub_eq_of_eq_add hQ.symm).symm
+          = d * Q - p ^ 2 : (sub_eq_of_eq_add' hQ.symm).symm
       ... = d * Q - d ^ 2 * H ^ 2 : by rw [this, mul_pow]
-      ... = d * Q - d * (d * H ^ 2) : by ring
-      ... = d * (Q - d * H ^ 2) : by rw nat.mul_sub_left_distrib },
-    have : d ∣ q,
-    { have h000 : d ∣ 3 * q ^ 2,
+      ... = d * (Q - d * H ^ 2) : by ring },
+
+    apply hcoprime.is_unit_of_dvd',
+    { rw ‹p = _›, exact dvd_mul_right d H },
+    { have h000 : (d : ℤ) ∣ 3 * q ^ 2,
       { rw this,
         apply dvd_mul_right },
-      rw nat.prime.dvd_mul hdprime at h000,
-      cases h000,
-      { linarith [nat.le_of_dvd (by norm_num) h000] },
-      { exact nat.prime.dvd_of_dvd_pow hdprime h000 } },
-    have : d ∣ p,
-    { rw ‹p = _›, exact dvd_mul_right d H },
-    have := nat.not_coprime_of_dvd_of_dvd hdprime.one_lt ‹d ∣ p› ‹d ∣ q›,
-    contradiction },
+      rw nat.prime_iff_prime_int at hdprime,
+      cases prime.div_or_div hdprime h000 with h000 h000,
+      { exfalso,
+        rw ←int.nat_abs_dvd_abs_iff at h000,
+        have := nat.le_of_dvd (by norm_num) h000,
+        apply lt_irrefl 3,
+        apply lt_of_lt_of_le _ this,
+        assumption },
+      { exact prime.dvd_of_dvd_pow hdprime h000 } } },
 
   set k := g.factors.length,
   have hg : g = 3 ^ k,
   { apply eq_pow,
-   { apply nat.gcd_pos_of_pos_left,
-     apply nat.mul_pos zero_lt_two hp },
+    { apply nat.gcd_pos_of_pos_left,
+      rw int.nat_abs_mul,
+      apply nat.mul_pos zero_lt_two,
+      rwa [pos_iff_ne_zero, int.nat_abs_ne_zero], },
     intros d hdprime hddvdg,
-    apply basic _ hdprime,
-    exact dvd_trans hddvdg (nat.gcd_dvd_left _ _),
-    exact dvd_trans hddvdg (nat.gcd_dvd_right _ _) },
+    rw ←int.coe_nat_dvd at hddvdg,
+    apply basic _ hdprime; apply dvd_trans hddvdg; rw hg',
+    exacts [int.gcd_dvd_left _ _, int.gcd_dvd_right _ _] },
   refine ⟨k, hg, _⟩,
   by_contra H,
   push_neg at H,
   rw ←pow_mul_pow_sub _ H at hg,
+  have : ¬is_unit (3 : ℤ),
+  { rw int.is_unit_iff_nat_abs, norm_num },
+  apply this,
   have hdvdp : 3 ∣ p,
   { suffices : 3 ∣ 2 * p,
-    { apply dvd_mul_cancel_prime this (by norm_num) nat.prime_two nat.prime_three },
-    have : 3 ∣ g,
-    { rw [hg, pow_two, mul_assoc],
+    { apply int.dvd_mul_cancel_prime _ nat.prime_two int.prime_three this,
+      rw int.abs_eq_nat_abs,
+      norm_num },
+    have : 3 ∣ (g : ℤ),
+    { rw [hg, pow_two, mul_assoc, int.coe_nat_mul],
       apply dvd_mul_right },
-    exact dvd_trans this (nat.gcd_dvd_left _ _) }, 
-  have hdvdq : 3 ∣ q,
+    exact dvd_trans this (int.gcd_dvd_left _ _) },
+  apply is_coprime.is_unit_of_dvd' hcoprime hdvdp,
   { have dvdpsq : 3 ^ 2 ∣ p ^ 2,
-    { rwa nat.pow_dvd_pow_iff zero_lt_two },
+    { rwa int.pow_dvd_pow_iff zero_lt_two, },
     suffices : 3 ∣ q ^ 2,
-    { apply nat.prime.dvd_of_dvd_pow nat.prime_three this },
+    { apply prime.dvd_of_dvd_pow int.prime_three this },
     suffices : 3 ^ 2 ∣ 3 * q ^ 2,
-    { rwa [pow_two, nat.mul_dvd_mul_iff_left (by norm_num : 0 < 3)] at this },
+    { rwa [pow_two, mul_dvd_mul_iff_left (@three_ne_zero ℤ _ _)] at this },
     suffices : 3 ^ 2 ∣ p ^ 2 + 3 * q ^ 2,
-    { rwa nat.dvd_add_iff_right dvdpsq },
-    refine dvd_trans _ (nat.gcd_dvd_right (2 * p) _),
-    rw [←hg', hg],
-    apply dvd_mul_right },
-
-  exact nat.not_coprime_of_dvd_of_dvd (by norm_num : 1 < 3) hdvdp hdvdq hcoprime,
+    { rwa dvd_add_iff_right dvdpsq },
+    refine dvd_trans _ (int.gcd_dvd_right (2 * p) _),
+    rw [←hg', hg, int.coe_nat_mul],
+    apply dvd_mul_right }
 end
 
 lemma obscure'
-  (p q : ℕ)
-  (hp : 0 < p) (hq : 0 < q)
-  (hcoprime : nat.gcd p q = 1)
+  (p q : ℤ)
+  (hp : p ≠ 0) (hq : q ≠ 0)
+  (hcoprime : is_coprime p q)
   (hparity : even p ↔ ¬even q)
   (hcube : ∃ r, p ^ 2 + 3 * q ^ 2 = r ^ 3) :
   ∃ a b : ℤ,
@@ -437,21 +413,15 @@ lemma obscure'
 begin
   obtain ⟨u, hu⟩ := hcube,
 
-  have hcoprime' : is_coprime (p : ℤ) q,
-  { rw ←int.gcd_eq_one_iff_coprime,
-    simp only [int.gcd],
-    rwa [int.nat_abs_of_nat] },
-
-  obtain ⟨a, b, hp', hq'⟩ := step6 p q u hcoprime' _,
+  obtain ⟨a, b, hp', hq'⟩ := step6 p q u hcoprime hu.symm,
   refine ⟨a, b, hp', hq', _, _⟩,
   { apply is_coprime_of_dvd,
     { rintro ⟨rfl, rfl⟩,
-      norm_num at hp',
-      exact hp.ne.symm hp' },
+      norm_num at hp' },
 
     intros k hknu hknezero hkdvdleft hkdvdright,
     apply hknu,
-    apply hcoprime'.is_unit_of_dvd',
+    apply hcoprime.is_unit_of_dvd',
     { rw hp',
       apply dvd_sub,
       { exact dvd_pow hkdvdleft (by norm_num) },
@@ -467,13 +437,12 @@ begin
     [skip, tauto, tauto, skip];
     { exfalso,
       have : even p,
-      { rw [←int.even_coe_nat, hp'],
+      { rw [hp'],
         simp [haparity, hbparity, three_ne_zero] with parity_simps },
       have : even q,
-      { rw [←int.even_coe_nat, hq'],
+      { rw [hq'],
         simp [haparity, hbparity, three_ne_zero] with parity_simps },
-      tauto } },
-  { norm_cast, exact hu.symm }
+      tauto } }
 end
 
 lemma int.cube_of_coprime (a b c s : ℤ)
@@ -488,17 +457,17 @@ lemma int.cube_of_coprime (a b c s : ℤ)
 begin
   obtain ⟨A, HA⟩ : ∃ A, a = A ^ 3,
   { rw [mul_assoc] at hs,
-    apply int.eq_pow_of_mul_eq_pow_bit1 ha _ _ hs,
+    apply int.eq_pow_of_mul_eq_pow_bit1_left ha _ _ hs,
     { exact mul_ne_zero hb hc },
     { exact is_coprime.mul_right hcoprimeab hcoprimeac } },
   obtain ⟨B, HB⟩ : ∃ B, b = B ^ 3,
   { rw [mul_comm a b, mul_assoc] at hs,
-    apply int.eq_pow_of_mul_eq_pow_bit1 hb _ _ hs,
+    apply int.eq_pow_of_mul_eq_pow_bit1_left hb _ _ hs,
     { exact mul_ne_zero ha hc },
     { exact is_coprime.mul_right hcoprimeab.symm hcoprimebc } },
   obtain ⟨C, HC⟩ : ∃ C, c = C ^ 3,
   { rw [mul_comm] at hs,
-    apply int.eq_pow_of_mul_eq_pow_bit1 hc _ _ hs,
+    apply int.eq_pow_of_mul_eq_pow_bit1_left hc _ _ hs,
     { exact mul_ne_zero ha hb },
     { exact is_coprime.mul_right hcoprimeac.symm hcoprimebc.symm } },
   refine ⟨A, B, C, _, _, _, HA, HB, HC⟩; apply ne_zero_pow three_ne_zero,
@@ -566,122 +535,41 @@ begin
     ring },
 end
 
-lemma nat_solution_of_int_solution
-  {a b c : ℤ}
-  (u : ℕ)
-  (ha : a ≠ 0)
-  (hb : b ≠ 0)
-  (hc : c ≠ 0)
-  (hu : (a ^ 3 * b ^ 3 * c ^ 3).nat_abs ≤ u)
-  (h : a ^ 3 + b ^ 3 = c ^ 3)
-  :
-  ∃ a' b' c' : ℕ,
-    0 < a' ∧ 0 < b' ∧ 0 < c' ∧ a' ^ 3 * b' ^ 3 * c' ^ 3 ≤ u ∧ a' ^ 3 + b' ^ 3 = c' ^ 3 :=
-begin
-  have hu' : a.nat_abs ^ 3 * b.nat_abs ^ 3 * c.nat_abs ^ 3 ≤ u,
-  { rwa [←int.nat_abs_pow, ←int.nat_abs_pow, ←int.nat_abs_pow, ←int.nat_abs_mul, ←int.nat_abs_mul] },
-  have ha': 0 < a.nat_abs := nat.pos_of_ne_zero (int.nat_abs_ne_zero_of_ne_zero ha),
-  have hb': 0 < b.nat_abs := nat.pos_of_ne_zero (int.nat_abs_ne_zero_of_ne_zero hb),
-  have hc': 0 < c.nat_abs := nat.pos_of_ne_zero (int.nat_abs_ne_zero_of_ne_zero hc),
-  cases ha.lt_or_lt with haneg hapos;
-  cases hb.lt_or_lt with hbneg hbpos;
-  cases hc.lt_or_lt with hcneg hcpos,
-  { use [a.nat_abs, b.nat_abs, c.nat_abs, ‹_›, ‹_›, ‹_›, hu'],
-    zify,
-    rw [int.of_nat_nat_abs_of_nonpos haneg.le, neg_pow_bit1],
-    rw [int.of_nat_nat_abs_of_nonpos hbneg.le, neg_pow_bit1],
-    rw [int.of_nat_nat_abs_of_nonpos hcneg.le, neg_pow_bit1],
-    rw [←h, neg_add] },
-  { exfalso,
-    apply lt_irrefl (0 : ℤ),
-    rw ←pow_bit1_neg_iff at haneg hbneg,
-    rw ←pow_bit1_pos_iff at hcpos,
-    calc 0 < c ^ 3 : hcpos
-    ... = a ^ 3 + b ^ 3 : h.symm
-    ... < 0 : add_neg haneg hbneg },
-  { refine ⟨b.nat_abs, c.nat_abs, a.nat_abs, ‹_›, ‹_›, ‹_›, _, _⟩,
-    { convert hu' using 1, ring },
-    zify,
-    rw [int.of_nat_nat_abs_of_nonpos haneg.le, neg_pow_bit1],
-    rw [int.nat_abs_of_nonneg hbpos.le],
-    rw [int.of_nat_nat_abs_of_nonpos hcneg.le, neg_pow_bit1],
-    rw ←h,
-    ring },
-  { refine ⟨a.nat_abs, c.nat_abs, b.nat_abs, ‹_›, ‹_›, ‹_›, _, _⟩,
-    { convert hu' using 1, ring },
-    zify,
-    rw [int.of_nat_nat_abs_of_nonpos haneg.le, neg_pow_bit1],
-    rw [int.nat_abs_of_nonneg hbpos.le],
-    rw [int.nat_abs_of_nonneg hcpos.le],
-    rw ←h,
-    ring },
-  { refine ⟨a.nat_abs, c.nat_abs, b.nat_abs, ‹_›, ‹_›, ‹_›, _, _⟩,
-    { convert hu' using 1, ring },
-    zify,
-    rw [int.nat_abs_of_nonneg hapos.le],
-    rw [int.of_nat_nat_abs_of_nonpos hbneg.le, neg_pow_bit1],
-    rw [int.of_nat_nat_abs_of_nonpos hcneg.le, neg_pow_bit1],
-    rw ←h,
-    ring },
-  { refine ⟨b.nat_abs, c.nat_abs, a.nat_abs, ‹_›, ‹_›, ‹_›, _, _⟩,
-    { convert hu' using 1, ring },
-    zify,
-    rw [int.nat_abs_of_nonneg hapos.le],
-    rw [int.of_nat_nat_abs_of_nonpos hbneg.le, neg_pow_bit1],
-    rw [int.nat_abs_of_nonneg hcpos.le],
-    rw ←h,
-    ring },
-  { exfalso,
-    apply lt_irrefl (0 : ℤ),
-    rw ←pow_bit1_pos_iff at hapos hbpos,
-    rw ←pow_bit1_neg_iff at hcneg,
-    calc 0 < a ^ 3 + b ^ 3 : add_pos hapos hbpos
-    ... = c ^ 3 : h
-    ... < 0 : hcneg },
-  { use [a.nat_abs, b.nat_abs, c.nat_abs, ‹_›, ‹_›, ‹_›, hu'],
-    zify,
-    rw [int.nat_abs_of_nonneg hapos.le],
-    rw [int.nat_abs_of_nonneg hbpos.le],
-    rw [int.nat_abs_of_nonneg hcpos.le],
-    exact h },
-end
-
-lemma descent_gcd1 (a b c p q : ℕ)
-  (hp : 0 < p)
-  (hq : 0 < q)
-  (hcoprime : p.gcd q = 1)
+lemma descent_gcd1 (a b c p q : ℤ)
+  (hp : p ≠ 0)
+  (hq : q ≠ 0)
+  (hcoprime : is_coprime p q)
   (hodd : even p ↔ ¬even q)
   (hcube : 2 * p * (p ^ 2 + 3 * q ^ 2) = a ^ 3 ∨
              2 * p * (p ^ 2 + 3 * q ^ 2) = b ^ 3 ∨
                2 * p * (p ^ 2 + 3 * q ^ 2) = c ^ 3)
-  (h : flt_coprime a b c 3)
-  (hgcd : (2 * p).gcd (p ^ 2 + 3 * q ^ 2) = 1) :
-  ∃ (a' b' c' : ℕ),
-    0 < a' ∧ 0 < b' ∧ 0 < c' ∧
-    a' ^ 3 * b' ^ 3 * c' ^ 3 ≤ 2 * p ∧
+  (h : flt_coprime 3 a b c)
+  (hgcd : is_coprime (2 * p) (p ^ 2 + 3 * q ^ 2)) :
+  ∃ (a' b' c' : ℤ),
+    a' ≠ 0 ∧ b' ≠ 0 ∧ c' ≠ 0 ∧
+    (a' ^ 3 * b' ^ 3 * c' ^ 3).nat_abs ≤ (2 * p).nat_abs ∧
     a' ^ 3 + b' ^ 3 = c' ^ 3 :=
 begin
   -- 2.
-  obtain ⟨hapos, hbpos, hcpos, h, habcoprime, haccoprime, hbccoprime⟩ := h,
+  have h' := h,
+  obtain ⟨⟨hapos, hbpos, hcpos, h⟩, habcoprime, haccoprime, hbccoprime⟩ := h,
   -- 5.
   obtain ⟨r, hr⟩ : ∃ r, 2 * p * (p ^ 2 + 3 * q ^ 2) = r ^ 3,
   { rcases hcube with (_|_|_);
     [use a, use b, use c];
     exact hcube },
-  have hposleft : 0 < 2 * p := nat.mul_pos zero_lt_two hp,
-  have hposright : 0 < p ^ 2 + 3 * q ^ 2 := nat.add_pos_left (pow_pos hp 2) _,
-  have hcubeleft : ∃ s, 2 * p = s ^ 3 := nat.eq_pow_of_mul_eq_pow hposleft hposright hgcd hr,
-  have hcuberight : ∃ t, p ^ 2 + 3 * q ^ 2 = t ^ 3,
-  { rw mul_comm at hr,
-    rw nat.gcd_comm at hgcd,
-    exact nat.eq_pow_of_mul_eq_pow hposright hposleft hgcd hr },
+  have hposleft : 2 * p ≠ 0 := mul_ne_zero two_ne_zero hp,
+  have hposright : p ^ 2 + 3 * q ^ 2 ≠ 0 := spts.not_zero_of_coprime hcoprime,
+  obtain ⟨hcubeleft, hcuberight⟩ := int.eq_pow_of_mul_eq_pow_bit1 hposleft hposright hgcd hr,
   -- todo shadowing hp hq
   obtain ⟨u, v, hp, hq, huvcoprime, huvodd⟩ := obscure' p q hp hq hcoprime hodd hcuberight,
   have u_ne_zero : u ≠ 0,
-  { rintro rfl, apply ‹0 < p›.ne.symm, norm_num at hp, assumption },
-  have hpfactor : (p : ℤ) = u * (u - 3 * v) * (u + 3 * v),
+  { rintro rfl,
+    apply ‹p ≠ 0›,
+    rwa [zero_pow zero_lt_three, mul_zero, zero_mul, sub_zero] at hp },
+  have hpfactor : p = u * (u - 3 * v) * (u + 3 * v),
   { rw hp, ring },
-  have haaa : (2 * p : ℤ) = (2 * u) * (u - 3 * v) * (u + 3 * v),
+  have haaa : 2 * p = (2 * u) * (u - 3 * v) * (u + 3 * v),
   { rw hp, ring },
   have : ¬even (u - 3 * v),
   { simp [huvodd] with parity_simps },
@@ -692,26 +580,23 @@ begin
   have hddd : ¬(3 ∣ p),
   { intro H,
     have : 3 ∣ p ^ 2 + 3 * q ^ 2,
-    { apply nat.dvd_add,
+    { apply dvd_add,
       { rw pow_two,
         apply dvd_mul_of_dvd_right H },
       { apply dvd_mul_right } },
     have : 3 ∣ 2 * p := dvd_mul_of_dvd_right H 2,
-    have : 3 ∣ nat.gcd (2 * p) (p ^ 2 + 3 * q ^ 2) := nat.dvd_gcd ‹_› ‹_›,
-    rw hgcd at this,
-    have := nat.eq_one_of_dvd_one this,
+    have := is_coprime.is_unit_of_dvd' hgcd ‹_› ‹_›,
+    rw is_unit_iff_dvd_one at this,
     norm_num at this },
   have not_3_dvd_2 : ¬(3 ∣ (u - 3 * v)),
   { intro hd2,
     apply hddd,
-    rw ←int.coe_nat_dvd,
     rw hpfactor,
     apply dvd_mul_of_dvd_left _,
     apply dvd_mul_of_dvd_right hd2 },
   have notdvd_3_3 : ¬(3 ∣ (u + 3 * v)),
   { intro hd3,
     apply hddd,
-    rw ←int.coe_nat_dvd,
     rw hpfactor,
     apply dvd_mul_of_dvd_right hd3 },
 
@@ -730,11 +615,10 @@ begin
     { apply int.gcd1_coprime12 u v; assumption },
     { apply int.gcd1_coprime13 u v; assumption },
     { apply int.gcd1_coprime23 u v; assumption },
-    { rw ←haaa, norm_cast, exact hs } },
+    { rw ←haaa, exact hs } },
 
-  apply nat_solution_of_int_solution (2 * p) HApos HBpos HCpos,
-  { rw [mul_comm, ←mul_assoc (C ^ 3), ←HA, ←HB, ←HC, ←haaa],
-    norm_cast },
+  refine ⟨A, B, C, HApos, HBpos, HCpos, _, _⟩,
+  { rw [mul_comm, ←mul_assoc (C ^ 3), ←HA, ←HB, ←HC, ←haaa] },
   { rw [←HA, ←HB, ←HC], ring },
 end
 
@@ -795,113 +679,117 @@ begin
   exact ⟨haddcoprime.symm, hsubcoprime.symm, haddsubcoprime.symm⟩,
 end
 
-lemma descent_gcd3 (a b c p q : ℕ)
-  (hp : 0 < p)
-  (hq : 0 < q)
-  (hcoprime : p.gcd q = 1)
+lemma descent_gcd3_coprime {q s : ℤ}
+  (h3_ndvd_q : ¬3 ∣ q)
+  (hspos : s ≠ 0)
+  (hcoprime' : is_coprime s q)
+  (hodd' : even q ↔ ¬even s) :
+  is_coprime (3 ^ 2 * 2 * s) (q ^ 2 + 3 * s ^ 2) :=
+begin
+  have h2ndvd : ¬(2 ∣ (q ^ 2 + 3 * s ^ 2)),
+  { change ¬(even _),
+    simp [two_ne_zero, hodd'] with parity_simps },
+
+  have h3ndvd : ¬(3 ∣ (q ^ 2 + 3 * s ^ 2)),
+  { intro H,
+    apply h3_ndvd_q,
+    rw ←dvd_add_iff_left (dvd_mul_right _ _) at H,
+    exact prime.dvd_of_dvd_pow int.prime_three H },
+
+  apply int.is_coprime_of_dvd',
+  { rintro ⟨h1, -⟩,
+    rw mul_eq_zero at h1,
+    exact hspos (h1.resolve_left (by norm_num)) },
+  intros k hknu hknz hkprime hkdvdleft hkdvdright,
+  apply hknu,
+  have : k ∣ s,
+  { apply int.dvd_mul_cancel_prime' h2ndvd hkdvdright int.prime_two hkprime,
+    apply int.dvd_mul_cancel_prime' h3ndvd hkdvdright int.prime_three hkprime,
+    apply int.dvd_mul_cancel_prime' h3ndvd hkdvdright int.prime_three hkprime,
+    convert hkdvdleft using 1,
+    ring },
+  apply hcoprime'.is_unit_of_dvd' this,
+  apply hkprime.dvd_of_dvd_pow,
+  rw dvd_add_iff_left (dvd_mul_of_dvd_right (dvd_pow this two_ne_zero) _),
+  exact hkdvdright
+end
+
+lemma descent_gcd3 (a b c p q : ℤ)
+  (hp : p ≠ 0)
+  (hq : q ≠ 0)
+  (hcoprime : is_coprime p q)
   (hodd : even p ↔ ¬even q)
   (hcube : 2 * p * (p ^ 2 + 3 * q ^ 2) = a ^ 3 ∨
              2 * p * (p ^ 2 + 3 * q ^ 2) = b ^ 3 ∨
                2 * p * (p ^ 2 + 3 * q ^ 2) = c ^ 3)
-  (h : flt_coprime a b c 3)
+  (h : flt_coprime 3 a b c)
   (hgcd : (2 * p).gcd (p ^ 2 + 3 * q ^ 2) = 3) :
-  ∃ (a' b' c' : ℕ),
-    0 < a' ∧ 0 < b' ∧ 0 < c' ∧
-    a' ^ 3 * b' ^ 3 * c' ^ 3 ≤ 2 * p ∧
+  ∃ (a' b' c' : ℤ),
+    a' ≠ 0 ∧ b' ≠ 0 ∧ c' ≠ 0 ∧
+    (a' ^ 3 * b' ^ 3 * c' ^ 3).nat_abs ≤ (2 * p).nat_abs ∧
     a' ^ 3 + b' ^ 3 = c' ^ 3 :=
 begin
-  obtain ⟨hapos, hbpos, hcpos, h, habcoprime, haccoprime, hbccoprime⟩ := h,
+  obtain ⟨⟨hapos, hbpos, hcpos, h⟩, habcoprime, haccoprime, hbccoprime⟩ := h,
   -- 1.
   have h3_dvd_p : 3 ∣ p,
-  { apply dvd_mul_cancel_prime _ (by norm_num) nat.prime_two nat.prime_three,
-    rw ← hgcd,
-    apply nat.gcd_dvd_left },
+  { apply int.dvd_mul_cancel_prime _ nat.prime_two int.prime_three,
+    { zify at hgcd,
+      rw ← hgcd,
+      convert int.gcd_dvd_left _ _},
+    { rw int.abs_eq_nat_abs, norm_num } },
   have h3_ndvd_q : ¬(3 ∣ q),
   { intro H,
-    apply nat.prime.not_dvd_one nat.prime_three,
-    conv_rhs { rw ←hcoprime },
-    exact nat.dvd_gcd h3_dvd_p H },
+    have := hcoprime.is_unit_of_dvd' h3_dvd_p H,
+    rw int.is_unit_iff_nat_abs at this,
+    norm_num at this },
   -- 2.
   obtain ⟨s, hs⟩ := h3_dvd_p,
-  have hspos : 0 < s,
-  { linarith },
+  have hspos : s ≠ 0,
+  { apply right_ne_zero_of_mul,
+    rwa ←hs },
   have hps : 2 * p * (p ^ 2 + 3 * q ^ 2) = 3 ^ 2 * 2 * s * (q ^ 2 + 3 * s ^ 2),
-  calc 2 * p * (p ^ 2 + 3 * q ^ 2)
-      = 2 * (3 * s) * ((3 * s) ^ 2 + 3 * q ^ 2) : by rw hs
-  ... = _ : by ring,
+  { calc 2 * p * (p ^ 2 + 3 * q ^ 2)
+        = 2 * (3 * s) * ((3 * s) ^ 2 + 3 * q ^ 2) : by rw hs
+    ... = _ : by ring },
   -- 3.
-  have hcoprime' : nat.coprime s q,
-  { apply nat.coprime_of_dvd',
-    intros k hkprime hkdvdleft hkdvdright,
-    have hkdvdp : k ∣ p,
-    { rw hs,
-      exact dvd_mul_of_dvd_right hkdvdleft 3 },
-    rw ←hcoprime,
-    exact nat.dvd_gcd hkdvdp hkdvdright },
-  
+  have hcoprime' : is_coprime s q,
+  { apply int.is_coprime_of_dvd',
+    { rintro ⟨h1, -⟩,
+      exact hspos h1 },
+    intros k hknu hknz hkprime hkdvdleft hkdvdright,
+    apply hknu,
+    apply hcoprime.is_unit_of_dvd' _ hkdvdright,
+    rw hs,
+    exact dvd_mul_of_dvd_right hkdvdleft 3 },
+
   have hodd' : even q ↔ ¬even s,
   { have : even p ↔ even s,
     { simp [hs] with parity_simps },
     rw this at hodd,
     tauto },
-  have hcoprime'' : nat.coprime (3^2 * 2 * s) (q ^ 2 + 3 * s ^ 2),
-  { have : ¬(2 ∣ (q ^ 2 + 3 * s ^ 2)),
-    { change ¬(even _),
-      simp [hs, two_ne_zero, hodd'] with parity_simps },
-
-    have : ¬(3 ∣ (q ^ 2 + 3 * s ^ 2)),
-    { intro H,
-      apply h3_ndvd_q,
-      rw ←nat.dvd_add_iff_left (dvd_mul_right _ _) at H,
-      exact nat.prime.dvd_of_dvd_pow nat.prime_three H },
-
-    apply nat.coprime_of_dvd',
-    intros k hkprime hkdvdleft hkdvdright,
-    rw ←hcoprime'.gcd_eq_one,
-    have hkne2 : k ≠ 2,
-    { rintro rfl, contradiction },
-    have hkne3 : k ≠ 3,
-    { rintro rfl, contradiction },
-    have : k ∣ s,
-    { apply dvd_mul_cancel_prime _ ‹_› nat.prime_two hkprime,
-      apply dvd_mul_cancel_prime _ ‹_› nat.prime_three hkprime,
-      apply dvd_mul_cancel_prime _ ‹_› nat.prime_three hkprime,
-      convert hkdvdleft using 1,
-      ring },
-    have : k ∣ q,
-    { have : k ∣ 3 * s ^ 2 := dvd_mul_of_dvd_right (dvd_pow this two_ne_zero) _,
-      rw ←nat.dvd_add_iff_left this at hkdvdright,
-      exact hkprime.dvd_of_dvd_pow hkdvdright },
-    exact nat.dvd_gcd ‹_› ‹_›,
-  },
+  have hcoprime'' : is_coprime (3^2 * 2 * s) (q ^ 2 + 3 * s ^ 2),
+  { exact descent_gcd3_coprime h3_ndvd_q hspos hcoprime' hodd' },
   -- 4.
   obtain ⟨r, hr⟩ : ∃ r, 2 * p * (p ^ 2 + 3 * q ^ 2) = r ^ 3,
   { rcases hcube with (_|_|_);
     [use a, use b, use c];
     exact hcube },
-  have : 0 < 3 ^ 2 * 2 * s,
-  { linarith },
-  have : 0 < q ^ 2 + 3 * s ^ 2,
-  { apply nat.add_pos_right,
-    apply nat.mul_pos (by norm_num : 0 < 3) (pow_pos hspos _) },
-  have hcubeleft : ∃ e, 3 ^ 2 * 2 * s = e ^ 3,
-  { rw hps at hr,
-    exact nat.eq_pow_of_mul_eq_pow ‹_› ‹_› hcoprime'' hr },
-  have hcuberight : ∃ f, q ^ 2 + 3 * s ^ 2 = f ^ 3,
-  { rw [hps, mul_comm] at hr,
-    exact nat.eq_pow_of_mul_eq_pow ‹_› ‹_› hcoprime''.symm hr },
+  have h1 : 3 ^ 2 * 2 * s ≠ 0,
+  { apply mul_ne_zero _ hspos,
+    norm_num },
+  have h2 : q ^ 2 + 3 * s ^ 2 ≠ 0 := spts.not_zero_of_coprime hcoprime'.symm,
+  rw hps at hr,
+  obtain ⟨hcubeleft, hcuberight⟩ := int.eq_pow_of_mul_eq_pow_bit1 h1 h2 hcoprime'' hr,
 
   -- 5.
   -- todo shadows hq hq
   obtain ⟨u, v, hq, hs, huvcoprime, huvodd⟩ := obscure' q s hq hspos hcoprime'.symm hodd' hcuberight,
   have hu : u ≠ 0,
   { rintro rfl,
-    norm_num at hq,
-    exact ‹0 < q›.ne.symm hq },
+    norm_num at hq },
   have hv : v ≠ 0,
   { rintro rfl,
-    norm_num at hs,
-    exact ‹0 < s›.ne.symm hs },
+    norm_num at hs },
 
   -- 6.
   obtain ⟨haddcoprime, hsubcoprime, haddsubcoprime⟩ := gcd3_coprime huvcoprime huvodd,
@@ -911,20 +799,16 @@ begin
   { obtain ⟨e, he⟩ := hcubeleft,
     obtain ⟨f, hf⟩ := hcuberight,
     have hxxx : 3 ^ 3 * (2 * (u ^ 2 * v - v ^ 3)) = e ^ 3,
-    { zify at he,
-      rw [←he, hs],
+    { rw [←he, hs],
       ring },
     have : 3 ∣ e,
-    { rw ←int.coe_nat_dvd,
-      rw ←int.pow_dvd_pow_iff (by norm_num : 0 < 3),
+    { rw ←int.pow_dvd_pow_iff (by norm_num : 0 < 3),
       rw ←hxxx,
       exact dvd_mul_right _ _ },
-    have : (e / 3) ^ 3 = e ^ 3 / 3 ^ 3 := div_pow' _ _ _ this,
-    zify at this,
     use e / 3,
     symmetry,
-    calc ((e : ℤ) / 3) ^ 3
-        = (e : ℤ) ^ 3 / 3 ^ 3 : this
+    calc (e / 3) ^ 3
+        = e ^ 3 / 3 ^ 3 : int.div_pow this 3
     ... = (3 ^ 3 * (2 * (u ^ 2 * v - v ^ 3))) / 3 ^ 3 : by rw hxxx
     ... = ((2 * (u ^ 2 * v - v ^ 3)) * 3 ^ 3) / 3 ^ 3 : by rw mul_comm
     ... = 2 * (u ^ 2 * v - v ^ 3) : int.mul_div_cancel _ (by norm_num : (3 ^ 3 : ℤ) ≠ 0)
@@ -943,74 +827,75 @@ begin
     { exact haddsubcoprime },
     { exact ht } },
 
-  apply nat_solution_of_int_solution (2 * p) HApos HBpos HCpos,
-
+  refine ⟨A, B, C, HApos, HBpos, HCpos, _, _⟩,
   -- 9.
-  { apply le_of_lt,
-    calc (A ^ 3 * B ^ 3 * C ^ 3).nat_abs
-        ≤ s : _
-    ... < 3 * s : nat.lt_mul_left s 3 (by norm_num) hspos
-    ... = p : eq.symm ‹_›
-    ... < 2 * p : nat.lt_mul_left p 2 (by norm_num) hp,
-
-    rw [←HA, ←HB, ←HC],
+  { rw [mul_comm, ←mul_assoc (C ^ 3), ←HA, ←HB, ←HC],
     set x := v * (u - v) * (u + v) with hx,
-
-    calc (2 * v * (u - v) * (u + v)).nat_abs
+    calc ((u + v) * (2 * v) * (u - v)).nat_abs
         = (2 * x).nat_abs : by { rw hx, congr' 1, ring }
     ... = 2 * x.nat_abs : by { rw [int.nat_abs_mul 2], refl }
     ... ≤ 3 * x.nat_abs : nat.mul_le_mul_right _ (by norm_num)
     ... = (3 * x).nat_abs : by { rw [int.nat_abs_mul 3], refl }
-    ... = s : by { rw [hx, ←int.nat_abs_of_nat s, hs], congr' 1, ring } },
-
-  -- 8.
-  { calc A ^ 3 + B ^ 3
-        = 2 * v + (u - v) : by rw [HA, HB]
-    ... = u + v : by ring
-    ... = C ^ 3 : HC },
+    ... = s.nat_abs : by { rw [hx, hs], congr' 1, ring }
+    ... ≤ 3 * s.nat_abs : nat.le_mul_of_pos_left (by norm_num)
+    ... = (3 * s).nat_abs : by { rw [int.nat_abs_mul 3], refl }
+    ... = p.nat_abs : by rw ‹p = 3 * s›
+    ... ≤ 2 * p.nat_abs : nat.le_mul_of_pos_left (by norm_num)
+    ... = (2 * p).nat_abs : by { rw [int.nat_abs_mul 2], refl } },
+  { rw [←HA, ←HB, ←HC], ring },
 end
 
 lemma descent
-  (a b c : ℕ)
-  (h : flt_coprime a b c 3) :
-  ∃ a' b' c', 0 < a' ∧ 0 < b' ∧ 0 < c' ∧ (a' * b' * c' < a * b * c) ∧ a' ^ 3 + b' ^ 3 = c' ^ 3 :=
+  (a b c : ℤ)
+  (h : flt_coprime 3 a b c) :
+  ∃ a' b' c' : ℤ,
+    a' ≠ 0 ∧ b' ≠ 0 ∧ c' ≠ 0 ∧
+    (a' * b' * c').nat_abs < (a * b * c).nat_abs ∧
+    a' ^ 3 + b' ^ 3 = c' ^ 3 :=
 begin
   -- 3.
   have := descent2 a b c h,
   obtain ⟨p, q, hp, hq, hcoprime, hodd, hcube, haaa⟩ := this,
 
-  suffices : ∃ a' b' c',
-    0 < a' ∧ 0 < b' ∧ 0 < c' ∧
-    a' ^ 3 * b' ^ 3 * c' ^ 3 ≤ 2 * p ∧
+  suffices : ∃ a' b' c' : ℤ,
+    a' ≠ 0 ∧ b' ≠ 0 ∧ c' ≠ 0 ∧
+    (a' ^ 3 * b' ^ 3 * c' ^ 3).nat_abs ≤ (2 * p).nat_abs ∧
     a' ^ 3 + b' ^ 3 = c' ^ 3,
   { obtain ⟨a', b', c', ha', hb', hc', hsmaller, hsolution⟩ := this,
     refine ⟨a', b', c', ha', hb', hc', _, hsolution⟩,
     rw ←nat.pow_lt_iff_lt_left (by norm_num : 1 ≤ 3),
-    iterate 4 {rw mul_pow},
-    exact lt_of_le_of_lt hsmaller haaa },
+    convert lt_of_le_of_lt hsmaller haaa;
+      simp [mul_pow, int.nat_abs_mul, int.nat_abs_pow] },
 
   -- 4.
   cases gcd1or3 p q hp hq hcoprime hodd with hgcd hgcd,
   -- 5.
-  { apply descent_gcd1 a b c p q hp hq hcoprime hodd hcube h hgcd },
+  { rw int.gcd_eq_one_iff_coprime at hgcd,
+    apply descent_gcd1 a b c p q hp hq hcoprime hodd hcube h hgcd },
   { apply descent_gcd3 a b c p q hp hq hcoprime hodd hcube h hgcd },
 end
 
 lemma flt_three
-  (a b c : ℕ)
-  (hpos : 0 < a ∧ 0 < b ∧ 0 < c) :
+  (a b c : ℤ)
+  (ha : a ≠ 0)
+  (hb : b ≠ 0)
+  (hc : c ≠ 0) :
   a ^ 3 + b ^ 3 ≠ c ^ 3 :=
 begin
-  suffices h : ∀ k a b c : ℕ, k = a * b * c → (0 < a ∧ 0 < b ∧ 0 < c) → a ^ 3 + b ^ 3 ≠ c ^ 3,
-  { exact h (a * b * c) a b c rfl hpos },
+  suffices h : ∀ (k : ℕ) (a b c : ℤ),
+    k = (a * b * c).nat_abs →
+    a ≠ 0 → b ≠ 0 → c ≠ 0 → a ^ 3 + b ^ 3 ≠ c ^ 3,
+  { exact h (a * b * c).nat_abs a b c rfl ha hb hc },
   intro k,
   refine nat.strong_induction_on k _,
-  intros k' IH x y z hk hpos H,
-  obtain ⟨x'', y'', z'', hxle, hyle, hzle, hcoprime⟩ := exists_coprime x y z 3 hpos (by norm_num) H,
+  intros k' IH x y z hk hxpos hypos hzpos H,
+  obtain ⟨x'', y'', z'', hxle, hyle, hzle, hcoprime⟩ :=
+    exists_coprime 3 x y z hxpos hypos hzpos (by norm_num) H,
   obtain ⟨x', y', z', hx'pos, hy'pos, hz'pos, hsmaller, hsolution⟩ := descent x'' y'' z'' hcoprime,
-  refine IH (x' * y' * z') _ _ _ _ rfl ⟨hx'pos, hy'pos, hz'pos⟩ hsolution,
+  refine IH (x' * y' * z').nat_abs _ _ _ _ rfl hx'pos hy'pos hz'pos hsolution,
   apply lt_of_lt_of_le hsmaller,
   rw hk,
+  simp only [int.nat_abs_mul],
   apply nat.mul_le_mul _ hzle,
   apply nat.mul_le_mul hxle hyle,
 end
