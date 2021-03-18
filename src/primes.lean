@@ -572,15 +572,6 @@ begin
   apply dvd_add; { apply dvd_mul_of_dvd_right, assumption },
 end
 
-lemma is_coprime.is_unit_of_dvd'' {a b x : R} (h : is_coprime a b) (ha : x ∣ a) (hb : x ∣ b) :
-is_unit x :=
-begin
-  rw is_unit_iff_dvd_one,
-  obtain ⟨c, d, h1⟩ := h,
-  rw ←h1,
-  apply dvd_add; { apply dvd_mul_of_dvd_right, assumption },
-end
-
 end
 
 section
