@@ -182,59 +182,6 @@ begin
     ring },
 end
 
-lemma descent1right {a b c : ℤ}
-  (habcoprime : is_coprime a b)
-  (hapos : a ≠ 0)
-  --(hbpos : b ≠ 0)
-  (hcpos : c ≠ 0)
-  (h : a ^ 3 + b ^ 3 = c ^ 3)
-  (ha : ¬even a)
-  (hb : ¬even b) :
-  ∃ (p q : ℤ),
-    p ≠ 0 ∧
-    q ≠ 0 ∧
-    is_coprime p q ∧
-    (even p ↔ ¬even q) ∧
-    2 * p * (p ^ 2 + 3 * q ^ 2) = c ^ 3 :=
-begin
-  obtain ⟨p, hp⟩ : even (a + b),
-  { simp [ha, hb] with parity_simps},
-  obtain ⟨q, hq⟩ : even (a - b),
-  { simp [ha, hb] with parity_simps},
-  have hadd : p + q = a,
-  { apply int.eq_of_mul_eq_mul_left two_ne_zero,
-    rw [mul_add, ←hp, ←hq],
-    ring },
-  have hsub : p - q = b,
-  { apply int.eq_of_mul_eq_mul_left two_ne_zero,
-    rw [mul_sub, ←hp, ←hq],
-    ring },
-  have hpnezero : p ≠ 0,
-  { rintro rfl,
-    apply hcpos,
-    rw [mul_zero, add_eq_zero_iff_eq_neg] at hp,
-    rwa [hp, neg_pow_bit1, add_left_neg, eq_comm, pow_eq_zero_iff] at h,
-    norm_num },
-  refine ⟨p, q, hpnezero, _, _, _, _⟩,
-  { rintro rfl,
-    apply flt_not_add_self hapos h,
-    rw [←hadd, ←hsub, add_zero, sub_zero] },
-  { apply is_coprime_of_dvd,
-    { exact not_and_of_not_or_not (or.inl hpnezero) },
-    intros z hznu hznz hzp hzq,
-    apply hznu,
-    apply habcoprime.is_unit_of_dvd',
-    { rw ←hadd,
-      exact dvd_add hzp hzq },
-    { rw ←hsub,
-      exact dvd_sub hzp hzq } },
-  { have : ¬even (p + q),
-    { rwa [hadd] },
-    split; intro H; simpa [H] with parity_simps using this },
-  { rw [←h, ←hadd, ←hsub],
-    ring },
-end
-
 lemma descent1 (a b c : ℤ)
   (h : flt_coprime 3 a b c) :
   ∃ (p q : ℤ),
@@ -254,8 +201,10 @@ begin
   { rw add_comm at h,
     obtain ⟨p, q, hp, hq, hcoprime, hodd, hcube⟩ := descent1left hbpos h haccoprime ha hc,
     refine ⟨p, q, hp, hq, hcoprime, hodd, or.inr $ or.inl hcube⟩ },
-  { obtain ⟨p, q, hp, hq, hcoprime, hodd, hcube⟩ := descent1right habcoprime hapos hcpos h ha hb,
-    exact ⟨p, q, hp, hq, hcoprime, hodd, or.inr $ or.inr hcube⟩, },
+  { obtain ⟨p, q, hp, hq, hcoprime, hodd, hcube⟩ := descent1left hcpos _ habcoprime.neg_left _ hb,
+    exact ⟨p, q, hp, hq, hcoprime, hodd, or.inr $ or.inr hcube⟩,
+    { rw ←h, ring },
+    { simp [ha] with parity_simps } },
 end
 
 lemma descent11 {a b c d : ℤ} (h : d = a ∨ d = b ∨ d = c) : d ∣ (a * b * c) :=
