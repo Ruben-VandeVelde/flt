@@ -24,13 +24,6 @@ def flt_coprime
   is_coprime a c ∧
   is_coprime b c
 
-lemma flt_coprime.symm {n a b c} (h : flt_coprime n a b c) : flt_coprime n b a c :=
-begin
-  obtain ⟨⟨hapos, hbpos, hcpos, h⟩, habcoprime, haccoprime, hbccoprime⟩ := h,
-  rw add_comm at h,
-  exact ⟨⟨hbpos, hapos, hcpos, h⟩, habcoprime.symm, hbccoprime, haccoprime⟩,
-end
-
 lemma exists_coprime
   {n : ℕ}
   (hn : 0 < n)
