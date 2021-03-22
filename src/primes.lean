@@ -591,6 +591,9 @@ begin
   simpa only [neg_mul_eq_neg_mul_symm, mul_neg_eq_neg_mul_symm, neg_neg] using h,
 end
 
+lemma is_coprime.neg_right_iff (a b : R) : is_coprime a (-b) ↔ is_coprime a b :=
+⟨λ h, (neg_neg b) ▸ is_coprime.neg_right h, is_coprime.neg_right⟩
+
 lemma is_coprime.neg_neg {a b : R} (h : is_coprime a b) : is_coprime (-a) (-b) :=
 h.neg_left.neg_right
 

@@ -32,12 +32,12 @@ begin
 end
 
 lemma exists_coprime
-  (n : ℕ)
-  (a b c : ℤ)
+  {n : ℕ}
+  (hn : 0 < n)
+  {a b c : ℤ}
   (ha' : a ≠ 0)
   (hb' : b ≠ 0)
   (hc' : c ≠ 0)
-  (hn : 0 < n)
   (h : a ^ n + b ^ n = c ^ n) :
   ∃ a' b' c' : ℤ,
     a'.nat_abs ≤ a.nat_abs ∧ b'.nat_abs ≤ b.nat_abs ∧ c'.nat_abs ≤ c.nat_abs ∧
@@ -128,8 +128,9 @@ begin
 end
 
 lemma descent1left {a b c : ℤ}
-  (h : flt_coprime 3 a b c)
-  (ha : even a)
+  (hapos : a ≠ 0)
+  (h : a ^ 3 + b ^ 3 = c ^ 3)
+  (hbccoprime : is_coprime b c)
   (hb : ¬even b)
   (hc : ¬even c) :
   ∃ (p q : ℤ),
@@ -137,12 +138,8 @@ lemma descent1left {a b c : ℤ}
       q ≠ 0 ∧
         is_coprime p q ∧
           (even p ↔ ¬even q) ∧
-            (2 * p * (p ^ 2 + 3 * q ^ 2) = a ^ 3 ∨
-               2 * p * (p ^ 2 + 3 * q ^ 2) = b ^ 3 ∨
-                 2 * p * (p ^ 2 + 3 * q ^ 2) = c ^ 3) :=
+            2 * p * (p ^ 2 + 3 * q ^ 2) = a ^ 3 :=
 begin
-  obtain ⟨⟨hapos, hbpos, hcpos, h⟩, habcoprime, haccoprime, hbccoprime⟩ := h,
-
   obtain ⟨p, hp⟩ : even (c - b),
   { simp [hb, hc] with parity_simps},
   obtain ⟨q, hq⟩ : even (c + b),
@@ -156,15 +153,11 @@ begin
     rw [mul_sub, ←hp, ←hq],
     ring },
   have hpnezero : p ≠ 0,
-  { have : c ≠ b,
-    { rintro rfl,
-      conv_rhs at h { rw [←zero_add (c ^ 3)] },
-      rw [add_left_inj] at h,
-      exact hapos (pow_eq_zero h) },
-    rintro rfl,
-    rw mul_zero at hp,
-    rw sub_eq_zero at hp,
-    exact this hp },
+  { rintro rfl,
+    rw [mul_zero, sub_eq_zero] at hp,
+    subst hp,
+    rw add_left_eq_self at h,
+    exact hapos (pow_eq_zero h) },
 
   have hqnezero : q ≠ 0,
   { rintro rfl,
@@ -185,8 +178,60 @@ begin
   { have : ¬even (p + q),
     { rwa [hadd] },
     split; intro H; simpa [H] with parity_simps using this },
-  { left,
-    rw [eq_sub_of_add_eq h, ←hadd, ←hsub],
+  { rw [eq_sub_of_add_eq h, ←hadd, ←hsub],
+    ring },
+end
+
+lemma descent1right {a b c : ℤ}
+  (habcoprime : is_coprime a b)
+  (hapos : a ≠ 0)
+  --(hbpos : b ≠ 0)
+  (hcpos : c ≠ 0)
+  (h : a ^ 3 + b ^ 3 = c ^ 3)
+  (ha : ¬even a)
+  (hb : ¬even b) :
+  ∃ (p q : ℤ),
+    p ≠ 0 ∧
+    q ≠ 0 ∧
+    is_coprime p q ∧
+    (even p ↔ ¬even q) ∧
+    2 * p * (p ^ 2 + 3 * q ^ 2) = c ^ 3 :=
+begin
+  obtain ⟨p, hp⟩ : even (a + b),
+  { simp [ha, hb] with parity_simps},
+  obtain ⟨q, hq⟩ : even (a - b),
+  { simp [ha, hb] with parity_simps},
+  have hadd : p + q = a,
+  { apply int.eq_of_mul_eq_mul_left two_ne_zero,
+    rw [mul_add, ←hp, ←hq],
+    ring },
+  have hsub : p - q = b,
+  { apply int.eq_of_mul_eq_mul_left two_ne_zero,
+    rw [mul_sub, ←hp, ←hq],
+    ring },
+  have hpnezero : p ≠ 0,
+  { rintro rfl,
+    apply hcpos,
+    rw [mul_zero, add_eq_zero_iff_eq_neg] at hp,
+    rwa [hp, neg_pow_bit1, add_left_neg, eq_comm, pow_eq_zero_iff] at h,
+    norm_num },
+  refine ⟨p, q, hpnezero, _, _, _, _⟩,
+  { rintro rfl,
+    apply flt_not_add_self hapos h,
+    rw [←hadd, ←hsub, add_zero, sub_zero] },
+  { apply is_coprime_of_dvd,
+    { exact not_and_of_not_or_not (or.inl hpnezero) },
+    intros z hznu hznz hzp hzq,
+    apply hznu,
+    apply habcoprime.is_unit_of_dvd',
+    { rw ←hadd,
+      exact dvd_add hzp hzq },
+    { rw ←hsub,
+      exact dvd_sub hzp hzq } },
+  { have : ¬even (p + q),
+    { rwa [hadd] },
+    split; intro H; simpa [H] with parity_simps using this },
+  { rw [←h, ←hadd, ←hsub],
     ring },
 end
 
@@ -201,51 +246,16 @@ lemma descent1 (a b c : ℤ)
      2 * p * (p ^ 2 + 3 * q ^ 2) = b ^ 3 ∨
      2 * p * (p ^ 2 + 3 * q ^ 2) = c ^ 3) :=
 begin
-  have h' := h,
   obtain ⟨⟨hapos, hbpos, hcpos, h⟩, habcoprime, haccoprime, hbccoprime⟩ := h,
 
   obtain (⟨ha, hb, hc⟩|⟨ha, hb, hc⟩)|⟨ha, hb, hc⟩ := descent1a h habcoprime haccoprime hbccoprime,
-  { exact descent1left h' ha hb hc },
-  { obtain ⟨p, q, hp, hq, hcoprime, hodd, hcube⟩ := descent1left h'.symm hb ha hc,
-    refine ⟨p, q, hp, hq, hcoprime, hodd, _⟩,
-    rwa or.left_comm },
-  { obtain ⟨p, hp⟩ : even (a + b),
-    { simp [ha, hb] with parity_simps},
-    obtain ⟨q, hq⟩ : even (a - b),
-    { simp [ha, hb] with parity_simps},
-    have hadd : p + q = a,
-    { apply int.eq_of_mul_eq_mul_left two_ne_zero,
-      rw [mul_add, ←hp, ←hq],
-      ring },
-    have hsub : p - q = b,
-    { apply int.eq_of_mul_eq_mul_left two_ne_zero,
-      rw [mul_sub, ←hp, ←hq],
-      ring },
-    have hpnezero : p ≠ 0,
-    { rintro rfl,
-      apply hcpos,
-      rw [mul_zero, add_eq_zero_iff_eq_neg] at hp,
-      rwa [hp, neg_pow_bit1, add_left_neg, eq_comm, pow_eq_zero_iff] at h,
-      norm_num },
-    refine ⟨p, q, hpnezero, _, _, _, _⟩,
-    { rintro rfl,
-      apply flt_not_add_self hapos h,
-      rw [←hadd, ←hsub, add_zero, sub_zero] },
-    { apply is_coprime_of_dvd,
-      { exact not_and_of_not_or_not (or.inl hpnezero) },
-      intros z hznu hznz hzp hzq,
-      apply hznu,
-      apply habcoprime.is_unit_of_dvd',
-      { rw ←hadd,
-        exact dvd_add hzp hzq },
-      { rw ←hsub,
-        exact dvd_sub hzp hzq } },
-    { have : ¬even (p + q),
-      { rwa [hadd] },
-      split; intro H; simpa [H] with parity_simps using this },
-    { right, right,
-      rw [←h, ←hadd, ←hsub],
-      ring } },
+  { obtain ⟨p, q, hp, hq, hcoprime, hodd, hcube⟩ := descent1left hapos h hbccoprime hb hc,
+    exact ⟨p, q, hp, hq, hcoprime, hodd, or.inl hcube⟩ },
+  { rw add_comm at h,
+    obtain ⟨p, q, hp, hq, hcoprime, hodd, hcube⟩ := descent1left hbpos h haccoprime ha hc,
+    refine ⟨p, q, hp, hq, hcoprime, hodd, or.inr $ or.inl hcube⟩ },
+  { obtain ⟨p, q, hp, hq, hcoprime, hodd, hcube⟩ := descent1right habcoprime hapos hcpos h ha hb,
+    exact ⟨p, q, hp, hq, hcoprime, hodd, or.inr $ or.inr hcube⟩, },
 end
 
 lemma descent11 {a b c d : ℤ} (h : d = a ∨ d = b ∨ d = c) : d ∣ (a * b * c) :=
@@ -890,7 +900,7 @@ begin
   refine nat.strong_induction_on k _,
   intros k' IH x y z hk hxpos hypos hzpos H,
   obtain ⟨x'', y'', z'', hxle, hyle, hzle, hcoprime⟩ :=
-    exists_coprime 3 x y z hxpos hypos hzpos (by norm_num) H,
+    exists_coprime zero_lt_three hxpos hypos hzpos H,
   obtain ⟨x', y', z', hx'pos, hy'pos, hz'pos, hsmaller, hsolution⟩ := descent x'' y'' z'' hcoprime,
   refine IH (x' * y' * z').nat_abs _ _ _ _ rfl hx'pos hy'pos hz'pos hsolution,
   apply lt_of_lt_of_le hsmaller,
