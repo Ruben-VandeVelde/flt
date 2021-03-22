@@ -223,7 +223,7 @@ begin
   obtain ⟨p, q, hp, hq, hcoprime, hodd, hcube⟩ := descent1 a b c h,
   refine ⟨p, q, hp, hq, hcoprime, hodd, hcube, _⟩,
 
-  obtain ⟨⟨hapos, hbpos, hcpos, h⟩, habcoprime, haccoprime, hbccoprime⟩ := h,
+  obtain ⟨⟨hapos, hbpos, hcpos, h⟩, -⟩ := h,
   have : (2 * p).nat_abs < (2 * p * (p ^ 2 + 3 * q ^ 2)).nat_abs,
   { rw [int.nat_abs_mul (2 * p)],
     apply lt_mul_of_one_lt_right,
@@ -234,13 +234,8 @@ begin
       exact spts.one_lt_of_right_ne_zero hq  } },
   apply lt_of_lt_of_le this,
   { apply nat.le_of_dvd,
-    { rw pos_iff_ne_zero,
-      intro H,
-      rw [int.nat_abs_mul, int.nat_abs_mul, mul_eq_zero, mul_eq_zero] at H,
-      obtain (H|H)|H := H;
-      { rw [int.nat_abs_eq_zero, pow_eq_zero_iff] at H,
-        contradiction,
-        norm_num } },
+    { rw [pos_iff_ne_zero, int.nat_abs_ne_zero, ←mul_pow, ←mul_pow],
+      exact pow_ne_zero 3 (mul_ne_zero (mul_ne_zero hapos hbpos) hcpos) },
     { rw int.nat_abs_dvd_abs_iff,
       exact descent11 hcube } }
 end
@@ -338,15 +333,10 @@ begin
       apply dvd_mul_right },
     exact dvd_trans this (int.gcd_dvd_left _ _) },
   apply is_coprime.is_unit_of_dvd' hcoprime hdvdp,
-  { have dvdpsq : 3 ^ 2 ∣ p ^ 2,
-    { rwa int.pow_dvd_pow_iff zero_lt_two, },
-    suffices : 3 ∣ q ^ 2,
-    { apply prime.dvd_of_dvd_pow int.prime_three this },
-    suffices : 3 ^ 2 ∣ 3 * q ^ 2,
-    { rwa [pow_two, mul_dvd_mul_iff_left (@three_ne_zero ℤ _ _)] at this },
-    suffices : 3 ^ 2 ∣ p ^ 2 + 3 * q ^ 2,
-    { rwa dvd_add_iff_right dvdpsq },
-    refine dvd_trans _ (int.gcd_dvd_right (2 * p) _),
+  { rw ←int.pow_dvd_pow_iff zero_lt_two at hdvdp,
+    apply prime.dvd_of_dvd_pow int.prime_three,
+    rw [←mul_dvd_mul_iff_left (@three_ne_zero ℤ _ _), ←pow_two, dvd_add_iff_right hdvdp],
+    refine dvd_trans _ (int.gcd_dvd_right (2 * p) (p ^ 2 + 3 * q ^ 2)),
     rw [←hg', hg, int.coe_nat_mul],
     apply dvd_mul_right }
 end
