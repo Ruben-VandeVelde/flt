@@ -727,23 +727,19 @@ begin
   -- 7.
   obtain ⟨t, ht⟩ : ∃ t, 2 * v * (u - v) * (u + v) = t ^ 3,
   { obtain ⟨e, he⟩ := hcubeleft,
-    obtain ⟨f, hf⟩ := hcuberight,
     have hxxx : 3 ^ 3 * (2 * (u ^ 2 * v - v ^ 3)) = e ^ 3,
     { rw [←he, hs],
       ring },
-    have : 3 ∣ e,
+    obtain ⟨g, rfl⟩ : 3 ∣ e,
     { rw ←int.pow_dvd_pow_iff (by norm_num : 0 < 3),
       rw ←hxxx,
       exact dvd_mul_right _ _ },
-    use e / 3,
-    symmetry,
-    calc (e / 3) ^ 3
-        = e ^ 3 / 3 ^ 3 : int.div_pow this 3
-    ... = (3 ^ 3 * (2 * (u ^ 2 * v - v ^ 3))) / 3 ^ 3 : by rw hxxx
-    ... = ((2 * (u ^ 2 * v - v ^ 3)) * 3 ^ 3) / 3 ^ 3 : by rw mul_comm
-    ... = 2 * (u ^ 2 * v - v ^ 3) : int.mul_div_cancel _ (by norm_num : (3 ^ 3 : ℤ) ≠ 0)
-    ... = 2 * v * (u ^ 2 - v ^ 2) : by rw [mul_assoc, mul_comm v, mul_sub_right_distrib, pow_succ' v]
-    ... = 2 * v * (u - v) * (u + v) : by { rw pow_two_sub_pow_two, ring } },
+    use g,
+    have : (3 ^ 3 : ℤ) ≠ 0,
+    { norm_num },
+    rw [←mul_right_inj' this, ←mul_pow],
+    convert hxxx using 1,
+    ring },
 
   obtain ⟨A, B, C, HApos, HBpos, HCpos, HA, HB, HC⟩ : ∃ X Y Z : ℤ,
     X ≠ 0 ∧ Y ≠ 0 ∧ Z ≠ 0 ∧
