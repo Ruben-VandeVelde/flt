@@ -10,6 +10,47 @@ import ring_theory.int.basic
 import data.zsqrtd.basic
 import .primes
 
+lemma int.sq_plus_three_sq_eq_zero_iff {a b : ℤ} : a ^ 2 + 3 * b ^ 2 = 0 ↔ a = 0 ∧ b = 0 :=
+begin
+  split,
+  { intro h,
+    have hposleft := pow_two_nonneg a,
+    have hposright := mul_nonneg (by norm_num : (0 : ℤ) ≤ 3) (pow_two_nonneg b),
+    obtain ⟨ha, hb⟩ := (add_eq_zero_iff_eq_zero_of_nonneg hposleft hposright).mp h,
+    split,
+    { exact pow_eq_zero ha },
+    { rw [mul_eq_zero, eq_false_intro (by norm_num : (3 : ℤ) ≠ 0), false_or] at hb,
+      exact pow_eq_zero hb } },
+  { rintro ⟨rfl, rfl⟩, norm_num }
+end
+
+lemma nat.sq_plus_three_sq_eq_zero_iff {a b : ℕ} : a ^ 2 + 3 * b ^ 2 = 0 ↔ a = 0 ∧ b = 0 :=
+begin
+  zify,
+  exact int.sq_plus_three_sq_eq_zero_iff
+end
+
+lemma spts.nonneg
+  (a b : ℤ) :
+  0 ≤ a ^ 2 + 3 * b ^ 2 :=
+add_nonneg (pow_two_nonneg a) (mul_nonneg zero_lt_three.le (pow_two_nonneg b))
+
+lemma spts.not_zero_of_coprime -- TODO ne_zero
+  {a b : ℤ}
+  (hcoprime : is_coprime a b) :
+  a ^ 2 + 3 * b ^ 2 ≠ 0 :=
+begin
+  contrapose! hcoprime with H,
+  obtain ⟨rfl, rfl⟩ := int.sq_plus_three_sq_eq_zero_iff.mp H,
+  exact not_coprime_zero_zero,
+end
+
+lemma spts.pos_of_coprime
+  {a b : ℤ}
+  (hcoprime : is_coprime a b) :
+  0 < a ^ 2 + 3 * b ^ 2 :=
+lt_of_le_of_ne (spts.nonneg _ _) (spts.not_zero_of_coprime hcoprime).symm
+
 lemma factors2
   {a b : ℕ}
   (heven : even (a ^ 2 + 3 * b ^ 2)) :
@@ -56,26 +97,6 @@ begin
           = (a + 3 * b) ^ 2 + 3 * (a - b) ^ 2 : by ring
       ... = (4 * u) ^ 2 + 3 * (4 * v) ^ 2 : by rw [hu, hv]
       ... = 4 * (4 * (u ^ 2 + 3 * v ^ 2)) : by ring } }
-end
-
-lemma int.sq_plus_three_sq_eq_zero_iff {a b : ℤ} : a ^ 2 + 3 * b ^ 2 = 0 ↔ a = 0 ∧ b = 0 :=
-begin
-  split,
-  { intro h,
-    have hposleft := pow_two_nonneg a,
-    have hposright := mul_nonneg (by norm_num : (0 : ℤ) ≤ 3) (pow_two_nonneg b),
-    obtain ⟨ha, hb⟩ := (add_eq_zero_iff_eq_zero_of_nonneg hposleft hposright).mp h,
-    split,
-    { exact pow_eq_zero ha },
-    { rw [mul_eq_zero, eq_false_intro (by norm_num : (3 : ℤ) ≠ 0), false_or] at hb,
-      exact pow_eq_zero hb } },
-  { rintro ⟨rfl, rfl⟩, norm_num }
-end
-
-lemma nat.sq_plus_three_sq_eq_zero_iff {a b : ℕ} : a ^ 2 + 3 * b ^ 2 = 0 ↔ a = 0 ∧ b = 0 :=
-begin
-  zify,
-  exact int.sq_plus_three_sq_eq_zero_iff
 end
 
 lemma spts.mul_of_dvd'
@@ -312,41 +333,43 @@ begin
 end
 
 lemma factors
-  (a b x : ℕ)
-  (hcoprime : nat.gcd a b = 1)
-  (hodd : ¬even x)
+  (a b x : ℤ)
+  (hcoprime : is_coprime a b)
+  (hodd : odd x)
   (hfactor : x ∣ (a ^ 2 + 3 * b ^ 2)) :
   ∃ c d, x = c ^ 2 + 3 * d ^ 2 :=
 begin
-  revert x a b,
-  intro x',
-  apply nat.strong_induction_on x',
-  clear x',
-  intros x IH a b hcoprime hodd hfactor,
+  suffices : ∀ (xabs : ℕ) (x a b : ℤ),
+    xabs = x.nat_abs → is_coprime a b → odd x → x ∣ a ^ 2 + 3 * b ^ 2 →
+    (∃ (c d : ℤ), x = c ^ 2 + 3 * d ^ 2),
+  { exact this x.nat_abs x a b rfl hcoprime hodd hfactor },
+  intro xabs,
+  induction xabs using nat.strong_induction_on with xabs IH,
+  intros x a b habs hcoprime hodd hfactor,
   have hneg1 : 1 ≤ a ^ 2 + 3 * b ^ 2,
-  { rw [nat.succ_le_iff, pos_iff_ne_zero],
-    intro H,
-    obtain ⟨rfl, rfl⟩ := nat.sq_plus_three_sq_eq_zero_iff.mp H,
-    simp only [nat.gcd_zero_right, zero_ne_one] at hcoprime,
-    assumption },
+  { rw [←int.sub_one_lt_iff, sub_self],
+    exact spts.pos_of_coprime hcoprime },
   by_cases h : x = 1,
   { subst h,
     refine ⟨1, 0, _⟩,
     ring },
-  have h0' : 0 < x,
-  { rw pos_iff_ne_zero,
-    rintro rfl,
-    exact hodd nat.even_zero },
+  have h0' : x ≠ 0,
+  { rintro rfl,
+    rw int.odd_iff_not_even at hodd,
+    apply hodd,
+    exact int.even_zero },
 
+/-
   have h0 : 1 < x,
   { apply lt_of_le_of_ne _ _,
     { apply nat.succ_le_of_lt,
       exact h0' },
     { symmetry,
       exact h } },
+-/
 
-  obtain ⟨m, c, ha, hc⟩ := factor_div a x hodd h0',
-  obtain ⟨n, d, hb, hd⟩ := factor_div b x hodd h0',
+  obtain ⟨m, c, ha, hc⟩ := int.factor_div a x hodd h0',
+  obtain ⟨n, d, hb, hd⟩ := int.factor_div b x hodd h0',
 
   set e : ℤ := m ^ 2 * x + 2 * m * c + 3 * n ^ 2 * x + 6 * n * d with he,
 
@@ -360,7 +383,6 @@ begin
     rw this,
     apply dvd_sub,
     { rw ←h1,
-      norm_cast,
       exact hfactor },
     { exact dvd_mul_right _ _ }
   },
@@ -511,27 +533,6 @@ begin
       rw [←int.nat_abs_pow_two, ←int.abs_eq_nat_abs, ←one_pow 2],
       apply pow_lt_pow_of_lt_left H zero_le_one zero_lt_two } }
 end
-
-lemma spts.nonneg
-  (a b : ℤ) :
-  0 ≤ a ^ 2 + 3 * b ^ 2 :=
-add_nonneg (pow_two_nonneg a) (mul_nonneg zero_lt_three.le (pow_two_nonneg b))
-
-lemma spts.not_zero_of_coprime -- TODO ne_zero
-  {a b : ℤ}
-  (hcoprime : is_coprime a b) :
-  a ^ 2 + 3 * b ^ 2 ≠ 0 :=
-begin
-  contrapose! hcoprime with H,
-  obtain ⟨rfl, rfl⟩ := int.sq_plus_three_sq_eq_zero_iff.mp H,
-  exact not_coprime_zero_zero,
-end
-
-lemma spts.pos_of_coprime
-  {a b : ℤ}
-  (hcoprime : is_coprime a b) :
-  0 < a ^ 2 + 3 * b ^ 2 :=
-lt_of_le_of_ne (spts.nonneg _ _) (spts.not_zero_of_coprime hcoprime).symm
 
 lemma spts.one_lt_of_right_ne_zero
   {a b : ℤ}

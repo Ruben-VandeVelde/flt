@@ -334,6 +334,9 @@ end
 
 @[parity_simps]
 lemma int.nat_abs.even (p : ℤ ) : even p.nat_abs ↔ even p := int.coe_nat_dvd_left.symm
+@[parity_simps]
+lemma int.nat_abs.odd (p : ℤ ) : odd p.nat_abs ↔ odd p :=
+by rw [int.odd_iff_not_even, nat.odd_iff_not_even, int.nat_abs.even]
 
 lemma nat.lt_mul_left (a b : nat) (h : 1 < b) (h' : 0 < a): a < b * a :=
 begin
@@ -378,31 +381,64 @@ begin
   exact associated_of_dvd_dvd (int.coe_nat_dvd_right.mpr (dvd_refl _)) (int.nat_abs_dvd.mpr (dvd_refl _)),
 end
 
-lemma int.factor_div (a: ℤ) (x : ℕ)
-  (hodd : odd x)
-  (h0' : 0 < x) :
-  ∃ (m c : ℤ), c + m * x = a ∧ 2 * c.nat_abs < x :=
+lemma int.nat_abs_eq_mul_sign (x : ℤ) : x.sign * x = x.nat_abs :=
 begin
-  set c : ℤ := a % x with hc,
-  have hcnonneg : 0 ≤ c := int.mod_nonneg _ (int.coe_nat_ne_zero_iff_pos.mpr h0'),
-  have : c < x := int.mod_lt_of_pos a (int.coe_nat_lt.mpr h0'),
-  by_cases H : 2 * c < x,
-  { refine ⟨a/x, c, _, _⟩,
-    { rw [mul_comm], exact int.mod_add_div a x },
-    { zify, rwa [int.nat_abs_of_nonneg hcnonneg] } },
+  obtain h|rfl|h := lt_trichotomy x 0,
+  { rw [int.sign_eq_neg_one_of_neg h, int.of_nat_nat_abs_of_nonpos h.le, neg_one_mul] },
+  { simp only [int.coe_nat_zero, mul_zero, int.nat_abs_zero] },
+  { rw [int.sign_eq_one_of_pos h, int.nat_abs_of_nonneg h.le, one_mul] },
+end
+
+lemma int.factor_div (a: ℤ) (x : ℤ)
+  (hodd : odd x)
+  (h0' : x ≠ 0) :
+  ∃ (m c : ℤ), c + m * x = a ∧ 2 * c.nat_abs < x.nat_abs :=
+begin
+  set c : ℤ := (a % x) with hc,
+  have hcnonneg : 0 ≤ c := int.mod_nonneg _ h0',
+  have : c.nat_abs < x.nat_abs,
+  { zify [hcnonneg],
+    rw int.nat_abs_of_nonneg hcnonneg,
+    rw hc,
+    rw ←int.abs_eq_nat_abs,
+    apply int.mod_lt a h0' },
+
+  have : 2 * c.nat_abs + 1 < 2 * x.nat_abs,
+  { rw ←nat.add_one_le_iff,
+    rw [add_assoc, ←two_mul, ←mul_add],
+    apply nat.mul_le_mul_of_nonneg_left,
+    rwa nat.add_one_le_iff },
+  by_cases H : 2 * c.nat_abs < x.nat_abs,
+  { refine ⟨a/x, c, _, H⟩,
+    rw [mul_comm], exact int.mod_add_div a x },
   { push_neg at H,
-    set c' : ℤ := c - x with hc',
-    refine ⟨a / x + 1, c', _, _⟩,
-    { rw [add_mul, one_mul, hc'],
-      conv_rhs { rw ←int.mod_add_div a x },
-      ring },
-    { zify at ⊢ H,
-      rw [hc', ←int.nat_abs_neg, neg_sub, int.nat_abs_of_nonneg (sub_nonneg_of_le this.le),
-        mul_sub, sub_lt_iff_lt_add, two_mul, add_lt_add_iff_left, hc],
-      apply lt_of_le_of_ne H,
-      rw [nat.odd_iff_not_even, ←int.even_coe_nat] at hodd,
+    have : x.nat_abs < 2 * c.nat_abs,
+    { apply lt_of_le_of_ne H,
       contrapose! hodd with heqtwomul,
-      exact ⟨_,  heqtwomul⟩ } },
+      rw [←int.nat_abs.odd, ←nat.even_iff_not_odd],
+      exact ⟨_,  heqtwomul⟩ },
+    have : 0 < 2 * c.nat_abs - x.nat_abs,
+    { zify [H],
+      rw sub_pos,
+      norm_cast,
+      assumption },
+    set c' : ℤ := c.nat_abs - x.nat_abs with hc',
+    refine ⟨a / x + x.sign, c', _, _⟩,
+    { rw [add_mul, hc'],
+      conv_rhs { rw ←int.mod_add_div a x },
+      rw int.nat_abs_of_nonneg hcnonneg,
+      rw hc,
+      rw int.nat_abs_eq_mul_sign,
+      ring },
+    { rw [hc', ←int.nat_abs_neg, neg_sub],
+      zify at ⊢ H,
+      rw [int.nat_abs_of_nonneg (sub_nonneg_of_le _)],
+      rw [mul_sub, sub_lt_iff_lt_add, two_mul, add_lt_add_iff_left],
+      norm_cast,
+      assumption,
+      norm_cast,
+      apply le_of_lt,
+      assumption } },
 end
 
 theorem int.coprime_div_gcd_div_gcd {m n : ℤ} (H : int.gcd m n ≠ 0) :

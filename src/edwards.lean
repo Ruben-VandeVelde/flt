@@ -106,6 +106,7 @@ begin
   { exact h.not_unit }
 end
 
+-- consolidate exists_prime_and_dvd'
 lemma odd_prime_or_four.exists_and_dvd
   {n : ℕ} (n2 : 2 < n) : ∃ p, p ∣ n ∧ odd_prime_or_four p :=
 begin
@@ -137,7 +138,7 @@ begin
   obtain rfl|⟨hprime, hodd⟩ := hx,
   { use [1, 1], norm_num },
   { rw ←int.nat_abs_dvd at hfactor,
-    obtain ⟨c, d, hcd⟩ := factors a.nat_abs b.nat_abs x.nat_abs _ _ _,
+    obtain ⟨c, d, hcd⟩ := factors a b x  _ _ _,
     refine ⟨c, d, _, _, _⟩,
     { rw int.abs_eq_nat_abs,
       norm_cast,
