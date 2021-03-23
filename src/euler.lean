@@ -397,21 +397,9 @@ lemma int.cube_of_coprime (a b c s : ℤ)
   (hs : a * b * c = s ^ 3) :
   ∃ A B C, A ≠ 0 ∧ B ≠ 0 ∧ C ≠ 0 ∧ a = A ^ 3 ∧ b = B ^ 3 ∧ c = C ^ 3 :=
 begin
-  obtain ⟨A, HA⟩ : ∃ A, a = A ^ 3,
-  { rw [mul_assoc] at hs,
-    apply int.eq_pow_of_mul_eq_pow_bit1_left ha _ _ hs,
-    { exact mul_ne_zero hb hc },
-    { exact is_coprime.mul_right hcoprimeab hcoprimeac } },
-  obtain ⟨B, HB⟩ : ∃ B, b = B ^ 3,
-  { rw [mul_comm a b, mul_assoc] at hs,
-    apply int.eq_pow_of_mul_eq_pow_bit1_left hb _ _ hs,
-    { exact mul_ne_zero ha hc },
-    { exact is_coprime.mul_right hcoprimeab.symm hcoprimebc } },
-  obtain ⟨C, HC⟩ : ∃ C, c = C ^ 3,
-  { rw [mul_comm] at hs,
-    apply int.eq_pow_of_mul_eq_pow_bit1_left hc _ _ hs,
-    { exact mul_ne_zero ha hb },
-    { exact is_coprime.mul_right hcoprimeac.symm hcoprimebc.symm } },
+  obtain ⟨⟨AB, HAB⟩, ⟨C, HC⟩⟩ := int.eq_pow_of_mul_eq_pow_bit1 (mul_ne_zero ha hb) hc
+    (is_coprime.mul_left hcoprimeac hcoprimebc) hs,
+  obtain ⟨⟨A, HA⟩, ⟨B, HB⟩⟩ := int.eq_pow_of_mul_eq_pow_bit1 ha hb hcoprimeab HAB,
   refine ⟨A, B, C, _, _, _, HA, HB, HC⟩; apply ne_zero_pow three_ne_zero,
   { rwa [←HA] },
   { rwa [←HB] },
