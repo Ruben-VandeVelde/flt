@@ -110,14 +110,11 @@ lemma flt_not_add_self {a b c : ℤ} (ha : a ≠ 0) (h : a ^ 3 + b ^ 3 = c ^ 3) 
 begin
   rintro rfl,
   rw ←mul_two at h,
-  apply int.two_not_cube (c/a),
-  rw int.div_pow,
-  { rw [←h, mul_comm, int.mul_div_cancel],
-    apply pow_ne_zero,
-    exact ha },
-
+  obtain ⟨d, rfl⟩ : a ∣ c,
   { rw [←int.pow_dvd_pow_iff (by norm_num : 0 < 3), ←h],
     apply dvd_mul_right },
+  apply int.two_not_cube d,
+  rwa [mul_pow, mul_right_inj' (pow_ne_zero 3 ha), eq_comm] at h,
 end
 
 lemma descent1left {a b c : ℤ}

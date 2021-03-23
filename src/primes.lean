@@ -302,41 +302,6 @@ by rw [int.odd_iff_not_even, nat.odd_iff_not_even, int.nat_abs_even]
 theorem nat.pow_two_sub_pow_two (a b : ℕ) : a ^ 2 - b ^ 2 = (a + b) * (a - b) :=
 by { simp only [pow_two], exact nat.mul_self_sub_mul_self_eq a b }
 
-lemma div_pow' (n m k : nat) (h : m ∣ n) : (n / m) ^ k = (n ^ k) / (m ^ k) :=
-begin
-  by_cases H : m = 0,
-  { subst H,
-    by_cases G : k = 0,
-    { subst G,
-      rw [pow_zero, pow_zero, pow_zero, nat.div_one] },
-    rw [←ne.def, ←pos_iff_ne_zero] at G,
-    rw [zero_pow G, nat.div_zero, nat.div_zero, zero_pow G], },
-  rw [←ne.def, ←pos_iff_ne_zero] at H,
-  obtain ⟨d, hd⟩ := h,
-  rw hd,
-  rw mul_comm,
-  rw mul_pow,
-  rw nat.mul_div_cancel _ H,
-  rw nat.mul_div_cancel _ (pow_pos H k),
-end.
-
-lemma int.div_pow {n m : int} (h : m ∣ n) (k : nat) : (n / m) ^ k = (n ^ k) / (m ^ k) :=
-begin
-  by_cases H : m = 0,
-  { subst H,
-    by_cases G : k = 0,
-    { subst G,
-      rw [pow_zero, pow_zero, pow_zero, int.div_one] },
-    rw [←ne.def, ←pos_iff_ne_zero] at G,
-    rw [zero_pow G, int.div_zero, int.div_zero, zero_pow G], },
-  obtain ⟨d, hd⟩ := h,
-  rw hd,
-  rw mul_comm,
-  rw mul_pow,
-  rw int.mul_div_cancel _ H,
-  rw int.mul_div_cancel _ (pow_ne_zero _ H),
-end.
-
 theorem nat.coprime.pow' {k l : ℕ} (m n : ℕ)
  (hm : m ≠ 0)
  (hn : n ≠ 0)
