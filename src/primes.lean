@@ -165,15 +165,14 @@ by { rw [int.even_iff, nat.even_iff], norm_cast }
 lemma int.coe_nat_odd {n : ℕ} : odd (n : ℤ) ↔ odd n :=
 by { rw [int.odd_iff, nat.odd_iff], norm_cast }
 
-lemma int.nat_abs_even {n : ℤ} : even n.nat_abs ↔ even n :=
+@[parity_simps] lemma int.nat_abs_even {n : ℤ} : even n.nat_abs ↔ even n :=
 begin
-  by_cases hsign : 0 ≤ n,
-  { convert int.coe_nat_even.symm,
-    exact (int.nat_abs_of_nonneg hsign).symm },
-  { rw [←int.coe_nat_even, int.of_nat_nat_abs_of_nonpos (le_of_not_le hsign), int.even_neg] },
+  cases int.nat_abs_eq n with h h,
+  conv_rhs { rw [h, int.coe_nat_even] },
+  conv_rhs { rw [h, int.even_neg, int.coe_nat_even] },
 end
 
-lemma int.nat_abs_odd {n : ℤ} : odd n.nat_abs ↔ odd n :=
+@[parity_simps] lemma int.nat_abs_odd {n : ℤ} : odd n.nat_abs ↔ odd n :=
 by rw [int.odd_iff_not_even, nat.odd_iff_not_even, int.nat_abs_even]
 
 theorem nat.pow_two_sub_pow_two (a b : ℕ) : a ^ 2 - b ^ 2 = (a + b) * (a - b) :=
