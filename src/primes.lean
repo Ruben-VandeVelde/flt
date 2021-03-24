@@ -113,20 +113,6 @@ begin
   rw [←associated_iff_eq, ←associates.mk_eq_mk_iff_associated, hd, associates.mk_pow],
 end
 
-lemma dvd_mul_cancel_prime {p n k : ℕ}
-  (h : k ∣ p * n)
-  (hne : k ≠ p)
-  (hp : nat.prime p)
-  (hk : nat.prime k) : k ∣ n :=
-begin
-  rw hk.dvd_mul at h,
-  cases h,
-  { exfalso,
-    rw nat.prime_dvd_prime_iff_eq hk hp at h,
-    contradiction },
-  { assumption },
-end
-
 lemma nat.even_pow' {m n : nat} (h : n ≠ 0) : even (m^n) ↔ even m :=
 begin
   rw [nat.even_pow], tauto,
@@ -664,10 +650,9 @@ lemma int.dvd_mul_cancel_prime {p : ℕ} {n k : ℤ}
   (hk : prime k)
   (h : k ∣ p * n) : k ∣ n :=
 begin
+  apply (prime.div_or_div hk h).resolve_left,
   rw int.prime_iff at hk,
-  rw ←int.nat_abs_dvd_abs_iff,
-  apply dvd_mul_cancel_prime _ hne hp hk,
-  rwa [←int.nat_abs_of_nat p, ←int.nat_abs_mul, int.nat_abs_dvd_abs_iff],
+  rwa [int.coe_nat_dvd_right, nat.prime_dvd_prime_iff_eq hk hp]
 end
 
 theorem int.prime.coprime_iff_not_dvd {p n : ℤ} (pp : prime p) : is_coprime p n ↔ ¬ p ∣ n :=
