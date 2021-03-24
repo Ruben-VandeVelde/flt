@@ -300,10 +300,7 @@ by rw [←int.gcd_eq_one_iff_coprime, int.gcd_div (int.gcd_dvd_left m n) (int.gc
     int.nat_abs_of_nat, nat.div_self H]
 
 lemma int.gcd_ne_zero_iff {i j : ℤ} : int.gcd i j ≠ 0 ↔ i ≠ 0 ∨ j ≠ 0 :=
-begin
-  convert not_congr int.gcd_eq_zero_iff,
-  rw not_and_distrib,
-end
+iff.trans (not_congr int.gcd_eq_zero_iff) not_and_distrib
 
 section
 variables {R : Type*} [comm_semiring R]
