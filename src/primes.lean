@@ -659,17 +659,15 @@ begin
 end
 
 lemma int.dvd_mul_cancel_prime {p : ℕ} {n k : ℤ}
-  (hne : abs k ≠ p) -- todo nat_abs
+  (hne : k.nat_abs ≠ p)
   (hp : nat.prime p)
   (hk : prime k)
   (h : k ∣ p * n) : k ∣ n :=
 begin
   rw int.prime_iff at hk,
   rw ←int.nat_abs_dvd_abs_iff,
-  apply dvd_mul_cancel_prime _ _ hp hk,
-  { rwa [←int.nat_abs_dvd_abs_iff, int.nat_abs_mul, int.nat_abs_of_nat] at h },
-  { contrapose! hne,
-    rw [int.abs_eq_nat_abs, hne] },
+  apply dvd_mul_cancel_prime _ hne hp hk,
+  rwa [←int.nat_abs_of_nat p, ←int.nat_abs_mul, int.nat_abs_dvd_abs_iff],
 end
 
 theorem int.prime.coprime_iff_not_dvd {p n : ℤ} (pp : prime p) : is_coprime p n ↔ ¬ p ∣ n :=
@@ -689,14 +687,13 @@ lemma int.dvd_mul_cancel_prime' {p k m n : ℤ}
   (hk : prime k)
   (h : k ∣ p * n) : k ∣ n :=
 begin
-  have : p ∣ p.nat_abs := int.nat_abs_dvd.mp (dvd_refl _),
   rw int.prime_iff at hp,
   apply int.dvd_mul_cancel_prime _ hp hk,
-  { apply dvd_trans h (mul_dvd_mul_right this _), },
+  { apply dvd_trans h (mul_dvd_mul_right _ _),
+    rw int.dvd_nat_abs },
   { rintro hk,
     apply hdvd1,
-    rw [int.dvd_iff_abs_dvd, hk] at hdvd2,
-    apply dvd_trans this hdvd2 }
+    rwa [←int.nat_abs_dvd, ←hk, int.nat_abs_dvd] }
 end
 
 -- todo norm_num for prime ℤ
