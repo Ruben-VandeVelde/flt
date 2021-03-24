@@ -264,11 +264,13 @@ begin
   exact ha rfl,
 end
 
+lemma int.associated_nat_abs (k : ℤ) : associated k k.nat_abs :=
+associated_of_dvd_dvd (int.coe_nat_dvd_right.mpr (dvd_refl _)) (int.nat_abs_dvd.mpr (dvd_refl _))
+
 lemma int.prime_iff (a : ℤ) : prime a ↔ nat.prime a.nat_abs :=
 begin
   rw nat.prime_iff_prime_int,
-  apply prime_iff_of_associated,
-  exact associated_of_dvd_dvd (int.coe_nat_dvd_right.mpr (dvd_refl _)) (int.nat_abs_dvd.mpr (dvd_refl _)),
+  exact prime_iff_of_associated (int.associated_nat_abs a),
 end
 
 lemma int.factor_div (a: ℤ) (x : ℕ)
