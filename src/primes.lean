@@ -185,27 +185,19 @@ variables {m n : ℕ}
 lemma not_coprime_zero_zero [nontrivial R] : ¬ is_coprime (0 : R) 0 :=
 by simp only [add_zero, is_coprime, exists_false, zero_ne_one, mul_zero, not_false_iff]
 
-theorem is_coprime.of_pow_left (hm : m ≠ 0) (H : is_coprime (x ^ m) y) : is_coprime x y :=
-by {
+theorem is_coprime.of_pow_left (hm : 0 < m) (H : is_coprime (x ^ m) y) : is_coprime x y :=
+begin
   rw [← finset.card_range m, ← finset.prod_const] at H,
-have := is_coprime.of_prod_left H 0,
-apply this,
-simp only [finset.mem_range],
-rwa pos_iff_ne_zero,
-}
+  apply is_coprime.of_prod_left H 0,
+  exact finset.mem_range.mpr hm,
+end
 
-theorem is_coprime.of_pow_right (hm : m ≠ 0) (H : is_coprime x (y ^ m)) : is_coprime x y :=
-by {
-  rw [← finset.card_range m, ← finset.prod_const] at H,
-have := is_coprime.of_prod_right H 0,
-apply this,
-simp only [finset.mem_range],
-rwa pos_iff_ne_zero,
-}
+theorem is_coprime.of_pow_right (hm : 0 < m) (H : is_coprime x (y ^ m)) : is_coprime x y :=
+(is_coprime.of_pow_left hm H.symm).symm
 
 theorem is_coprime.of_pow
- (hm : m ≠ 0)
- (hn : n ≠ 0)
+ (hm : 0 < m)
+ (hn : 0 < n)
  (H1 : is_coprime (x ^ m) (y ^ n)) : is_coprime x y :=
 (H1.of_pow_left hm).of_pow_right hn
 
@@ -228,10 +220,8 @@ lemma coprime_add_self_pow
   (hxx : is_coprime x y)
    : is_coprime x z :=
 begin
-  have hn' := pos_iff_ne_zero.mp hn,
-  apply is_coprime.of_pow hn' hn',
+  apply is_coprime.of_pow hn hn,
   rw ←hsoln,
-
   apply coprime_add_self',
   exact is_coprime.pow hxx,
 end
