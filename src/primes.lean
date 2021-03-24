@@ -88,17 +88,22 @@ begin
     exact ⟨p, hdvd, or.inr ⟨hp, hodd⟩⟩ },
 end
 
+section comm_monoid_with_zero
+
+variables {α : Type*} [comm_monoid_with_zero α]
+
+@[simp] theorem associates.mk_ne_zero {a : α} : associates.mk a ≠ 0 ↔ a ≠ 0 :=
+not_congr associates.mk_eq_zero
+
+end comm_monoid_with_zero
+
 theorem nat.eq_pow_of_mul_eq_pow {a b c : ℕ} (ha : 0 < a) (hb : 0 < b)
   (hab : nat.coprime a b) {k : ℕ} (h : a * b = c ^ k) : ∃ d, a = d ^ k :=
 begin
   have ha' : associates.mk a ≠ 0,
-  { intro H,
-    rw [associates.mk_eq_zero] at H,
-    exact ha.ne.symm H },
+  { rwa [associates.mk_ne_zero, ←pos_iff_ne_zero] },
   have hb' : associates.mk b ≠ 0,
-  { intro H,
-    rw [associates.mk_eq_zero] at H,
-    exact hb.ne.symm H },
+  { rwa [associates.mk_ne_zero, ←pos_iff_ne_zero] },
   have hab' : ∀ (d : associates ℕ), d ∣ associates.mk a → d ∣ associates.mk b → ¬prime d,
   { intros d da db dprime,
     obtain ⟨d', rfl⟩ := associates.exists_rep d,
