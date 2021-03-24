@@ -54,7 +54,7 @@ begin
     ... = (c / d) ^ n * d ^ n : by rw mul_pow },
   have hsoln' : (b / d) ^ n + (a / d) ^ n = (c / d) ^ n,
   { rwa add_comm at hsoln },
-  have hcoprime_div : is_coprime (a / d) (b / d) := int.coprime_div_gcd_div_gcd hdpos.ne.symm,
+  have hcoprime_div : is_coprime (a / d) (b / d) := int.coprime_div_gcd_div_gcd hdpos,
   exact ⟨
     a / d,
     b / d,

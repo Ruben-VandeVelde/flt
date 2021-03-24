@@ -294,10 +294,10 @@ begin
       exact ⟨_,  heqtwomul⟩ } },
 end
 
-theorem int.coprime_div_gcd_div_gcd {m n : ℤ} (H : int.gcd m n ≠ 0) :
+theorem int.coprime_div_gcd_div_gcd {m n : ℤ} (H : 0 < int.gcd m n) :
   is_coprime (m / int.gcd m n) (n / int.gcd m n) :=
 by rw [←int.gcd_eq_one_iff_coprime, int.gcd_div (int.gcd_dvd_left m n) (int.gcd_dvd_right m n),
-    int.nat_abs_of_nat, nat.div_self (nat.pos_of_ne_zero H)]
+    int.nat_abs_of_nat, nat.div_self H]
 
 lemma int.gcd_ne_zero_iff {i j : ℤ} : int.gcd i j ≠ 0 ↔ i ≠ 0 ∨ j ≠ 0 :=
 begin
