@@ -1,19 +1,7 @@
 import data.multiset
 
 section
-variables {α : Type*} {β : Type*} {r p : α → β → Prop} {s : multiset α} { t : multiset β}
-lemma multiset.rel.mono'
-  (h : ∀(a ∈ s) (b ∈ t), r a b → p a b) (hst : multiset.rel r s t) : multiset.rel p s t :=
-begin
-  induction hst,
-  case rel.zero { exact multiset.rel.zero },
-  case rel.cons : a b s t hab hst ih {
-    have := h a  (multiset.mem_cons_self _ _) b  (multiset.mem_cons_self _ _) hab,
-    apply multiset.rel.cons this,
-    apply ih,
-    intros a' ha' b' hb' h',
-    apply h _ (multiset.mem_cons_of_mem ha') _ (multiset.mem_cons_of_mem hb') h' }
-end
+variables {α : Type*} {s : multiset α}
 
 lemma multiset.filter_eq
   {α : Type*}
@@ -158,13 +146,6 @@ begin
         rw [multiset.countp_cons_of_neg _ ha1, multiset.countp_cons_of_neg _ ha2, ih] } } }
 end
 
-end
-
-section
-variables {α : Type*} {β : Type*} {γ : Type*} {δ : Type*} {r : γ → δ → Prop}
-lemma multiset.rel_map_iff {s : multiset α} {t : multiset β} {f : α → γ} {g : β → δ} :
-  multiset.rel r (s.map f) (t.map g) ↔ multiset.rel (λa b, r (f a) (g b)) s t :=
-by rw [multiset.rel_map_left, multiset.rel_map_right]
 end
 
 lemma multiset.induction_on_repeat

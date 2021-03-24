@@ -870,8 +870,8 @@ begin
     { exact hg' y hy },
     { exact hf x hx } },
 
-  refine multiset.rel.mono' p _,
-  rw ←multiset.rel_map_iff,
+  refine multiset.rel.mono _ p,
+  rw ←multiset.rel_map,
   apply factors_unique_prod hf hg,
   have hd : (-3 : ℤ) ≤ 0,
   { norm_num },
@@ -988,7 +988,7 @@ begin
       simp only [int.nat_abs_of_nat],
       rw ←associated_iff_eq,
       exact (unique_factorization_monoid.factors_prod (int.nat_abs_ne_zero_of_ne_zero hz)).symm } },
-  apply multiset.rel.mono' _ this,
+  apply multiset.rel.mono this,
   intros a ha b hb hab,
   apply eq_of_associated_of_nonneg hab,
   { exact int.factors_nonneg ha },
@@ -1120,7 +1120,7 @@ lemma factors_odd_prime_or_four.unique
   f = (factors_odd_prime_or_four (a ^ 2 + 3 * b ^ 2)) :=
 begin
   rw ←multiset.rel_eq,
-  apply multiset.rel.mono' _ (factors_odd_prime_or_four.associated hcoprime hf hassoc),
+  apply multiset.rel.mono (factors_odd_prime_or_four.associated hcoprime hf hassoc),
   intros x hx y hy hxy,
   exact eq_of_associated_of_nonneg hxy (hf' x hx) (factors_odd_prime_or_four.nonneg hy)
 end
