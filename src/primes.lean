@@ -234,12 +234,6 @@ begin
   rw one_mul
 end
 
-lemma int.nat_abs_square (a : ℤ) : (a.nat_abs ^ 2 : ℤ) = a ^ 2 :=
-begin
-  rw [pow_two, pow_two],
-  exact int.nat_abs_mul_self' a
-end
-
 theorem nat.dvd_sub' {k m n : ℕ} (h₁ : k ∣ m) (h₂ : k ∣ n) : k ∣ m - n :=
 begin
   by_cases H : n ≤ m,
