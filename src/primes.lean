@@ -166,11 +166,7 @@ lemma int.coe_nat_odd {n : ℕ} : odd (n : ℤ) ↔ odd n :=
 by { rw [int.odd_iff, nat.odd_iff], norm_cast }
 
 @[parity_simps] lemma int.nat_abs_even {n : ℤ} : even n.nat_abs ↔ even n :=
-begin
-  cases int.nat_abs_eq n with h h,
-  conv_rhs { rw [h, int.coe_nat_even] },
-  conv_rhs { rw [h, int.even_neg, int.coe_nat_even] },
-end
+int.coe_nat_dvd_left.symm
 
 @[parity_simps] lemma int.nat_abs_odd {n : ℤ} : odd n.nat_abs ↔ odd n :=
 by rw [int.odd_iff_not_even, nat.odd_iff_not_even, int.nat_abs_even]
