@@ -575,13 +575,7 @@ begin
   { left, rwa [eq_neg_iff_eq_neg, eq_comm, neg_neg] at h },
 end
 
-lemma int.nat_abs_eq_nat_abs_iff {a b : ℤ} (h : a.nat_abs = b.nat_abs) : a = b ∨ a = -b :=
-begin
-  apply int.abs_eq_abs_iff,
-  rwa [int.abs_eq_nat_abs, int.abs_eq_nat_abs, int.coe_nat_inj'],
-end
-
-lemma int.nat_abs_eq_nat_abs_iff' {a b : ℤ} : a.nat_abs = b.nat_abs ↔ a = b ∨ a = -b :=
+lemma int.nat_abs_eq_nat_abs_iff {a b : ℤ} : a.nat_abs = b.nat_abs ↔ a = b ∨ a = -b :=
 begin
   split,
   { intro h,
@@ -651,8 +645,8 @@ theorem int.eq_pow_of_mul_eq_pow_bit1_left {a b c : ℤ} (ha : a ≠ 0) (hb : b 
   (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ (bit1 k)) : ∃ d, a = d ^ (bit1 k) :=
 begin
   obtain ⟨d, hd⟩ := int.associated_pow_of_mul_eq_pow ha hb hab h,
-  rw int.associated_iff at hd,
-  obtain rfl|rfl := int.nat_abs_eq_nat_abs_iff hd,
+  rw [int.associated_iff, int.nat_abs_eq_nat_abs_iff] at hd,
+  obtain rfl|rfl := hd,
   { use d, },
   { use -d, rw neg_pow_bit1 },
 end
