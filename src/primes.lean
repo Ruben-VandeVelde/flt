@@ -178,34 +178,6 @@ by rw [int.odd_iff_not_even, nat.odd_iff_not_even, int.nat_abs_even]
 theorem nat.pow_two_sub_pow_two (a b : ℕ) : a ^ 2 - b ^ 2 = (a + b) * (a - b) :=
 by { simp only [pow_two], exact nat.mul_self_sub_mul_self_eq a b }
 
-theorem nat.coprime.pow' {k l : ℕ} (m n : ℕ)
- (hm : m ≠ 0)
- (hn : n ≠ 0)
- (h : k ≠ 0 ∨ l ≠ 0) (H1 : nat.coprime (k ^ m) (l ^ n)) : nat.coprime k l :=
-begin
-  unfold nat.coprime at *,
-  contrapose! H1,
-  rw ←ne.def at *,
-  apply ne_of_gt,
-  apply lt_of_lt_of_le,
-  { apply lt_of_le_of_ne _ H1.symm,
-    rw [nat.succ_le_iff, pos_iff_ne_zero],
-    intro H,
-    obtain ⟨rfl, rfl⟩ := nat.gcd_eq_zero_iff.mp H,
-    rw [or_self] at h,
-    contradiction },
-  { apply nat.le_of_dvd,
-    { contrapose! h,
-      rw [nat.le_zero_iff, nat.gcd_eq_zero_iff] at h,
-      obtain ⟨hk, hl⟩ := h,
-      split; apply pow_eq_zero; assumption },
-    { apply nat.dvd_gcd; refine dvd_trans _ (dvd_pow (dvd_refl _) _),
-      { exact nat.gcd_dvd_left _ _ },
-      { exact hm },
-      { exact nat.gcd_dvd_right _ _ },
-      { exact hn } } }
-end
-
 section
 variables {R : Type*} [comm_semiring R] {x y z : R}
 variables {m n : ℕ}
@@ -296,25 +268,6 @@ begin
   rw [←nat.add_sub_cancel b a, add_comm],
   apply nat.dvd_sub _ a_2 a_1 ,
   apply nat.le_add_right
-end
-
-lemma nat.coprime_add_self_pow
-  {a b c n : ℕ}
-  (hn : 0 < n)
-  (hsoln : (a) ^ n + (b) ^ n = (c) ^ n)
-  (hxx : (a).coprime (b))
-   : (a).coprime (c) :=
-begin
-  have hn' := pos_iff_ne_zero.mp hn,
-  apply nat.coprime.pow' n n hn' hn',
-  { contrapose! hxx,
-    obtain ⟨rfl, rfl⟩ := hxx,
-    rw [zero_pow hn, zero_add] at hsoln,
-    obtain rfl := pow_eq_zero hsoln,
-    norm_num },
-  rw ←hsoln,
-  apply coprime_add_self,
-  exact nat.coprime.pow n n hxx
 end
 
 @[parity_simps]
