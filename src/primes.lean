@@ -209,30 +209,11 @@ theorem is_coprime.of_pow
  (H1 : is_coprime (x ^ m) (y ^ n)) : is_coprime x y :=
 (H1.of_pow_left hm).of_pow_right hn
 
-lemma int.coprime_add_self
-  { x y : ℤ }
-  (h : is_coprime x y) :
-  is_coprime x (x + y) :=
-  
-begin
-  apply @is_coprime.of_add_mul_right_right _ _ x (x +  y) (-1),
-  convert h,
-  ring,
-end
-
 end
 section
 variables {R : Type*} [comm_ring R] {x y z : R}
 variables {m n : ℕ}
 lemma coprime_add_self'
-  (h : is_coprime x y) :
-  is_coprime x (x + y) :=
-begin
-  apply @is_coprime.of_add_mul_right_right _ _ x (x +  y) (-1),
-  convert h,
-  ring,
-end
-lemma coprime_add_self''
   (h : is_coprime x y) :
   is_coprime x (x + y) :=
 begin
@@ -254,20 +235,6 @@ begin
   apply coprime_add_self',
   exact is_coprime.pow hxx,
 end
-end
-
-lemma coprime_add_self
-  (a b : ℕ)
-  (h : nat.coprime a b) :
-  nat.coprime a (a + b) :=
-begin
-  apply nat.coprime_of_dvd',
-  rintros k - a_1 a_2,
-  rw ←h.gcd_eq_one,
-  apply nat.dvd_gcd a_1 _,
-  rw [←nat.add_sub_cancel b a, add_comm],
-  apply nat.dvd_sub _ a_2 a_1 ,
-  apply nat.le_add_right
 end
 
 lemma nat.lt_mul_left (a b : nat) (h : 1 < b) (h' : 0 < a): a < b * a :=
