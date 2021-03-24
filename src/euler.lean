@@ -589,11 +589,6 @@ begin
     { rintro ⟨h1, -⟩,
       norm_num [h1] at haddodd },
     intros k hknu hknz hkprime hkdvdleft hkdvdright,
-    have kne2 : abs k ≠ 2,
-    { rintro hk,
-      rw [int.dvd_iff_abs_dvd, hk] at hkdvdleft,
-      exact haddodd hkdvdleft },
-
     apply hknu,
     apply huvcoprime.is_unit_of_dvd';
       apply int.dvd_mul_cancel_prime' haddodd hkdvdleft int.prime_two hkprime,

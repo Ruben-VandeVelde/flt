@@ -677,9 +677,6 @@ begin
   refl,
 end
 
-lemma int.dvd_iff_abs_dvd {a b : ℤ} : a ∣ b ↔ abs a ∣ b :=
-by rw [int.abs_eq_nat_abs, int.nat_abs_dvd]
-
 lemma int.dvd_mul_cancel_prime' {p k m n : ℤ}
   (hdvd1 : ¬(p ∣ m))
   (hdvd2 : k ∣ m)
