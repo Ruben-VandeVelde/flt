@@ -527,9 +527,7 @@ begin
   rw int.prime_iff at pp qp,
   rw ←int.nat_abs_dvd_abs_iff,
   rw int.associated_iff,
-  split; intro H,
-  { rwa nat.prime_dvd_prime_iff_eq pp qp at H },
-  { rw H }
+  exact nat.prime_dvd_prime_iff_eq pp qp,
 end
 
 lemma int.is_unit_iff_nat_abs {x : ℤ} : is_unit x ↔ x.nat_abs = 1 :=
@@ -636,9 +634,8 @@ begin
   { rw [associates.mk_mul_mk, ←associates.mk_pow, h] },
   obtain ⟨d, hd⟩ := associates.eq_pow_of_mul_eq_pow ha' hb' hab' h',
   obtain ⟨d', rfl⟩ := associates.exists_rep d,
-  rw [←associates.mk_pow, associates.mk_eq_mk_iff_associated, int.associated_iff] at hd,
-  use d',
-  rwa int.associated_iff
+  rw [←associates.mk_pow, associates.mk_eq_mk_iff_associated] at hd,
+  exact ⟨d', hd⟩,
 end
 
 theorem int.eq_pow_of_mul_eq_pow_bit1_left {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
@@ -683,15 +680,7 @@ begin
 end
 
 lemma int.dvd_iff_abs_dvd {a b : ℤ} : a ∣ b ↔ abs a ∣ b :=
-begin
-  have : associated a (abs a),
-  { rw int.associated_iff,
-    apply int.coe_nat_inj,
-    rw int.nat_abs_of_nonneg (abs_nonneg _),
-    rw int.abs_eq_nat_abs },
-  split; intro h; apply dvd_trans _ h; apply dvd_of_associated,
-  exacts [this.symm, this],
-end
+by rw [int.abs_eq_nat_abs, int.nat_abs_dvd]
 
 lemma int.dvd_mul_cancel_prime' {p k m n : ℤ}
   (hdvd1 : ¬(p ∣ m))
