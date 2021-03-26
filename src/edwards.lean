@@ -1151,11 +1151,9 @@ begin
     calc n * (2 * m) / 2 = 2 * (n * m) / 2 : by { congr' 1, ring }
     ... = n * m : nat.mul_div_right (n * m) zero_lt_two
     ... = n * (2 * m / 2) : by rw nat.mul_div_right m zero_lt_two },
-  {
-    simp only [odd_factors],
+  { simp only [odd_factors],
     rw unique_factorization_monoid.factors_pow,
-    rw multiset.nsmul_filter,
-  },
+    rw multiset.nsmul_filter },
 end
 
 lemma eq_or_eq_conj_of_associated_of_re_zero
