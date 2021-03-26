@@ -36,21 +36,22 @@ begin
     rw zsqrtd.zero_im,
 end
 
-lemma abs_pow_bit1 {R:Type*} [linear_ordered_ring R] (x : R) (n : ℕ) : abs x ^ (bit0 n) = x ^ (bit0 n) :=
+-- https://github.com/leanprover-community/mathlib/commit/19e214e2073d75eca34dd1340b8e161e4fb30de8#
+lemma pow_bit0_abs {R:Type*} [linear_ordered_ring R] (x : R) (n : ℕ) : abs x ^ (bit0 n) = x ^ (bit0 n) :=
 begin
   rw [←abs_pow, abs_of_nonneg],
   exact pow_bit0_nonneg _ _,
 end
 
-lemma abs_pow_two {R:Type*} [linear_ordered_ring R] (x : R) : abs x ^ 2 = x ^ 2 :=
-abs_pow_bit1 x 1
+lemma pow_two_abs {R:Type*} [linear_ordered_ring R] (x : R) : abs x ^ 2 = x ^ 2 :=
+pow_bit0_abs x 1
 
 lemma zsqrt3.is_unit_iff {z : ℤ√-3} : is_unit z ↔ abs z.re = 1 ∧ z.im = 0 :=
 begin
   rw [←zsqrtd.norm_eq_one_iff, zsqrt3.norm, ←int.coe_nat_inj', int.coe_nat_one],
   rw int.nat_abs_of_nonneg (spts.nonneg _ _),
   refine ⟨spts.eq_one, λ h, _⟩,
-  rw [h.2, ←abs_pow_two, h.1],
+  rw [h.2, ←pow_two_abs, h.1],
   norm_num,
 end
 
@@ -178,7 +179,7 @@ begin
   simp only [zero_pow, zero_lt_two, add_zero, mul_zero] at h,
   obtain h|⟨hp, hodd⟩ := h,
   { rw [is_coprime_zero_right, int.is_unit_iff_abs] at hcoprime,
-    rw [←abs_pow_two, hcoprime] at h,
+    rw [←pow_two_abs, hcoprime] at h,
     norm_num at h },
   { exact pow_not_prime one_lt_two hp }
 end
