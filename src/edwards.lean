@@ -856,28 +856,6 @@ begin
   { exact ((factorization_prop h).2 b hbmem).2.2 },
 end
 
-lemma prod_norm_eq_prod_mul_prod_conj {d : ℤ} (f : multiset ℤ√d) :
-  f.prod * (f.map zsqrtd.conj).prod = (f.map zsqrtd.norm).prod :=
-begin
-  refine multiset.induction_on f _ _,
-  { simp only [mul_one, int.cast_one, multiset.prod_zero, multiset.map_zero] },
-  { intros x t ih,
-    simp only [multiset.map_cons, multiset.prod_cons, int.cast_mul],
-    rw [zsqrtd.norm_eq_mul_conj, ←ih],
-    ring },
-end
-
-lemma prod_norm_eq_prod_mul_prod_conj' {d : ℤ} (f : multiset ℤ√d) :
-  f.prod * f.prod.conj = (f.map zsqrtd.norm).prod :=
-begin
-  refine multiset.induction_on f _ _,
-  { simp only [mul_one, int.cast_one, multiset.prod_zero, multiset.map_zero, zsqrtd.conj_one] },
-  { intros x t ih,
-    simp only [multiset.map_cons, multiset.prod_cons, int.cast_mul, zsqrtd.conj_mul],
-    rw [zsqrtd.norm_eq_mul_conj, ←ih],
-    ring },
-end
-
 lemma factors_unique
   {f g : multiset ℤ√-3}
   (hf : ∀x∈f, odd_prime_or_four (zsqrtd.norm x))
