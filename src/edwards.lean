@@ -384,27 +384,31 @@ lemma odd_prime_or_four.factors'
   {a b : ℤ}
   (h2 : 2 < a ^ 2 + 3 * b ^ 2)
   (hcoprime : is_coprime a b) :
-  ∃ u v q r,
-    0 ≤ q ∧
-    0 < r ∧
-    odd_prime_or_four (q ^ 2 + 3 * r ^ 2) ∧
-    ((⟨a, b⟩ : ℤ√-3) = ⟨q, r⟩ * ⟨u, v⟩ ∨ (⟨a, b⟩ : ℤ√-3) = ⟨q, -r⟩ * ⟨u, v⟩) ∧
+  ∃ (u v : ℤ) (q : ℤ√-3),
+    0 ≤ q.re ∧
+    q.im ≠ 0 ∧
+    odd_prime_or_four q.norm ∧
+    (⟨a, b⟩ : ℤ√-3) = q * ⟨u, v⟩ ∧
     is_coprime u v ∧
     (u ^ 2 + 3 * v ^ 2) < (a ^ 2 + 3 * b ^ 2) :=
 begin
   obtain ⟨p, hpdvd, hp⟩ := odd_prime_or_four.exists_and_dvd h2,
   obtain ⟨q, r, hcd, hc, hd⟩ := odd_prime_or_four.factors a b p hcoprime hp hpdvd,
+  set q' : ℤ√-3 := ⟨q, r⟩ with hq',
   have hdvd' : q ^ 2 + 3 * r ^ 2 ∣ a ^ 2 + 3 * b ^ 2,
   { apply dvd_trans _ hpdvd,
     rw [←hcd, int.abs_eq_nat_abs, int.nat_abs_dvd] },
   have hp' := hp.abs,
   rw hcd at hp',
   obtain ⟨u, v, huvcoprime, huv, huvdvd⟩ := step1_2 a b q r hcoprime hdvd' hp' hd.ne.symm,
-  use [u, v, q, r, hc, hd, hp', huv, huvcoprime],
-  rw huvdvd,
-  apply int.lt_mul_self (spts.pos_of_coprime huvcoprime),
-  rw ←hcd,
-  exact hp.one_lt_abs,
+  rw [zsqrt3.norm', ←hq'] at hp',
+  cases huv; use [u, v]; [use q', use q'.conj];
+  { try { rw [zsqrtd.conj_re, zsqrtd.conj_im, neg_ne_zero, zsqrtd.norm_conj] },
+    use [hc, hd.ne.symm, hp', huv, huvcoprime],
+    rw huvdvd,
+    apply int.lt_mul_self (spts.pos_of_coprime huvcoprime),
+    rw ←hcd,
+    exact hp.one_lt_abs },
 end
 
 lemma step3
@@ -462,29 +466,23 @@ begin
     have : 2 < a ^ 2 + 3 * b ^ 2,
     { apply lt_of_le_of_ne _ (spts.not_two a b).symm,
       exact this },
-    obtain ⟨u, v, q, r, hc, hd, hp, huv, huvcoprime, descent⟩ := odd_prime_or_four.factors'
+    obtain ⟨u, v, q, hc, hd, hp, huv, huvcoprime, descent⟩ := odd_prime_or_four.factors'
       this hcoprime,
     replace descent := int.nat_abs_lt_nat_abs_of_nonneg_of_lt (spts.nonneg _ _) descent,
     rw hn' at descent,
     obtain ⟨g, hgprod, hgfactors⟩ := ih (u ^ 2 + 3 * v ^ 2).nat_abs descent huvcoprime
       (int.nat_abs_of_nonneg (spts.nonneg _ _)).symm,
-    cases huv;
-    [use ⟨q, r⟩ ::ₘ g, use ⟨q, -r⟩ ::ₘ g];
-    { split,
-      { rw huv,
-        cases hgprod; rw [multiset.prod_cons, hgprod],
-        { left, refl },
-        { right, simp only [mul_neg_eq_neg_mul_symm] } },
-      { rintros pq hpq,
-        rw multiset.mem_cons at hpq,
-        obtain rfl|ind := hpq,
-        { rw [zsqrt3.norm],
-          try { rw neg_square },
-          dsimp only,
-          refine ⟨hc, _, hp⟩,
-          try { rw neg_ne_zero },
-          exact hd.ne.symm },
-        { exact hgfactors pq ind } } } },
+    use q ::ₘ g,
+    split,
+    { rw huv,
+      cases hgprod; rw [multiset.prod_cons, hgprod],
+      { left, refl },
+      { right, simp only [mul_neg_eq_neg_mul_symm] } },
+    { rintros pq hpq,
+      rw multiset.mem_cons at hpq,
+      obtain rfl|ind := hpq,
+      { exact ⟨hc, hd, hp⟩ },
+      { exact hgfactors pq ind } } },
 end
 
 lemma step4_3
