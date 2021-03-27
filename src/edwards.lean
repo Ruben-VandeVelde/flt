@@ -988,7 +988,7 @@ begin
       apply associated.trans this,
       rw multiset.prod_hom,
       simp only [ring_hom.coe_monoid_hom, ring_hom.eq_nat_cast, int.nat_cast_eq_coe_nat],
-      rw int.associated_iff,
+      rw int.associated_iff_nat_abs,
       simp only [int.nat_abs_of_nat],
       rw ←associated_iff_eq,
       exact (unique_factorization_monoid.factors_prod (int.nat_abs_ne_zero_of_ne_zero hz)).symm } },

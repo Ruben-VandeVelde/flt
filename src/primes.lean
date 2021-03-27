@@ -402,7 +402,7 @@ end
 
 -- todo square neg_square and neg_pow_bit0
 
-theorem int.associated_iff {a b : ℤ} : associated a b ↔ a.nat_abs = b.nat_abs :=
+theorem int.associated_iff_nat_abs {a b : ℤ} : associated a b ↔ a.nat_abs = b.nat_abs :=
 begin
   rw [←dvd_dvd_iff_associated, ←int.nat_abs_dvd_abs_iff, ←int.nat_abs_dvd_abs_iff, dvd_dvd_iff_associated],
   exact associated_iff_eq,
@@ -412,7 +412,7 @@ theorem prime_dvd_prime_iff_eq {p q : ℤ} (pp : prime p) (qp : prime q) : p ∣
 begin
   rw int.prime_iff at pp qp,
   rw ←int.nat_abs_dvd_abs_iff,
-  rw int.associated_iff,
+  rw int.associated_iff_nat_abs,
   exact nat.prime_dvd_prime_iff_eq pp qp,
 end
 
@@ -528,7 +528,7 @@ theorem int.eq_pow_of_mul_eq_pow_bit1_left {a b c : ℤ} (ha : a ≠ 0) (hb : b 
   (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ (bit1 k)) : ∃ d, a = d ^ (bit1 k) :=
 begin
   obtain ⟨d, hd⟩ := int.associated_pow_of_mul_eq_pow ha hb hab h,
-  rw [int.associated_iff, int.nat_abs_eq_nat_abs_iff] at hd,
+  rw [int.associated_iff_nat_abs, int.nat_abs_eq_nat_abs_iff] at hd,
   obtain rfl|rfl := hd,
   { use d, },
   { use -d, rw neg_pow_bit1 },
