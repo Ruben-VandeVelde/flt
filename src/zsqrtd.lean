@@ -25,5 +25,5 @@ lemma zsqrtd.norm_eq_of_associated {d : ℤ} (hd : d ≤ 0) {x y : ℤ√d} (h :
   x.norm = y.norm :=
 begin
   obtain ⟨u, rfl⟩ := h,
-  rw [zsqrtd.norm_mul, (zsqrtd.norm_eq_one_iff' hd _).mpr (is_unit_unit u), mul_one],
+  rw [zsqrtd.norm_mul, (zsqrtd.norm_eq_one_iff' hd _).mpr u.is_unit, mul_one],
 end

@@ -36,13 +36,6 @@ begin
     rw zsqrtd.zero_im,
 end
 
--- https://github.com/leanprover-community/mathlib/commit/19e214e2073d75eca34dd1340b8e161e4fb30de8#
-lemma pow_bit0_abs {R:Type*} [linear_ordered_ring R] (x : R) (n : ℕ) : abs x ^ (bit0 n) = x ^ (bit0 n) :=
-begin
-  rw [←abs_pow, abs_of_nonneg],
-  exact pow_bit0_nonneg _ _,
-end
-
 lemma pow_two_abs {R:Type*} [linear_ordered_ring R] (x : R) : abs x ^ 2 = x ^ 2 :=
 pow_bit0_abs x 1
 
@@ -70,7 +63,7 @@ begin
   obtain ⟨u, hu⟩ := zsqrt3.coe_of_is_unit h,
   refine ⟨u, _, _⟩,
   { rw [hu, coe_coe] },
-  { exact int.is_unit_iff_abs.mp (is_unit_unit u) },
+  { exact int.is_unit_iff_abs.mp u.is_unit },
 end
 
 def odd_prime_or_four (z : ℤ) : Prop :=
@@ -794,7 +787,7 @@ begin
   { subst a, replace h := associated.symm h, rw [associated_zero_iff_eq_zero] at h, exact h.symm },
   { obtain ⟨u, hu⟩ := h,
     rw ←hu,
-    have := is_unit_unit u,
+    have := u.is_unit,
     rw int.is_unit_iff_abs at this,
     rw abs_of_nonneg _ at this,
     rw [this, mul_one],
@@ -880,7 +873,7 @@ begin
   have hd : (-3 : ℤ) ≤ 0,
   { norm_num },
   obtain ⟨u, hu⟩ := h,
-  rw [←hu, zsqrtd.norm_mul, (zsqrtd.norm_eq_one_iff' hd u).mpr (is_unit_unit u), mul_one],
+  rw [←hu, zsqrtd.norm_mul, (zsqrtd.norm_eq_one_iff' hd u).mpr u.is_unit, mul_one],
 end
 
 noncomputable def odd_factors (x : ℤ) := multiset.filter odd (unique_factorization_monoid.factors x)
@@ -1162,7 +1155,7 @@ lemma eq_or_eq_conj_of_associated_of_re_zero
   x = A ∨ x = A.conj :=
 begin
   obtain ⟨u, hu⟩ := h,
-  obtain ⟨v, hv1, hv2⟩ := zsqrt3.coe_of_is_unit' (is_unit_unit u),
+  obtain ⟨v, hv1, hv2⟩ := zsqrt3.coe_of_is_unit' u.is_unit,
   have hA : A.re = 0,
   { simp only [←hu, hv1, hx, add_zero, zero_mul, zsqrtd.mul_re, mul_zero, zsqrtd.coe_int_im] },
   cases int.abs_iff v with habsv habsv; rw habsv at hv2,
@@ -1181,7 +1174,7 @@ lemma eq_or_eq_conj_iff_associated'_of_nonneg
   associated' x A ↔ (x = A ∨ x = A.conj) :=
 begin
   split,
-  { rintro (⟨u, hu⟩|⟨u, hu⟩); obtain ⟨v, hv1, hv2⟩ := zsqrt3.coe_of_is_unit' (is_unit_unit u),
+  { rintro (⟨u, hu⟩|⟨u, hu⟩); obtain ⟨v, hv1, hv2⟩ := zsqrt3.coe_of_is_unit' u.is_unit,
     -- associated x A
     { by_cases hxre : x.re = 0,
       { apply eq_or_eq_conj_of_associated_of_re_zero hxre ⟨u, hu⟩ },

@@ -258,9 +258,6 @@ begin
   exact ha rfl,
 end
 
-lemma int.associated_nat_abs (k : ℤ) : associated k k.nat_abs :=
-associated_of_dvd_dvd (int.coe_nat_dvd_right.mpr (dvd_refl _)) (int.nat_abs_dvd.mpr (dvd_refl _))
-
 lemma int.prime_iff (a : ℤ) : prime a ↔ nat.prime a.nat_abs :=
 begin
   rw nat.prime_iff_prime_int,
@@ -402,12 +399,6 @@ end
 
 -- todo square neg_square and neg_pow_bit0
 
-theorem int.associated_iff_nat_abs {a b : ℤ} : associated a b ↔ a.nat_abs = b.nat_abs :=
-begin
-  rw [←dvd_dvd_iff_associated, ←int.nat_abs_dvd_abs_iff, ←int.nat_abs_dvd_abs_iff, dvd_dvd_iff_associated],
-  exact associated_iff_eq,
-end
-
 theorem prime_dvd_prime_iff_eq {p q : ℤ} (pp : prime p) (qp : prime q) : p ∣ q ↔ associated p q :=
 begin
   rw int.prime_iff at pp qp,
@@ -449,32 +440,7 @@ begin
 end
 
 lemma int.abs_eq_abs_iff {a b : ℤ} (h : abs a = abs b) : a = b ∨ a = -b :=
-begin
-  cases int.abs_iff a with h1 h1;
-  cases int.abs_iff b with h2 h2;
-  rw [h1, h2] at h,
-  { left, exact h },
-  { right, exact h },
-  { right, rwa [eq_neg_iff_eq_neg, eq_comm] },
-  { left, rwa [eq_neg_iff_eq_neg, eq_comm, neg_neg] at h },
-end
-
-lemma int.nat_abs_eq_nat_abs_iff {a b : ℤ} : a.nat_abs = b.nat_abs ↔ a = b ∨ a = -b :=
-begin
-  split,
-  { intro h,
-    apply_fun coe at h,
-    cases int.nat_abs_eq a with ha ha;
-    cases int.nat_abs_eq b with hb hb;
-    rw [ha, hb],
-    { left, exact h },
-    { right, rwa neg_neg },
-    { right, rw h },
-    { left, rw h } },
-  { rintro (rfl|rfl),
-    { refl },
-    { exact int.nat_abs_neg b } },
-end
+by rwa [←int.nat_abs_eq_nat_abs_iff, ←int.coe_nat_inj', ←int.abs_eq_nat_abs, ←int.abs_eq_nat_abs]
 
 theorem int.exists_prime_and_dvd {n : ℤ} (n2 : 2 ≤ n.nat_abs) : ∃ p, prime p ∧ p ∣ n :=
 begin
