@@ -418,27 +418,72 @@ end
 lemma int.is_unit_iff_abs {x : ℤ} : is_unit x ↔ abs x = 1 :=
 by rw [int.is_unit_iff_nat_abs, int.abs_eq_nat_abs, ←int.coe_nat_one, int.coe_nat_inj']
 
-lemma int.neg_prime {p : ℤ} (hp : prime p) : prime (-p) :=
-by rwa [int.prime_iff, int.nat_abs_neg, ←int.prime_iff]
+section
+variables {α : Type*} [linear_ordered_add_comm_group α]
 
-lemma int.abs_prime {p : ℤ} (hp : prime p) : prime (abs p) :=
-by rwa [int.prime_iff, int.nat_abs_abs, ←int.prime_iff]
+lemma abs_choice (x : α) : abs x = x ∨ abs x = -x := max_choice _ _
 
-lemma int.abs_odd {p : ℤ} (hp : odd p) : odd (abs p) :=
-by rwa [←int.nat_abs_odd, int.nat_abs_abs, int.nat_abs_odd]
-
-lemma int.abs_iff (x : ℤ) : abs x = x ∨ abs x = -x :=
+lemma abs_eq' (x : α) : x = abs x ∨ x = -abs x :=
 begin
-  exact max_choice x (-x),
-end
-
-lemma int.abs_eq (x : ℤ) : x = abs x ∨ x = -abs x :=
-begin
-  cases int.abs_iff x with h h,
+  obtain h|h := abs_choice x,
   { left, exact h.symm },
   { right, exact eq_neg_of_eq_neg h }
 end
 
+end
+
+section
+variables {α : Type*} [ring α]
+
+lemma is_unit.neg (u : α) : is_unit (-u) ↔ is_unit u :=
+begin
+  split;
+  { rintro ⟨u', hu⟩,
+    use -u',
+    simp only [hu, neg_neg, units.coe_neg] }
+end
+
+end
+
+section
+variables {α : Type*} [comm_ring α]
+
+lemma prime.neg {p : α} (hp : prime p) : prime (-p) :=
+begin
+  obtain ⟨h1, h2, h3⟩ := hp,
+  exact ⟨neg_ne_zero.mpr h1, by rwa is_unit.neg, by simpa [neg_dvd] using h3⟩
+end
+
+end
+
+section
+variables {α : Type*} [linear_ordered_comm_ring α]
+
+lemma prime.abs {p : α} (hp : prime p) : prime (abs p) :=
+begin
+  obtain h|h := abs_choice p; rw h,
+  { exact hp },
+  { exact hp.neg }
+end
+
+end
+
+-- todo remove
+lemma int.neg_prime {p : ℤ} (hp : prime p) : prime (-p) := prime.neg hp
+
+-- todo remove
+lemma int.abs_prime {p : ℤ} (hp : prime p) : prime (abs p) := prime.abs hp
+
+lemma int.abs_odd {p : ℤ} (hp : odd p) : odd (abs p) :=
+by rwa [←int.nat_abs_odd, int.nat_abs_abs, int.nat_abs_odd]
+
+-- todo remove
+lemma int.abs_iff (x : ℤ) : abs x = x ∨ abs x = -x := abs_choice x
+
+-- todo remove
+lemma int.abs_eq (x : ℤ) : x = abs x ∨ x = -abs x := abs_eq' x
+
+-- todo consider removing
 lemma int.abs_eq_abs_iff {a b : ℤ} (h : abs a = abs b) : a = b ∨ a = -b :=
 by rwa [←int.nat_abs_eq_nat_abs_iff, ←int.coe_nat_inj', ←int.abs_eq_nat_abs, ←int.abs_eq_nat_abs]
 
