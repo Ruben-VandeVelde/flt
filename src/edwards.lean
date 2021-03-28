@@ -88,7 +88,7 @@ begin
   obtain rfl|⟨h, -⟩ := h,
   { rw int.abs_eq_nat_abs, norm_cast, norm_num },
   { rw int.abs_eq_nat_abs,
-    rw int.prime_iff at h,
+    rw int.prime_iff_nat_abs_prime at h,
     norm_cast,
     exact h.one_lt, }
 end
@@ -153,7 +153,7 @@ begin
       norm_cast,
       rintro rfl,
       simp only [zero_lt_two, zero_pow, add_zero, mul_zero] at hcd,
-      rw [int.prime_iff, hcd] at hprime,
+      rw [int.prime_iff_nat_abs_prime, hcd] at hprime,
       exact nat.prime.pow_not_prime le_rfl hprime },
     { rwa ←int.gcd_eq_one_iff_coprime at hcoprime, },
     { rwa [int.nat_abs_even, ←int.odd_iff_not_even] },

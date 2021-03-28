@@ -258,12 +258,6 @@ begin
   exact ha rfl,
 end
 
-lemma int.prime_iff (a : ℤ) : prime a ↔ nat.prime a.nat_abs :=
-begin
-  rw nat.prime_iff_prime_int,
-  exact prime_iff_of_associated (int.associated_nat_abs a),
-end
-
 lemma int.factor_div (a: ℤ) (x : ℕ)
   (hodd : odd x)
   (h0' : 0 < x) :
@@ -401,7 +395,7 @@ end
 
 theorem prime_dvd_prime_iff_eq {p q : ℤ} (pp : prime p) (qp : prime q) : p ∣ q ↔ associated p q :=
 begin
-  rw int.prime_iff at pp qp,
+  rw int.prime_iff_nat_abs_prime at pp qp,
   rw ←int.nat_abs_dvd_abs_iff,
   rw int.associated_iff_nat_abs,
   exact nat.prime_dvd_prime_iff_eq pp qp,
@@ -562,13 +556,13 @@ lemma int.dvd_mul_cancel_prime {p : ℕ} {n k : ℤ}
   (h : k ∣ p * n) : k ∣ n :=
 begin
   apply (prime.div_or_div hk h).resolve_left,
-  rw int.prime_iff at hk,
+  rw int.prime_iff_nat_abs_prime at hk,
   rwa [int.coe_nat_dvd_right, nat.prime_dvd_prime_iff_eq hk hp]
 end
 
 theorem int.prime.coprime_iff_not_dvd {p n : ℤ} (pp : prime p) : is_coprime p n ↔ ¬ p ∣ n :=
 begin
-  rw int.prime_iff at pp,
+  rw int.prime_iff_nat_abs_prime at pp,
   rw [←int.nat_abs_dvd_abs_iff, ←nat.prime.coprime_iff_not_dvd pp, ←int.gcd_eq_one_iff_coprime],
   refl,
 end
@@ -580,7 +574,7 @@ lemma int.dvd_mul_cancel_prime' {p k m n : ℤ}
   (hk : prime k)
   (h : k ∣ p * n) : k ∣ n :=
 begin
-  rw int.prime_iff at hp,
+  rw int.prime_iff_nat_abs_prime at hp,
   apply int.dvd_mul_cancel_prime _ hp hk,
   { apply dvd_trans h (mul_dvd_mul_right _ _),
     rw int.dvd_nat_abs },
