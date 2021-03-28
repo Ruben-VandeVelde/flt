@@ -557,7 +557,7 @@ begin
   apply associated_of_dvd'; assumption,
 end
 
-lemma dvd_blah (p a b : ℤ) (hp : prime p) (n : ℕ) (h : ¬(p ∣ a)) (h' : p ^ n ∣ a * b) : p ^ n ∣ b :=
+lemma dvd_blah {p a b : ℤ} (hp : prime p) (n : ℕ) (h : ¬(p ∣ a)) (h' : p ^ n ∣ a * b) : p ^ n ∣ b :=
 begin
   induction n with n ih,
   { rw pow_zero, exact one_dvd b },
@@ -591,9 +591,7 @@ begin
       have : (4 : ℤ) = 2 ^ 2,
       { norm_num },
       rw [hp, this],
-      apply dvd_blah,
-      { rw int.prime_iff,
-        convert nat.prime_two },
+      apply dvd_blah int.prime_two,
       { rw [←even_iff_two_dvd, ←int.odd_iff_not_even], exact ha.2 },
       { rwa [hp, this] at hdvd } } },
   { exact (hp.1.div_or_div hdvd) }
