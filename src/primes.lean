@@ -113,30 +113,33 @@ begin
   exact right_ne_zero_of_mul ha,
 end
 
-lemma int.factor_div (a: ℤ) (x : ℕ)
+-- Edwards p49 introduction
+lemma int.factor_div (a x : ℤ)
   (hodd : odd x)
-  (h0' : 0 < x) :
-  ∃ (m c : ℤ), c + m * x = a ∧ 2 * c.nat_abs < x :=
+  (h0' : x ≠ 0) :
+  ∃ (m c : ℤ), c + m * x = a ∧ 2 * c.nat_abs < x.nat_abs :=
 begin
-  set c : ℤ := a % x with hc,
-  have hcnonneg : 0 ≤ c := int.mod_nonneg _ (int.coe_nat_ne_zero_iff_pos.mpr h0'),
-  have : c < x := int.mod_lt_of_pos a (int.coe_nat_lt.mpr h0'),
-  by_cases H : 2 * c < x,
-  { refine ⟨a/x, c, _, _⟩,
-    { rw [mul_comm], exact int.mod_add_div a x },
-    { zify, rwa [int.nat_abs_of_nonneg hcnonneg] } },
+  have hcnonneg := int.mod_nonneg a h0',
+  have := int.mod_lt a h0',
+  set c := a % x with hc,
+  by_cases H : 2 * c.nat_abs < x.nat_abs,
+  { refine ⟨a/x, c, _, H⟩,
+    { rw [mul_comm], exact int.mod_add_div a x } },
   { push_neg at H,
-    set c' : ℤ := c - x with hc',
-    refine ⟨a / x + 1, c', _, _⟩,
-    { rw [add_mul, one_mul, hc'],
+    set c' : ℤ := c - abs x with hc',
+    refine ⟨(a + abs x) / x, c', _, _⟩,
+    { have := self_dvd_abs x,
+      rw [int.add_div_of_dvd_right this, add_mul, int.div_mul_cancel this, hc', hc],
       conv_rhs { rw ←int.mod_add_div a x },
+      rw mul_comm,
       ring },
     { zify at ⊢ H,
+      rw [int.nat_abs_of_nonneg hcnonneg] at H,
       rw [hc', ←int.nat_abs_neg, neg_sub, int.nat_abs_of_nonneg (sub_nonneg_of_le this.le),
-        mul_sub, sub_lt_iff_lt_add, two_mul, add_lt_add_iff_left, hc],
+        mul_sub, sub_lt_iff_lt_add, two_mul, int.abs_eq_nat_abs, add_lt_add_iff_left],
       apply lt_of_le_of_ne H,
-      rw [nat.odd_iff_not_even, ←int.even_coe_nat] at hodd,
       contrapose! hodd with heqtwomul,
+      rw [←int.even_iff_not_odd, ←int.nat_abs_even, ←int.even_coe_nat],
       exact ⟨_,  heqtwomul⟩ } },
 end
 
@@ -418,3 +421,12 @@ begin
   simp only [ring_hom.coe_monoid_hom, int.coe_nat_nonneg, ring_hom.eq_nat_cast, int.nat_cast_eq_coe_nat],
 end
 
+lemma int.strong_induction_on {p : ℤ → Prop} (x : ℤ)
+  (h : ∀ n : ℤ, (∀ m : ℤ, m.nat_abs < n.nat_abs → p m) → p n) : p x :=
+begin
+  suffices h : ∀ (k : ℕ) (a : ℤ), k = a.nat_abs → p a,
+  { exact h x.nat_abs x rfl },
+  intro k,
+  induction k using nat.strong_induction_on with k ih,
+  exact λ a ha, h a (λ m hm, ih m.nat_abs (ha.symm ▸ hm) m rfl),
+end
