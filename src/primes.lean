@@ -60,6 +60,36 @@ begin
 end
 end
 
+-- Edwards p49 introduction
+lemma int.factor_div (a x : ℤ) (hodd : odd x) :
+  ∃ (m c : ℤ), c + m * x = a ∧ 2 * c.nat_abs < x.nat_abs :=
+begin
+  have h0' : x ≠ 0,
+  { rintro rfl,
+    simpa only [int.even_zero, not_true, int.odd_iff_not_even] using hodd },
+  have hcnonneg := int.mod_nonneg a h0',
+  have := int.mod_lt a h0',
+  set c := a % x with hc,
+  by_cases H : 2 * c.nat_abs < x.nat_abs,
+  { refine ⟨a/x, c, _, H⟩,
+    { rw [mul_comm], exact int.mod_add_div a x } },
+  { push_neg at H,
+    set c' : ℤ := c - abs x with hc',
+    refine ⟨(a + abs x) / x, c', _, _⟩,
+    { have := self_dvd_abs x,
+      rw [int.add_div_of_dvd_right this, add_mul, int.div_mul_cancel this, hc', hc],
+      conv_rhs { rw ←int.mod_add_div a x },
+      ring },
+    { zify at ⊢ H,
+      rw [int.nat_abs_of_nonneg hcnonneg] at H,
+      rw [hc', ←int.nat_abs_neg, neg_sub, int.nat_abs_of_nonneg (sub_nonneg_of_le this.le),
+        mul_sub, sub_lt_iff_lt_add, two_mul, int.abs_eq_nat_abs, add_lt_add_iff_left],
+      apply lt_of_le_of_ne H,
+      contrapose! hodd with heqtwomul,
+      rw [←int.even_iff_not_odd, ←int.nat_abs_even, ←int.even_coe_nat],
+      exact ⟨_, heqtwomul⟩ } },
+end
+
 section
 theorem is_unit_of_irreducible_pow {α} [monoid α] {x : α} {n : ℕ} (hn : n ≠ 1) :
   irreducible (x ^ n) → is_unit x :=
