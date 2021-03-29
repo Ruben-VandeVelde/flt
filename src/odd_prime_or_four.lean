@@ -78,18 +78,3 @@ begin
     rw ←int.odd_coe_nat at hodd,
     exact ⟨p, int.coe_nat_dvd.mpr hdvd, or.inr ⟨hp, hodd⟩⟩ },
 end
-
-lemma odd_prime_or_four.im_ne_zero
-  {p q : ℤ}
-  (h: odd_prime_or_four (p ^ 2 + 3 * q ^ 2))
-  (hcoprime: is_coprime p q) :
-  q ≠ 0 :=
-begin
-  rintro rfl,
-  simp only [zero_pow, zero_lt_two, add_zero, mul_zero] at h,
-  obtain h|⟨hp, hodd⟩ := h,
-  { rw [is_coprime_zero_right, int.is_unit_iff_abs_eq] at hcoprime,
-    rw [←sq_abs, hcoprime] at h,
-    norm_num at h },
-  { exact pow_not_prime one_lt_two.ne' hp }
-end
