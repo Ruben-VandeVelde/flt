@@ -38,13 +38,14 @@ end
 
 lemma multiset.nsmul_repeat {a : α} (n m : ℕ) : n •ℕ (multiset.repeat a m) = multiset.repeat a (n * m) :=
 begin
-  by_cases hn : n = 0,
-  { simp only [hn, zero_mul, zero_nsmul, multiset.repeat_zero] },
-  rw multiset.eq_repeat,
-  simp only [true_and, nat.cast_id, nsmul_eq_mul, multiset.card_repeat, eq_self_iff_true, add_monoid_hom.map_nsmul],
-  intros b hb,
-  rw multiset.mem_nsmul hn at hb,
-  exact multiset.eq_of_mem_repeat hb,
+  rw [multiset.eq_repeat],
+  split,
+  { rw [add_monoid_hom.map_nsmul, multiset.card_repeat, nsmul_eq_mul, nat.cast_id] },
+  { intros b hb,
+    by_cases hn : n = 0,
+    { exfalso, apply multiset.not_mem_zero b, rwa [hn, zero_nsmul] at hb },
+    { rw multiset.mem_nsmul hn at hb,
+      exact multiset.eq_of_mem_repeat hb } },
 end
 
 lemma multiset.nsmul_cons (n : ℕ) (a : α) : n •ℕ (a ::ₘ s) = n •ℕ (↑[a]) +  n •ℕ s :=
