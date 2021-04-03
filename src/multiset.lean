@@ -118,19 +118,10 @@ begin
   refine s.induction_on _ _,
   { rintro -, simp only [multiset.countp_zero] },
   { intros a t ih h,
-    specialize ih _,
-    { intros x hx,
-      apply h,
-      rw multiset.mem_cons,
-      right,
-      assumption },
-    { by_cases ha1 : p1 a,
-      { have ha2 : p2 a,
-        { rwa ←h a (multiset.mem_cons_self a t) },
-        simp only [ha1, ha2, multiset.countp_cons_of_pos, ih] },
-      { have ha2 : ¬p2 a,
-        { rwa ←h a (multiset.mem_cons_self a t) },
-        rw [multiset.countp_cons_of_neg _ ha1, multiset.countp_cons_of_neg _ ha2, ih] } } }
+    specialize ih (λ x hx, h _ (multiset.mem_cons_of_mem hx)),
+    rw [multiset.countp_cons, multiset.countp_cons, ih],
+    obtain ⟨h1, h2⟩|⟨h1, h2⟩ := iff_iff_and_or_not_and_not.mp (h a (multiset.mem_cons_self a t));
+    simp only [h1, h2, if_congr, if_true, if_false, add_left_inj, eq_self_iff_true] }
 end
 
 end
