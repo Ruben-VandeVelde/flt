@@ -86,16 +86,6 @@ begin
         rwa hb } } }
 end
 
-lemma prod_map_multiplicative {M N : Type*} [comm_monoid M] [comm_monoid N] {s : multiset M}
-  {f : M → N} (fone : f 1 = 1) (fmul : ∀ a b, f (a * b) = f a * f b) :
-  (s.map f).prod = f s.prod := 
-begin
-  refine multiset.induction_on s _ _,
-  { simp only [multiset.prod_zero, fone, multiset.map_zero] },
-  { intros a s ih,
-    rw [multiset.map_cons, multiset.prod_cons, multiset.prod_cons, fmul, ih] },
-end
-
 end
 
 section

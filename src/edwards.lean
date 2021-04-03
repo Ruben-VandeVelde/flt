@@ -503,7 +503,7 @@ end
 
 lemma prod_map_norm {s : multiset ℤ√-3} :
   (s.map zsqrtd.norm).prod = zsqrtd.norm s.prod :=
-prod_map_multiplicative zsqrtd.norm_one zsqrtd.norm_mul
+multiset.prod_hom s zsqrtd.norm_hom
 
 lemma norm_not_dvd_four_of_odd_prime' {p : ℤ} (hmin : 0 ≤ p) (hp : prime p) (hodd: odd p) :
   ¬(p ∣ 4) :=

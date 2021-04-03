@@ -2,6 +2,17 @@ import data.zsqrtd.basic
 import ring_theory.int.basic
 import .primes -- int.is_unit_iff_nat_abs
 
+section
+variables {d : ℤ}
+namespace zsqrtd
+/-- `conj` as an `add_monoid_hom`. -/
+def norm_hom : ℤ√d →* ℤ :=
+{ to_fun := norm,
+  map_mul' := norm_mul,
+  map_one' := norm_one }
+end zsqrtd
+end
+
 lemma zsqrtd.is_unit_iff_norm_is_unit {d : ℤ} (z : ℤ√d) : is_unit z ↔ is_unit z.norm :=
 by rw [int.is_unit_iff_nat_abs, zsqrtd.norm_eq_one_iff]
 
