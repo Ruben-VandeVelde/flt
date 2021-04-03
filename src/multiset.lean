@@ -93,19 +93,24 @@ end
 
 section
 variables {α : Type*} {β : Type*} {r p : α → β → Prop} {s : multiset α} { t : multiset β}
-lemma multiset.count_map (b : β )
+
+theorem multiset.countp_cons (p : α → Prop)
+  [decidable_pred p] (b : α) (s : multiset α) :
+  multiset.countp p (b ::ₘ s) = multiset.countp p s + (if p b then 1 else 0) :=
+begin
+  split_ifs with h;
+  simp only [h, multiset.countp_cons_of_pos, add_zero, multiset.countp_cons_of_neg, not_false_iff],
+end
+
+lemma multiset.count_map (b : β)
   [decidable_eq β]
   (f : α → β) :
-  multiset.count b (s.map f) = multiset.countp (λ x, f x = b) s :=
+  multiset.count b (s.map f) = multiset.countp (λ x, b = f x) s :=
 begin
   refine s.induction_on _ _,
   { simp only [multiset.countp_zero, multiset.count_zero, multiset.map_zero] },
   { intros a ha ih,
-    simp only [multiset.map_cons],
-    by_cases hb : f a = b,
-    { simp only [hb, add_left_inj, multiset.countp_cons_of_pos, multiset.count_cons_self, ih] },
-    { rw [multiset.count_cons_of_ne (ne.symm hb)],
-      simp only [hb, ih, multiset.countp_cons_of_neg, not_false_iff] } },
+    rw [multiset.map_cons, multiset.count_cons, multiset.countp_cons, ih] },
 end
 
 -- TODO: should be countp_congr?

@@ -1290,9 +1290,8 @@ begin
     apply multiset.countp_eq,
     intros A HA,
     split; intro H,
-    { symmetry,
-      exact associated'.norm_eq H },
-    { exact factorization.associated'_of_norm_eq hcoprime hx HA H.symm } },
+    { exact associated'.norm_eq H },
+    { exact factorization.associated'_of_norm_eq hcoprime hx HA H } },
 
   dsimp only [multiset.count],
   convert this using 1,
