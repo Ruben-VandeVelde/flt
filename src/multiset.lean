@@ -62,6 +62,15 @@ end
 lemma multiset.nsmul_cons' (n : ℕ) (a : α) : n •ℕ (a ::ₘ s) = n •ℕ (a ::ₘ 0) +  n •ℕ s :=
 multiset.nsmul_cons n a
 
+theorem multiset.filter_cons {a : α} (s : multiset α)
+  (p : α → Prop) [decidable_pred p] :
+  multiset.filter p (a ::ₘ s) = (ite (p a) ↑[a] 0) + multiset.filter p s :=
+begin
+  split_ifs with h,
+  { rw [multiset.filter_cons_of_pos _ h, multiset.singleton_add] },
+  { rw [multiset.filter_cons_of_neg _ h, zero_add] },
+end
+
 lemma multiset.nsmul_filter (n : ℕ)
   (p : α → Prop) [decidable_pred p] :
   multiset.filter p (n •ℕ s) = n •ℕ multiset.filter p s :=
@@ -71,16 +80,10 @@ begin
   { refine s.induction_on _ _,
     { simp only [multiset.filter_zero, nsmul_zero] },
     { intros a ha ih,
-      by_cases hp : p a,
-      { simp only [hp, multiset.filter_cons_of_pos, multiset.nsmul_cons, multiset.filter_add, ih],
-        congr,
-        rw multiset.filter_eq_self,
-        intros b hb,
-        rw [multiset.mem_nsmul hn, multiset.mem_coe, list.mem_singleton] at hb,
-        rwa hb },
-      { rw [multiset.filter_cons_of_neg _ hp, multiset.nsmul_cons, multiset.filter_add, ih],
-        convert zero_add _,
-        rw multiset.filter_eq_nil,
+      rw [multiset.nsmul_cons, multiset.filter_add, ih, multiset.filter_cons, nsmul_add],
+      congr,
+      split_ifs with hp;
+      { simp only [multiset.filter_eq_self, nsmul_zero, multiset.filter_eq_nil],
         intros b hb,
         rw [multiset.mem_nsmul hn, multiset.mem_coe, list.mem_singleton] at hb,
         rwa hb } } }
