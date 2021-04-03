@@ -163,7 +163,7 @@ lemma multiset.exists_nsmul_of_dvd
   (h : ∀ x ∈ s, k ∣ multiset.count x s) :
   ∃ t : multiset α, s = k •ℕ t :=
 begin
-  obtain (rfl|hk) := (zero_le k).eq_or_lt,
+  obtain (rfl|hk) := nat.eq_zero_or_pos k,
   { use 0,
     simp only [nsmul_zero],
     apply multiset.eq_zero_of_forall_not_mem,
