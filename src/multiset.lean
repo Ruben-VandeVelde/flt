@@ -48,16 +48,11 @@ begin
       exact multiset.eq_of_mem_repeat hb } },
 end
 
-lemma multiset.nsmul_cons (n : ℕ) (a : α) : n •ℕ (a ::ₘ s) = n •ℕ (↑[a]) +  n •ℕ s :=
+lemma multiset.nsmul_cons (n : ℕ) (a : α) : n •ℕ (a ::ₘ s) = n •ℕ (↑[a]) + n •ℕ s :=
 begin
   induction n with n ih,
   { simp only [add_zero, zero_nsmul] },
-  { rw nat.succ_eq_add_one,
-    rw [add_nsmul, add_nsmul, one_nsmul, ih],
-    rw [add_assoc, add_assoc],
-    congr' 1,
-    rw [one_nsmul, add_nsmul, one_nsmul, ←multiset.singleton_add],
-    rw [add_comm _ s, ←add_assoc, add_comm], }
+  { simp only [add_nsmul, one_nsmul, ih, ←multiset.singleton_add, nsmul_add] }
 end
 lemma multiset.nsmul_cons' (n : ℕ) (a : α) : n •ℕ (a ::ₘ s) = n •ℕ (a ::ₘ 0) +  n •ℕ s :=
 multiset.nsmul_cons n a
