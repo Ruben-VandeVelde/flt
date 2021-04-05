@@ -40,10 +40,11 @@ lemma multiset.nsmul_repeat {a : α} (n m : ℕ) : n •ℕ (multiset.repeat a m
 begin
   rw [multiset.eq_repeat],
   split,
-  { rw [add_monoid_hom.map_nsmul, multiset.card_repeat, nsmul_eq_mul, nat.cast_id] },
+  { rw [add_monoid_hom.map_nsmul, multiset.card_repeat, nat.nsmul_eq_mul] },
   { intros b hb,
     by_cases hn : n = 0,
-    { exfalso, apply multiset.not_mem_zero b, rwa [hn, zero_nsmul] at hb },
+    { rw [hn, zero_nsmul] at hb,
+      exact absurd hb (multiset.not_mem_zero b) },
     { rw multiset.mem_nsmul hn at hb,
       exact multiset.eq_of_mem_repeat hb } },
 end
