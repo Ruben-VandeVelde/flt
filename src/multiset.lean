@@ -173,9 +173,9 @@ begin
     rw [←multiset.count_pos, this] at hx,
     exact lt_irrefl 0 hx },
   { refine s.induction_on_repeat _ _ _,
-    { use 0, simp only [nsmul_zero, h] },
+    { use 0, rw [nsmul_zero] },
     { rintros t a ha ⟨u, hu⟩,
-      use u + multiset.repeat a (s.count a / k),
       obtain ⟨n, hn⟩ := h a ha,
-      rw [nsmul_add, multiset.nsmul_repeat, hu, hn, nat.mul_div_right _ hk] } }
+      use u + multiset.repeat a n,
+      rw [nsmul_add, multiset.nsmul_repeat, hu, hn] } }
 end
