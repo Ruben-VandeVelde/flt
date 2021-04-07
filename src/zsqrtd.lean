@@ -3,7 +3,7 @@ import data.zsqrtd.basic
 section
 variables {d : ℤ}
 namespace zsqrtd
-/-- `conj` as an `add_monoid_hom`. -/
+/-- `norm` as an `add_monoid_hom`. -/
 def norm_hom : ℤ√d →* ℤ :=
 { to_fun := norm,
   map_mul' := norm_mul,
