@@ -373,7 +373,7 @@ end
 
 @[norm_cast]
 lemma int.of_nat_is_unit {n : ℕ} : is_unit (n : ℤ) ↔ is_unit n :=
-by rw [nat.is_unit_iff, is_unit_int, int.nat_abs_of_nat]
+by rw [nat.is_unit_iff, int.is_unit_iff_nat_abs_eq, int.nat_abs_of_nat]
 
 lemma two_not_cube (r : ℕ) : r ^ 3 ≠ 2 :=
 begin
@@ -435,13 +435,8 @@ end
 section
 variables {α : Type*} [ring α]
 
-lemma is_unit.neg (u : α) : is_unit (-u) ↔ is_unit u :=
-begin
-  split;
-  { rintro ⟨u', hu⟩,
-    use -u',
-    simp only [hu, neg_neg, units.coe_neg] }
-end
+lemma is_unit.neg_iff (u : α) : is_unit (-u) ↔ is_unit u :=
+⟨λ h, neg_neg u ▸ h.neg, is_unit.neg⟩
 
 end
 
@@ -451,7 +446,7 @@ variables {α : Type*} [comm_ring α]
 lemma prime.neg {p : α} (hp : prime p) : prime (-p) :=
 begin
   obtain ⟨h1, h2, h3⟩ := hp,
-  exact ⟨neg_ne_zero.mpr h1, by rwa is_unit.neg, by simpa [neg_dvd] using h3⟩
+  exact ⟨neg_ne_zero.mpr h1, by rwa is_unit.neg_iff, by simpa [neg_dvd] using h3⟩
 end
 
 end
