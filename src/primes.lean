@@ -407,16 +407,8 @@ begin
   exact nat.prime_dvd_prime_iff_eq pp qp,
 end
 
-lemma int.is_unit_iff_nat_abs {x : ℤ} : is_unit x ↔ x.nat_abs = 1 :=
-begin
-  split; intro h,
-  { obtain ⟨u, rfl⟩ := h,
-    rw int.units_nat_abs },
-  { rw [is_unit_iff_dvd_one, ←int.nat_abs_dvd_abs_iff, h, int.nat_abs_one] }
-end
-
 lemma int.is_unit_iff_abs {x : ℤ} : is_unit x ↔ abs x = 1 :=
-by rw [int.is_unit_iff_nat_abs, int.abs_eq_nat_abs, ←int.coe_nat_one, int.coe_nat_inj']
+by rw [int.is_unit_iff_nat_abs_eq, int.abs_eq_nat_abs, ←int.coe_nat_one, int.coe_nat_inj']
 
 section
 variables {α : Type*} [linear_ordered_add_comm_group α]
@@ -501,7 +493,7 @@ begin
   apply H k,
   { intro H,
     apply kprime.ne_one,
-    rwa [int.is_unit_iff_nat_abs, int.nat_abs_of_nat] at H },
+    rwa [int.is_unit_iff_nat_abs_eq, int.nat_abs_of_nat] at H },
   { simp only [int.coe_nat_eq_zero, ne.def], exact kprime.ne_zero },
   { rwa ←nat.prime_iff_prime_int },
   { exact int.coe_nat_dvd_left.mpr ka },

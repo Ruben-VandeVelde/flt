@@ -318,7 +318,7 @@ begin
   push_neg at H,
   rw ←pow_mul_pow_sub _ H at hg,
   have : ¬is_unit (3 : ℤ),
-  { rw int.is_unit_iff_nat_abs, norm_num },
+  { rw int.is_unit_iff_nat_abs_eq, norm_num },
   apply this,
   have hdvdp : 3 ∣ p,
   { suffices : 3 ∣ 2 * p,
@@ -661,7 +661,7 @@ begin
   have h3_ndvd_q : ¬(3 ∣ q),
   { intro H,
     have := hcoprime.is_unit_of_dvd' h3_dvd_p H,
-    rw int.is_unit_iff_nat_abs at this,
+    rw int.is_unit_iff_nat_abs_eq at this,
     norm_num at this },
   -- 2.
   obtain ⟨s, hs⟩ := h3_dvd_p,
