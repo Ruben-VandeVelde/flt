@@ -27,15 +27,6 @@ begin
   ring,
 end
 
-lemma zsqrt3.norm_eq_zero_iff (z : ℤ√-3) : z.norm = 0 ↔ z = 0 :=
-begin
-    rw zsqrt3.norm,
-    rw int.sq_plus_three_sq_eq_zero_iff,
-    rw zsqrtd.ext,
-    rw zsqrtd.zero_re,
-    rw zsqrtd.zero_im,
-end
-
 lemma pow_two_abs {R:Type*} [linear_ordered_ring R] (x : R) : abs x ^ 2 = x ^ 2 :=
 pow_bit0_abs x 1
 
