@@ -4,7 +4,7 @@ section
 variables {d : ℤ}
 namespace zsqrtd
 /-- `norm` as an `add_monoid_hom`. -/
-def norm_hom : ℤ√d →* ℤ :=
+def norm_monoid_hom : ℤ√d →* ℤ :=
 { to_fun := norm,
   map_mul' := norm_mul,
   map_one' := norm_one }
