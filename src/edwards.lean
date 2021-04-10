@@ -713,26 +713,38 @@ lemma factorization_prop
       odd_prime_or_four pq.norm :=
 classical.some_spec (step3 hcoprime)
 
+lemma factorization_prop'
+  {a : ℤ√-3}
+  (hcoprime : is_coprime a.re a.im) :
+  (a = (factorization hcoprime).prod ∨ a = - (factorization hcoprime).prod) ∧
+    ∀ pq : ℤ√-3, pq ∈ (factorization hcoprime) →
+      0 ≤ pq.re ∧
+      pq.im ≠ 0 ∧
+      odd_prime_or_four pq.norm :=
+begin
+  convert factorization_prop hcoprime;
+  { rw zsqrtd.ext, dsimp only, split; refl },
+end
+
 lemma factorization.coprime_of_mem
   {a b : ℤ√-3} (h : is_coprime a.re a.im) (hmem : b ∈ factorization h) :
   is_coprime b.re b.im :=
 begin
-  obtain ⟨h1, h2⟩ := factorization_prop h,
+  obtain ⟨h1, h2⟩ := factorization_prop' h,
   set f := factorization h,
   apply is_coprime_of_dvd,
   { rintro ⟨-, H⟩,
     exact (h2 b hmem).2.1 H },
   { intros z hznu hznz hzr hzi,
     apply hznu,
-    obtain ⟨d, hd⟩ : (z : ℤ√-3) ∣ f.prod,
+    have : (z : ℤ√-3) ∣ f.prod,
     { apply dvd_trans _ (multiset.dvd_prod hmem),
       rw zsqrtd.int_dvd_iff,
       exact ⟨hzr, hzi⟩ },
-    simp only [hd, zsqrtd.ext, add_zero, zsqrtd.coe_int_re, zero_mul, zsqrtd.neg_im, zsqrtd.neg_re,
-      zsqrtd.mul_im, zsqrtd.mul_re, mul_zero, zsqrtd.coe_int_im, int.neg_mul_eq_mul_neg] at h1,
-    apply is_coprime.is_unit_of_dvd' h,
-    { cases h1; rw [h1.1]; apply dvd_mul_right },
-    { cases h1; rw [h1.2]; apply dvd_mul_right } } ,
+    have : (z : ℤ√-3) ∣ a,
+    { cases h1; simp only [h1, dvd_neg, this] },
+    rw zsqrtd.int_dvd_iff at this,
+    exact is_coprime.is_unit_of_dvd' h this.1 this.2 } ,
 end
 
 lemma no_conj
@@ -1228,14 +1240,10 @@ lemma step5' -- lemma page 54
   (hcube : r ^ 3 = a.norm) :
   ∃ g : multiset ℤ√-3, factorization hcoprime = 3 •ℕ g :=
 begin
-  obtain ⟨h1, h2⟩ := factorization_prop hcoprime,
+  obtain ⟨h1, h2⟩ := factorization_prop' hcoprime,
   set f := factorization hcoprime with hf,
-  have xxx : a = ⟨a.re, a.im⟩ := by simp only [zsqrtd.ext, eq_self_iff_true, and_self],
-  rw ←xxx at h1,
   have h1' : f.prod = a ∨ f.prod = -a,
-  { cases h1,
-    { left, rw h1, },
-    { right, rw h1, simp only [neg_neg] } },
+  { cases h1; simp only [eq_self_iff_true, or_true, true_or, neg_neg, h1] },
   set f' := multiset.map zsqrtd.norm f with hf',
   have heqnsmulthree : factors_odd_prime_or_four a.norm =
     3 •ℕ factors_odd_prime_or_four r,
@@ -1249,8 +1257,7 @@ begin
     exact factors_2_even' a.re a.im hcoprime },
 
   have heqprod : a.norm = f.prod.norm,
-  { cases h1; rw [h1],
-    rw zsqrtd.norm_neg },
+  { cases h1; simp only [h1, zsqrtd.norm_neg] },
 
   have : f' = factors_odd_prime_or_four a.norm,
   { rw zsqrt3.norm,
@@ -1313,16 +1320,12 @@ lemma step5 -- lemma page 54
   ∃ p : ℤ√-3, a = p ^ 3 :=
 begin
   obtain ⟨f, hf⟩ := step5' a r hcoprime hcube,
-  obtain ⟨h1, h2⟩ := factorization_prop hcoprime,
-  set f' := factorization hcoprime with hf',
-  have xxx : a = ⟨a.re, a.im⟩ := by simp only [zsqrtd.ext, eq_self_iff_true, and_self],
-  rw ←xxx at h1,
-  set x := f.prod with hx,
+  obtain ⟨h1, -⟩ := factorization_prop' hcoprime,
   cases h1,
-  { use x,
+  { use f.prod,
     rw [h1, hf, multiset.prod_nsmul] },
-  { use -x,
-    rw [h1, hf, multiset.prod_nsmul, hx, neg_pow_bit1] },
+  { use -f.prod,
+    rw [h1, hf, multiset.prod_nsmul, neg_pow_bit1] },
 end
 
 lemma step6
