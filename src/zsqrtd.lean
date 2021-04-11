@@ -1,6 +1,6 @@
 import data.zsqrtd.basic
 
-lemma zsqrtd.int_dvd_iff {d : ℤ} (z : ℤ) (a : ℤ√d) : ↑z ∣ a ↔ z ∣ a.re ∧ z ∣ a.im :=
+lemma zsqrtd.coe_int_dvd_iff {d : ℤ} (z : ℤ) (a : ℤ√d) : ↑z ∣ a ↔ z ∣ a.re ∧ z ∣ a.im :=
 begin
   split,
   { rintro ⟨x, rfl⟩,

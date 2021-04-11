@@ -734,11 +734,11 @@ begin
     apply hznu,
     have : (z : ℤ√-3) ∣ f.prod,
     { apply dvd_trans _ (multiset.dvd_prod hmem),
-      rw zsqrtd.int_dvd_iff,
+      rw zsqrtd.coe_int_dvd_iff,
       exact ⟨hzr, hzi⟩ },
     have : (z : ℤ√-3) ∣ a,
     { cases h1; simp only [h1, dvd_neg, this] },
-    rw zsqrtd.int_dvd_iff at this,
+    rw zsqrtd.coe_int_dvd_iff at this,
     exact is_coprime.is_unit_of_dvd' h this.1 this.2 } ,
 end
 
