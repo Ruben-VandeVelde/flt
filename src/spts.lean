@@ -28,9 +28,8 @@ begin
     { rwa ←hparity },
 
     have h4 : (4 : ℤ) ∣ a + b ∨ (4 : ℤ) ∣ a - b,
-    { apply int.four_dvd_add_or_sub_of_odd,
-      { rwa [←nat.odd_iff_not_even, ←int.coe_nat_odd] at h },
-      { rwa [←nat.odd_iff_not_even, ←int.coe_nat_odd] at this } },
+    { apply int.four_dvd_add_or_sub_of_odd;
+      rwa [int.odd_coe_nat, nat.odd_iff_not_even] },
     cases h4,
     { obtain ⟨u, hu⟩ : (4 : ℤ) ∣ a - 3 * b,
       { convert dvd_sub h4 (dvd_mul_right 4 b) using 1,

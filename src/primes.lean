@@ -163,11 +163,7 @@ begin
 end
 
 @[norm_cast]
-lemma int.coe_nat_even {n : ℕ} : even (n : ℤ) ↔ even n :=
-by { rw [int.even_iff, nat.even_iff], norm_cast }
-
-@[norm_cast]
-lemma int.coe_nat_odd {n : ℕ} : odd (n : ℤ) ↔ odd n :=
+lemma int.odd_coe_nat {n : ℕ} : odd (n : ℤ) ↔ odd n :=
 by { rw [int.odd_iff, nat.odd_iff], norm_cast }
 
 @[parity_simps] lemma int.nat_abs_even {n : ℤ} : even n.nat_abs ↔ even n :=

@@ -96,7 +96,7 @@ begin
   obtain rfl|⟨hp, ho⟩ := h,
   { left, rw abs_eq_self, norm_num },
   { right,
-    rw [←int.nat_abs_odd, ←int.coe_nat_odd, ←int.abs_eq_nat_abs] at ho,
+    rw [←int.nat_abs_odd, ←int.odd_coe_nat, ←int.abs_eq_nat_abs] at ho,
     exact ⟨int.abs_prime hp, ho⟩ }
 end
 
@@ -120,7 +120,7 @@ begin
       ... = 4 * 2 ^ (k - 2) : by norm_num },
     { left, refl } },
   { rw nat.prime_iff_prime_int at hp,
-    rw ←int.coe_nat_odd at hodd,
+    rw ←int.odd_coe_nat at hodd,
     exact ⟨p, int.coe_nat_dvd.mpr hdvd, or.inr ⟨hp, hodd⟩⟩ },
 end
 
