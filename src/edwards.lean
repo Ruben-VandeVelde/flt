@@ -491,7 +491,7 @@ lemma prod_map_norm {s : multiset ℤ√-3} :
   (s.map zsqrtd.norm).prod = zsqrtd.norm s.prod :=
 multiset.prod_hom s zsqrtd.norm_monoid_hom
 
-lemma norm_not_dvd_four_of_odd_prime' {p : ℤ} (hmin : 0 ≤ p) (hp : prime p) (hodd: odd p) :
+lemma norm_not_dvd_four_of_odd_prime {p : ℤ} (hmin : 0 ≤ p) (hp : prime p) (hodd: odd p) :
   ¬(p ∣ 4) :=
 begin
   intro h,
@@ -505,42 +505,24 @@ begin
   { norm_num at hodd },
 end
 
-lemma norm_not_dvd_four_of_odd_prime {p : ℤ√-3} (hp : prime p.norm) (hodd: odd p.norm) :
-  ¬(p.norm ∣ 4) :=
-begin
-  have hmin := zsqrtd.norm_nonneg (by norm_num : (-3 : ℤ) ≤ 0) p,
-  apply norm_not_dvd_four_of_odd_prime'; assumption,
-end
-
-lemma associated_of_dvd' {a p : ℤ}
-  (ha : odd_prime_or_four (a))
-  (hp : odd_prime_or_four (p))
+lemma associated_of_dvd {a p : ℤ}
+  (ha : odd_prime_or_four a)
+  (hp : odd_prime_or_four p)
   (h: p ∣ a) : associated p a :=
 begin
-  cases ha; cases hp,
-  { rw [ha, hp] },
+  obtain (rfl|ha) := ha;
+  obtain (rfl|hp) := hp,
+  { refl },
   { exfalso,
-    rw ha at h,
     have h : abs p ∣ 4,
-    { rw int.abs_eq_nat_abs,
-      exact int.nat_abs_dvd.mpr h,},
-    exact norm_not_dvd_four_of_odd_prime' (abs_nonneg _) (int.abs_prime hp.1) (int.abs_odd hp.2) h },
+    { rwa [int.abs_eq_nat_abs, int.nat_abs_dvd] },
+    exact norm_not_dvd_four_of_odd_prime (abs_nonneg _) (int.abs_prime hp.1) (int.abs_odd hp.2) h },
   { exfalso,
-    have : ¬odd a,
-    { rw ←int.even_iff_not_odd,
-      apply dvd_trans _ h,
-      norm_num [hp] },
-    exact this ha.2 },
+    rw int.odd_iff_not_even at ha,
+    refine ha.2 (dvd_trans _ h),
+    norm_num },
   { rwa prime_dvd_prime_iff_eq hp.1 ha.1 at h }
 
-end
-
-lemma associated_of_dvd {a p : ℤ√-3}
-  (ha : odd_prime_or_four (zsqrtd.norm a))
-  (hp : odd_prime_or_four (zsqrtd.norm p))
-  (h: p.norm ∣ a.norm) : associated p.norm a.norm :=
-begin
-  apply associated_of_dvd'; assumption,
 end
 
 lemma dvd_blah {p a b : ℤ} (hp : prime p) (n : ℕ) (h : ¬(p ∣ a)) (h' : p ^ n ∣ a * b) : p ^ n ∣ b :=
@@ -565,7 +547,7 @@ begin
     exact mul_dvd_mul_left (p ^ n) this }
 end 
 
-lemma dvd_or_dvd' {a p x : ℤ}
+lemma dvd_or_dvd {a p x : ℤ}
   (ha : odd_prime_or_four a)
   (hp : odd_prime_or_four p)
   (hdvd : p ∣ a * x) : p ∣ a ∨ p ∣ x :=
@@ -583,63 +565,26 @@ begin
   { exact (hp.1.div_or_div hdvd) }
 end 
 
-lemma dvd_or_dvd (a p : ℤ√-3) (x : ℤ)
-  (ha : odd_prime_or_four (zsqrtd.norm a))
-  (hp : odd_prime_or_four (zsqrtd.norm p))
-  (hdvd : p.norm ∣ a.norm * x) : p.norm ∣ a.norm ∨ p.norm ∣ x :=
-begin
-  apply dvd_or_dvd'; assumption,
-end 
-
-lemma exists_associated_mem_of_dvd_prod'
-  {p : ℤ√-3} (hp : odd_prime_or_four p.norm)
-  {s : multiset ℤ√-3} :
-  (∀ r ∈ s, odd_prime_or_four (zsqrtd.norm r)) →
-  zsqrtd.norm p ∣ (s.map zsqrtd.norm).prod →
-  ∃ q ∈ s, associated (zsqrtd.norm p) (zsqrtd.norm q) :=
-multiset.induction_on s (by {
-  simp only [forall_const, forall_prop_of_false, exists_false, multiset.prod_zero, not_false_iff,
-    exists_prop_of_false, multiset.not_mem_zero],
-    simp only [int.cast_one, multiset.prod_zero, multiset.map_zero],
-    rw ←is_unit_iff_dvd_one,
-    exact hp.not_unit })
-  (λ a s ih hs hps, begin
-    rw [multiset.map_cons, multiset.prod_cons] at hps,
-    have hps' : p.norm ∣ (a * s.prod).norm,
-    { obtain ⟨x, hx⟩ := hps,
-      rw prod_map_norm at hx,
-      rw [zsqrtd.norm_mul, hx],
-      exact dvd_mul_right _ _ },
-    have := hs a (multiset.mem_cons_self _ _),
-    have h : p.norm ∣ a.norm ∨ p.norm ∣ (multiset.map zsqrtd.norm s).prod := dvd_or_dvd _ _ _ this hp hps,
-    cases h with h h,
-    { use [a, by simp],
-      apply associated_of_dvd' _ _ h; assumption },
-    { obtain ⟨q, hq₁, hq₂⟩ := ih (λ r hr, hs _ (multiset.mem_cons.2 (or.inr hr))) h,
-      exact ⟨q, multiset.mem_cons.2 (or.inr hq₁), hq₂⟩ }
-  end)
-
 lemma exists_associated_mem_of_dvd_prod''
   {p : ℤ} (hp : odd_prime_or_four p)
-  {s : multiset ℤ} :
-  (∀ r ∈ s, odd_prime_or_four (r)) →
-  p ∣ (s).prod →
+  {s : multiset ℤ}
+  (hs : ∀ r ∈ s, odd_prime_or_four r)
+  (hdvd : p ∣ s.prod) :
   ∃ q ∈ s, associated p q :=
-multiset.induction_on s (by {
-  simp only [forall_const, forall_prop_of_false, exists_false, multiset.prod_zero, not_false_iff,
-    exists_prop_of_false, multiset.not_mem_zero],
-    rw ←is_unit_iff_dvd_one,
-    exact hp.not_unit })
-  (λ a s ih hs hps, begin
+begin
+  revert hs hdvd,
+  refine s.induction_on _ _,
+  { simp [forall_const, forall_prop_of_false, exists_false, multiset.prod_zero, not_false_iff,
+      exists_prop_of_false, multiset.not_mem_zero, ←is_unit_iff_dvd_one, hp.not_unit] },
+  { intros a s ih hs hps,
     rw [multiset.prod_cons] at hps,
     have := hs a (multiset.mem_cons_self _ _),
-    have h := dvd_or_dvd' this hp hps,
+    have h := dvd_or_dvd this hp hps,
     cases h with h h,
-    { use [a, by simp],
-      apply associated_of_dvd' _ _ h; assumption },
+    { exact ⟨a, multiset.mem_cons_self _ _, associated_of_dvd this hp h⟩ },
     { obtain ⟨q, hq₁, hq₂⟩ := ih (λ r hr, hs _ (multiset.mem_cons.2 (or.inr hr))) h,
-      exact ⟨q, multiset.mem_cons.2 (or.inr hq₁), hq₂⟩ }
-  end)
+      exact ⟨q, multiset.mem_cons.2 (or.inr hq₁), hq₂⟩ } }
+end
 
 lemma factors_unique_prod' : ∀{f g : multiset ℤ},
   (∀x∈f, odd_prime_or_four x) →
@@ -650,19 +595,18 @@ begin
   intros f,
   refine multiset.induction_on f _ _,
   { rintros g - hg h,
+    rw [multiset.prod_zero] at h,
     rw [multiset.rel_zero_left],
     apply multiset.eq_zero_of_forall_not_mem,
     intros x hx,
     apply (hg x hx).not_unit,
     rw is_unit_iff_dvd_one,
-    apply dvd.trans (multiset.dvd_prod hx),
-    { rw [←is_unit_iff_dvd_one, ←associated_one_iff_is_unit],
-      rw [multiset.prod_zero] at h,
-      exact h.symm } },
+    exact dvd.trans (multiset.dvd_prod hx) (dvd_of_associated h.symm) },
   { intros p f ih g hf hg hfg,
-    have hp := hf p (by simp only [multiset.mem_cons_self]),
-    have hdvd : p ∣ g.prod := ((dvd_iff_dvd_of_rel_right hfg).1
-            (show p ∣ (p ::ₘ f).prod, by simp)),
+    have hp := hf p (multiset.mem_cons_self _ _),
+    have hdvd : p ∣ g.prod,
+    { rw [←dvd_iff_dvd_of_rel_right hfg, multiset.prod_cons],
+      exact dvd_mul_right _ _ },
     obtain ⟨b, hbg, hb⟩ := exists_associated_mem_of_dvd_prod'' hp hg hdvd,
     rw ← multiset.cons_erase hbg,
     apply multiset.rel.cons hb,
