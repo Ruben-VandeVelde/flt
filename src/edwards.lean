@@ -14,7 +14,6 @@ import data.zsqrtd.gaussian_int
 import .primes
 import .spts
 import .multiset
-import .zsqrtd
 
 lemma zsqrt3.norm (z : ℤ√-3) : z.norm = z.re ^ 2 + 3 * z.im ^ 2 :=
 begin
