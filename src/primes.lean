@@ -172,9 +172,6 @@ int.coe_nat_dvd_left.symm
 @[parity_simps] lemma int.nat_abs_odd {n : ℤ} : odd n.nat_abs ↔ odd n :=
 by rw [int.odd_iff_not_even, nat.odd_iff_not_even, int.nat_abs_even]
 
-theorem nat.pow_two_sub_pow_two (a b : ℕ) : a ^ 2 - b ^ 2 = (a + b) * (a - b) :=
-by { simp only [pow_two], exact nat.mul_self_sub_mul_self_eq a b }
-
 section
 variables {R : Type*} [comm_semiring R] {x y z : R}
 variables {m n : ℕ}
@@ -224,25 +221,10 @@ begin
 end
 end
 
-lemma nat.lt_mul_left (a b : nat) (h : 1 < b) (h' : 0 < a): a < b * a :=
+lemma nat.lt_mul_of_one_lt_left {m n : ℕ} (hm : 0 < m) (hn : 1 < n) : m < n * m :=
 begin
-  convert nat.mul_lt_mul h (le_refl _) h',
+  convert nat.mul_lt_mul hn (le_refl _) hm,
   rw one_mul
-end
-
-theorem nat.dvd_sub' {k m n : ℕ} (h₁ : k ∣ m) (h₂ : k ∣ n) : k ∣ m - n :=
-begin
-  by_cases H : n ≤ m,
-  { exact nat.dvd_sub H h₁ h₂ },
-  { rw not_le at H,
-    rw nat.sub_eq_zero_of_le H.le,
-    exact dvd_zero k },
-end
-
-lemma nat.le_mul_of_one_le_left (a : ℕ) {b : ℕ} (h : 1 ≤ b) : a ≤ b * a :=
-begin
-  convert nat.mul_le_mul_right a h,
-  rw one_mul,
 end
 
 lemma int.div_ne_zero_of_dvd {a b : ℤ} (ha : a ≠ 0) (hb : b ≠ 0) (hadvd: b ∣ a) : a / b ≠ 0 :=
