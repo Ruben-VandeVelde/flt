@@ -433,20 +433,8 @@ end
 
 end
 
--- todo remove
-lemma int.neg_prime {p : ℤ} (hp : prime p) : prime (-p) := prime.neg hp
-
--- todo remove
-lemma int.abs_prime {p : ℤ} (hp : prime p) : prime (abs p) := prime.abs hp
-
 lemma int.abs_odd {p : ℤ} (hp : odd p) : odd (abs p) :=
 by rwa [←int.nat_abs_odd, int.nat_abs_abs, int.nat_abs_odd]
-
--- todo remove
-lemma int.abs_iff (x : ℤ) : abs x = x ∨ abs x = -x := abs_choice x
-
--- todo remove
-lemma int.abs_eq (x : ℤ) : x = abs x ∨ x = -abs x := abs_eq' x
 
 -- todo consider removing
 lemma int.abs_eq_abs_iff {a b : ℤ} (h : abs a = abs b) : a = b ∨ a = -b :=

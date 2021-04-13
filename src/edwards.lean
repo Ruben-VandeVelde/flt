@@ -94,9 +94,7 @@ lemma odd_prime_or_four.abs {z : ℤ} (h : odd_prime_or_four z) : odd_prime_or_f
 begin
   obtain rfl|⟨hp, ho⟩ := h,
   { left, rw abs_eq_self, norm_num },
-  { right,
-    rw [←int.nat_abs_odd, ←int.odd_coe_nat, ←int.abs_eq_nat_abs] at ho,
-    exact ⟨int.abs_prime hp, ho⟩ }
+  { right, exact ⟨hp.abs, int.abs_odd ho⟩ }
 end
 
 lemma odd_prime_or_four.exists_and_dvd
@@ -306,14 +304,13 @@ begin
     { apply dvd_trans _ hdvd,
       norm_num },
     obtain ⟨u, v, h1, h2, h3⟩ := step1' a b hcoprime heven,
-    obtain ⟨hpone, hqone⟩ := spts.four hp hq,
-    cases int.abs_eq p with hp' hp';
-    cases int.abs_eq q with hq' hq';
-    rw [hpone] at hp';
-    rw [hqone] at hq';
+    obtain ⟨hp', hq'⟩ := spts.four hp hq,
+    rw (abs_eq $ @zero_le_one ℤ _) at hp' hq',
+    cases hp';
+    cases hq';
     subst p;
     subst q,
-    
+
     { refine ⟨u, v, h1, h2, _⟩,
       { rwa hp } },
     { refine ⟨u, v, h1, _, _⟩,
@@ -515,7 +512,7 @@ begin
   { exfalso,
     have h : abs p ∣ 4,
     { rwa [int.abs_eq_nat_abs, int.nat_abs_dvd] },
-    exact norm_not_dvd_four_of_odd_prime (abs_nonneg _) (int.abs_prime hp.1) (int.abs_odd hp.2) h },
+    exact norm_not_dvd_four_of_odd_prime (abs_nonneg _) hp.1.abs (int.abs_odd hp.2) h },
   { exfalso,
     rw int.odd_iff_not_even at ha,
     refine ha.2 (dvd_trans _ h),
@@ -1097,13 +1094,14 @@ begin
   obtain ⟨v, hv1, hv2⟩ := zsqrt3.coe_of_is_unit' u.is_unit,
   have hA : A.re = 0,
   { simp only [←hu, hv1, hx, add_zero, zero_mul, zsqrtd.mul_re, mul_zero, zsqrtd.coe_int_im] },
-  cases int.abs_iff v with habsv habsv; rw habsv at hv2,
-  { simp only [hv1, hv2, mul_one, int.cast_one] at hu,
-    simp only [←hu, true_or, eq_self_iff_true] },
-  { rw neg_eq_iff_neg_eq at hv2,
-    simp only [hv1, ←hv2, mul_one, int.cast_one, mul_neg_eq_neg_mul_symm, int.cast_neg] at hu,
-    simp only [zsqrtd.ext, hx, ←hu, zsqrtd.conj_re, eq_self_iff_true, zsqrtd.neg_im, zsqrtd.neg_re,
-      or_true, and_self, neg_neg, neg_zero, zsqrtd.conj_im] }
+  rw (abs_eq $ @zero_le_one ℤ _) at hv2,
+  cases hv2 with hv2 hv2,
+  { left,
+    simpa only [hv1, hv2, mul_one, int.cast_one] using hu },
+  { right,
+    simp only [hv1, hv2, mul_one, int.cast_one, mul_neg_eq_neg_mul_symm, int.cast_neg] at hu,
+    simp only [←hu, hx, zsqrtd.conj_neg, zsqrtd.ext, zsqrtd.neg_re, zsqrtd.neg_im, zsqrtd.conj_re,
+      zsqrtd.conj_im, neg_neg, neg_zero, eq_self_iff_true, and_self] }
 end
 
 lemma eq_or_eq_conj_iff_associated'_of_nonneg
@@ -1118,12 +1116,12 @@ begin
     { by_cases hxre : x.re = 0,
       { apply eq_or_eq_conj_of_associated_of_re_zero hxre ⟨u, hu⟩ },
       { rw hv1 at hu,
-        cases int.abs_iff v with habsv habsv,
+        rw (abs_eq $ @zero_le_one ℤ _) at hv2,
+        cases hv2 with habsv habsv,
         { left,
-          rw [←hu, ←habsv, hv2, int.cast_one, mul_one] },
+          rw [←hu, habsv, int.cast_one, mul_one] },
         { exfalso,
-          rw [habsv, neg_eq_iff_neg_eq] at hv2,
-          simp only [←hv2, mul_one, int.cast_one, mul_neg_eq_neg_mul_symm, int.cast_neg] at hu,
+          simp only [habsv, mul_one, int.cast_one, mul_neg_eq_neg_mul_symm, int.cast_neg] at hu,
           apply lt_irrefl (0 : ℤ),
           calc 0 < A.re : _
           ... = -x.re : _
@@ -1140,12 +1138,12 @@ begin
       { convert (eq_or_eq_conj_of_associated_of_re_zero hxre ⟨u, hu⟩).symm,
         rw zsqrtd.conj_conj },
       { rw hv1 at hu,
-        cases int.abs_iff v with habsv habsv,
+        rw (abs_eq $ @zero_le_one ℤ _) at hv2,
+        cases hv2 with habsv habsv,
         { right,
-          rw [←hu, ←habsv, hv2, int.cast_one, mul_one] },
+          rw [←hu, habsv, int.cast_one, mul_one] },
         { exfalso,
-          rw [habsv, neg_eq_iff_neg_eq] at hv2,
-          simp only [←hv2, mul_one, int.cast_one, mul_neg_eq_neg_mul_symm, int.cast_neg] at hu,
+          simp only [habsv, mul_one, int.cast_one, mul_neg_eq_neg_mul_symm, int.cast_neg] at hu,
           apply lt_irrefl (0 : ℤ),
           calc 0 < A.re : _
           ... = -x.re : _
