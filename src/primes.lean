@@ -545,3 +545,69 @@ end
 -- todo norm_num for prime ℤ
 lemma int.prime_two : prime (2 : ℤ) := nat.prime_iff_prime_int.mp nat.prime_two
 lemma int.prime_three : prime (3 : ℤ) := nat.prime_iff_prime_int.mp nat.prime_three
+
+lemma eq_of_associated_of_nonneg {a b : ℤ} (h : associated a b) (ha : 0 ≤ a) (hb : 0 ≤ b) : a = b :=
+begin
+  by_cases ha' : a = 0,
+  { subst a, replace h := associated.symm h, rw [associated_zero_iff_eq_zero] at h, exact h.symm },
+  { obtain ⟨u, hu⟩ := h,
+    rw ←hu,
+    have := u.is_unit,
+    rw int.is_unit_iff_abs at this,
+    rw abs_of_nonneg _ at this,
+    rw [this, mul_one],
+
+    apply nonneg_of_mul_nonneg_left,
+    { rwa hu },
+    { apply lt_of_le_of_ne ha, symmetry, exact ha' } }
+end
+
+lemma int.nonneg_of_normalize_eq_self {z : ℤ} (hz : normalize z = z) : 0 ≤ z :=
+calc 0 ≤ (z.nat_abs : ℤ) : int.coe_zero_le _
+... = normalize z : int.coe_nat_abs_eq_normalize _
+... = z : hz
+
+lemma int.factors_nonneg {z a : ℤ} (ha : a ∈ unique_factorization_monoid.factors z) : 0 ≤ a :=
+int.nonneg_of_normalize_eq_self (unique_factorization_monoid.normalize_factor a ha)
+
+lemma int.factors_eq' (z : ℤ) :
+  ((unique_factorization_monoid.factors z).map int.nat_abs).map (coe : ℕ → ℤ)
+  = unique_factorization_monoid.factors z :=
+begin
+  conv_rhs { rw ←multiset.map_id (unique_factorization_monoid.factors z) },
+  rw multiset.map_map,
+  apply multiset.map_congr,
+  intros x hx,
+  rw [id.def, function.comp_app, int.nat_abs_of_nonneg (int.factors_nonneg hx)],
+end
+
+lemma int.factors_eq (z : ℤ) :
+  unique_factorization_monoid.factors z = multiset.map (int.of_nat_hom) (nat.factors z.nat_abs) :=
+begin
+  rw ←nat.factors_eq,
+  rw ←multiset.rel_eq,
+  have : multiset.rel associated (unique_factorization_monoid.factors z) (multiset.map (int.of_nat_hom : ℕ →* ℤ) (unique_factorization_monoid.factors z.nat_abs)),
+  { apply prime_factors_unique,
+    { exact unique_factorization_monoid.prime_of_factor },
+    { intros x hx,
+      obtain ⟨y, hy, rfl⟩ := multiset.mem_map.mp hx,
+      simp only [ring_hom.coe_monoid_hom, ring_hom.eq_nat_cast, int.nat_cast_eq_coe_nat],
+      rw [←nat.prime_iff_prime_int, ←irreducible_iff_nat_prime],
+      exact unique_factorization_monoid.irreducible_of_factor _ hy },
+    { by_cases hz: z = 0,
+      { simp only [hz, unique_factorization_monoid.factors_zero, multiset.map_zero, int.nat_abs_zero] },
+      apply associated.trans (unique_factorization_monoid.factors_prod hz),
+      apply associated.trans (int.associated_nat_abs z),
+      rw multiset.prod_hom,
+      simp only [ring_hom.coe_monoid_hom, ring_hom.eq_nat_cast, int.nat_cast_eq_coe_nat],
+      rw int.associated_iff_nat_abs,
+      simp only [int.nat_abs_of_nat],
+      rw ←associated_iff_eq,
+      exact (unique_factorization_monoid.factors_prod (int.nat_abs_ne_zero_of_ne_zero hz)).symm } },
+  apply multiset.rel.mono this,
+  intros a ha b hb hab,
+  apply eq_of_associated_of_nonneg hab,
+  { exact int.factors_nonneg ha },
+  { obtain ⟨b', hb', rfl⟩ := multiset.mem_map.mp hb,
+    simp only [ring_hom.coe_monoid_hom, int.coe_nat_nonneg, ring_hom.eq_nat_cast, int.nat_cast_eq_coe_nat] },
+end
