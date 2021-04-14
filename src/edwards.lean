@@ -998,7 +998,7 @@ end
 
 lemma factors_odd_prime_or_four.pow
   (z : ℤ) (n : ℕ) (hz : even (even_factor_exp z)) :
-  factors_odd_prime_or_four (z ^ n) = n •ℕ factors_odd_prime_or_four z :=
+  factors_odd_prime_or_four (z ^ n) = n • factors_odd_prime_or_four z :=
 begin
   simp only [factors_odd_prime_or_four, nsmul_add],
   congr,
@@ -1107,7 +1107,7 @@ lemma step5' -- lemma page 54
   (r : ℤ)
   (hcoprime : is_coprime a.re a.im)
   (hcube : r ^ 3 = a.norm) :
-  ∃ g : multiset ℤ√-3, factorization hcoprime = 3 •ℕ g :=
+  ∃ g : multiset ℤ√-3, factorization hcoprime = 3 • g :=
 begin
   obtain ⟨h1, h2⟩ := factorization_prop' hcoprime,
   set f := factorization hcoprime with hf,
@@ -1115,7 +1115,7 @@ begin
   { cases h1; simp only [eq_self_iff_true, or_true, true_or, neg_neg, h1] },
   set f' := multiset.map zsqrtd.norm f with hf',
   have heqnsmulthree : factors_odd_prime_or_four a.norm =
-    3 •ℕ factors_odd_prime_or_four r,
+    3 • factors_odd_prime_or_four r,
   { rw ←hcube,
     apply factors_odd_prime_or_four.pow,
     suffices : even (3 * even_factor_exp r),

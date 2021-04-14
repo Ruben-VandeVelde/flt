@@ -322,7 +322,8 @@ theorem is_unit_of_pow {α} [comm_monoid α] {x : α} {n : ℕ} (hn : 0 < n)
 begin
   cases n,
   { norm_num at hn },
-  { apply is_unit_of_mul_is_unit_left h }
+  { rw pow_succ at h,
+    exact is_unit_of_mul_is_unit_left h }
 end
 
 theorem of_irreducible_pow {α} [comm_monoid α] {x : α} {n : ℕ} (hn : 1 < n) :

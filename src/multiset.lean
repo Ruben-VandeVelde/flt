@@ -36,7 +36,7 @@ begin
       exact ih _ (multiset.mem_cons_of_mem ha) } }
 end
 
-lemma multiset.nsmul_repeat {a : α} (n m : ℕ) : n •ℕ (multiset.repeat a m) = multiset.repeat a (n * m) :=
+lemma multiset.nsmul_repeat {a : α} (n m : ℕ) : n • (multiset.repeat a m) = multiset.repeat a (n * m) :=
 begin
   rw [multiset.eq_repeat],
   split,
@@ -49,13 +49,13 @@ begin
       exact multiset.eq_of_mem_repeat hb } },
 end
 
-lemma multiset.nsmul_cons (n : ℕ) (a : α) : n •ℕ (a ::ₘ s) = n •ℕ (↑[a]) + n •ℕ s :=
+lemma multiset.nsmul_cons (n : ℕ) (a : α) : n • (a ::ₘ s) = n • (↑[a]) + n • s :=
 begin
   induction n with n ih,
   { simp only [add_zero, zero_nsmul] },
   { simp only [add_nsmul, one_nsmul, ih, ←multiset.singleton_add, nsmul_add] }
 end
-lemma multiset.nsmul_cons' (n : ℕ) (a : α) : n •ℕ (a ::ₘ s) = n •ℕ (a ::ₘ 0) +  n •ℕ s :=
+lemma multiset.nsmul_cons' (n : ℕ) (a : α) : n • (a ::ₘ s) = n • (a ::ₘ 0) +  n • s :=
 multiset.nsmul_cons n a
 
 theorem multiset.filter_cons {a : α} (s : multiset α)
@@ -69,7 +69,7 @@ end
 
 lemma multiset.nsmul_filter (n : ℕ)
   (p : α → Prop) [decidable_pred p] :
-  multiset.filter p (n •ℕ s) = n •ℕ multiset.filter p s :=
+  multiset.filter p (n • s) = n • multiset.filter p s :=
 begin
   by_cases hn : n = 0,
   { simp only [hn, multiset.filter_zero, zero_nsmul] },
@@ -162,7 +162,7 @@ lemma multiset.exists_nsmul_of_dvd
   (s : multiset α)
   (k : ℕ)
   (h : ∀ x ∈ s, k ∣ multiset.count x s) :
-  ∃ t : multiset α, s = k •ℕ t :=
+  ∃ t : multiset α, s = k • t :=
 begin
   obtain (rfl|hk) := nat.eq_zero_or_pos k,
   { use 0,
