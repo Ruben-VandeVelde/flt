@@ -18,10 +18,6 @@ zero_lt_four.ne.symm
 
 end
 
-lemma nat.mem_factors' {n p} (hn : 0 < n) : p ∈ nat.factors n ↔ nat.prime p ∧ p ∣ n :=
-⟨λ h, ⟨nat.mem_factors h, (nat.mem_factors_iff_dvd hn (nat.mem_factors h)).mp h⟩,
- λ ⟨hprime, hdvd⟩, (nat.mem_factors_iff_dvd hn hprime).mpr hdvd⟩
-
 lemma eq_pow
   {n p : ℕ}
   (hpos : 0 < n)
@@ -35,7 +31,7 @@ begin
     suffices : n.factors = list.repeat p k, { rw this },
     apply list.eq_repeat_of_mem,
     intros d hd,
-    rw nat.mem_factors' hpos at hd,
+    rw nat.mem_factors hpos at hd,
     apply h hd.left hd.right,
   },
   { exact list.prod_repeat p k },
