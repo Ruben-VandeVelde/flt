@@ -42,43 +42,6 @@ begin
     exact zero_le _ }
 end
 
-lemma exists_odd_prime_and_dvd_or_two_pow
-  {n : ℕ} (n2 : 2 ≤ n) : (∃ k : ℕ, n = 2 ^ k) ∨ ∃ p, nat.prime p ∧ p ∣ n ∧ odd p :=
-begin
-  rw or_iff_not_imp_right,
-  intro H,
-  push_neg at H,
-  use n.factors.length,
-  apply eq_pow (zero_lt_two.trans_le n2),
-  intros p hprime hdvd,
-  apply hprime.eq_two_or_odd.resolve_right,
-  rw ←nat.odd_iff,
-  exact H p hprime hdvd,
-end
-
-lemma exists_prime_and_dvd'
-  {n : ℕ} (n2 : 2 < n) : ∃ p, p ∣ n ∧ (p = 4 ∨ (nat.prime p ∧ p % 2 = 1)) :=
-begin
-  obtain ⟨k, h2⟩|⟨p, hp, hdvd, hodd⟩ := exists_odd_prime_and_dvd_or_two_pow n2.le,
-  { refine ⟨4, _, _⟩,
-    { use 2 ^ (k - 2),
-
-      have h3 : 2 ≤ k,
-      { rw h2 at n2,
-        apply l0 n2 },
-
-      calc n
-          = 2 ^ k : h2
-      ... = 2 ^ 2 * 2 ^ (k - 2) : (pow_mul_pow_sub _ h3).symm
-      ... = 4 * 2 ^ (k - 2) : by norm_num },
-    { left, refl } },
-  { rw nat.odd_iff at hodd,
-    have pnetwo : p ≠ 2,
-    { rintro rfl,
-      norm_num at hodd },
-    exact ⟨p, hdvd, or.inr ⟨hp, hodd⟩⟩ },
-end
-
 section comm_monoid_with_zero
 
 variables {α : Type*} [comm_monoid_with_zero α]
