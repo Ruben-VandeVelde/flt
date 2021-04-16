@@ -593,3 +593,6 @@ begin
   obtain ⟨b', hb', rfl⟩ := multiset.mem_map.mp hb,
   simp only [ring_hom.coe_monoid_hom, int.coe_nat_nonneg, ring_hom.eq_nat_cast, int.nat_cast_eq_coe_nat],
 end
+
+lemma pow_two_abs {R:Type*} [linear_ordered_ring R] (x : R) : abs x ^ 2 = x ^ 2 :=
+pow_bit0_abs x 1
