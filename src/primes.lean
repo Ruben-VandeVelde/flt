@@ -163,12 +163,6 @@ begin
 end
 end
 
-lemma nat.lt_mul_of_one_lt_left {m n : ℕ} (hm : 0 < m) (hn : 1 < n) : m < n * m :=
-begin
-  convert nat.mul_lt_mul hn (le_refl _) hm,
-  rw one_mul
-end
-
 lemma int.div_ne_zero_of_dvd {a b : ℤ} (ha : a ≠ 0) (hb : b ≠ 0) (hadvd: b ∣ a) : a / b ≠ 0 :=
 begin
   obtain ⟨c, rfl⟩ := hadvd,
