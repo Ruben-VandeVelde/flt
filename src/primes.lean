@@ -403,23 +403,13 @@ end
 theorem int.associated_pow_of_mul_eq_pow {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
   (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ k) : ∃ d, associated a (d ^ k) :=
 begin
-  have ha' : associates.mk a ≠ 0,
-  { rwa [ne.def, associates.mk_eq_zero] },
-  have hb' : associates.mk b ≠ 0,
-  { rwa [ne.def, associates.mk_eq_zero] },
-  have hab' : ∀ (d : associates ℤ), d ∣ associates.mk a → d ∣ associates.mk b → ¬prime d,
-  { intros d da db dprime,
-    obtain ⟨d', rfl⟩ := associates.exists_rep d,
-    rw associates.mk_dvd_mk at da db,
-    rw [associates.prime_mk] at dprime,
-    apply dprime.not_unit,
-    exact is_coprime.is_unit_of_dvd' hab da db },
-  have h' : associates.mk a * associates.mk b = (associates.mk c) ^ k,
-  { rw [associates.mk_mul_mk, ←associates.mk_pow, h] },
-  obtain ⟨d, hd⟩ := associates.eq_pow_of_mul_eq_pow ha' hb' hab' h',
-  obtain ⟨d', rfl⟩ := associates.exists_rep d,
-  rw [←associates.mk_pow, associates.mk_eq_mk_iff_associated] at hd,
-  exact ⟨d', hd⟩,
+  have : a.nat_abs * b.nat_abs = c.nat_abs ^ k,
+  { rw [←int.nat_abs_mul, ←int.nat_abs_pow, h] },
+  rw ←int.gcd_eq_one_iff_coprime at hab,
+  obtain ⟨d, hd⟩ := nat.eq_pow_of_mul_eq_pow
+    (int.nat_abs_pos_of_ne_zero ha) (int.nat_abs_pos_of_ne_zero hb) hab this,
+  use d,
+  rw [int.associated_iff_nat_abs, hd, int.nat_abs_pow, int.nat_abs_of_nat]
 end
 
 theorem int.eq_pow_of_mul_eq_pow_bit1_left {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
