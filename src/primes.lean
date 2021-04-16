@@ -142,7 +142,7 @@ end
 section
 variables {R : Type*} [comm_ring R] {x y z : R}
 variables {m n : ℕ}
-lemma coprime_add_self'
+lemma is_coprime.add_self_right
   (h : is_coprime x y) :
   is_coprime x (x + y) :=
 begin
@@ -159,8 +159,7 @@ lemma coprime_add_self_pow
 begin
   apply is_coprime.of_pow hn hn,
   rw ←hsoln,
-  apply coprime_add_self',
-  exact is_coprime.pow hxx,
+  exact hxx.pow.add_self_right,
 end
 end
 
