@@ -304,9 +304,7 @@ begin
   cases huv; use [u, v]; [use q', use q'.conj];
   { try { rw [zsqrtd.conj_re, zsqrtd.conj_im, neg_ne_zero, zsqrtd.norm_conj] },
     use [hc, hd.ne.symm, hp', huv, huvcoprime],
-    rw huvdvd,
-    apply int.lt_mul_self (spts.pos_of_coprime huvcoprime),
-    rw ←hcd,
+    rw [huvdvd, lt_mul_iff_one_lt_left (spts.pos_of_coprime huvcoprime), ←hcd],
     exact hp.one_lt_abs },
 end
 
@@ -831,8 +829,7 @@ begin
     apply iff_of_true (dvd_refl _),
     apply ih _ _ u v huvcoprime hm'.symm,
     zify,
-    rw [hm', ←hn, huvprod],
-    apply int.lt_mul_self (spts.pos_of_coprime huvcoprime),
+    rw [hm', ←hn, huvprod, lt_mul_iff_one_lt_left (spts.pos_of_coprime huvcoprime)],
     norm_num },
   { rw hn at hparity,
     convert nat.even_zero, 

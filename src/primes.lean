@@ -306,12 +306,6 @@ begin
   norm_num,
 end
 
-lemma int.lt_mul_self {a b : ℤ} (ha : 0 < a) (hb : 1 < b) : a < b * a :=
-begin
-  convert int.mul_lt_mul hb le_rfl ha (le_trans zero_le_one hb.le),
-  rw one_mul,
-end
-
 -- todo square neg_square and neg_pow_bit0
 
 theorem prime_dvd_prime_iff_eq {p q : ℤ} (pp : prime p) (qp : prime q) : p ∣ q ↔ associated p q :=
