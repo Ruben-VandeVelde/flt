@@ -25,16 +25,12 @@ lemma eq_pow
   n = p ^ n.factors.length :=
 begin
   set k := n.factors.length,
-  rw [←nat.prod_factors hpos],
-  transitivity,
-  {
-    suffices : n.factors = list.repeat p k, { rw this },
-    apply list.eq_repeat_of_mem,
-    intros d hd,
-    rw nat.mem_factors hpos at hd,
-    apply h hd.left hd.right,
-  },
-  { exact list.prod_repeat p k },
+  rw [←nat.prod_factors hpos, ←list.prod_repeat p k],
+  congr,
+  apply list.eq_repeat_of_mem,
+  intros d hd,
+  rw nat.mem_factors hpos at hd,
+  exact h hd.left hd.right,
 end
 
 lemma l0 {n : ℕ} (h : 2 < 2 ^ n) : 2 ≤ n :=
