@@ -308,11 +308,10 @@ end
 
 -- todo square neg_square and neg_pow_bit0
 
-theorem prime_dvd_prime_iff_eq {p q : ℤ} (pp : prime p) (qp : prime q) : p ∣ q ↔ associated p q :=
+theorem int.prime_dvd_prime_iff_associated {p q : ℤ} (pp : prime p) (qp : prime q) : p ∣ q ↔ associated p q :=
 begin
   rw int.prime_iff_nat_abs_prime at pp qp,
-  rw ←int.nat_abs_dvd_abs_iff,
-  rw int.associated_iff_nat_abs,
+  rw [←int.nat_abs_dvd_abs_iff, int.associated_iff_nat_abs],
   exact nat.prime_dvd_prime_iff_eq pp qp,
 end
 
