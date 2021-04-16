@@ -84,36 +84,25 @@ end
 
 theorem int.nat_abs_ne_zero {a : ℤ} : a.nat_abs ≠ 0 ↔ a ≠ 0 := not_congr int.nat_abs_eq_zero
 
-lemma int.mod_four_of_odd' {n : ℤ} (hodd: odd n) : ∃ m, n = 4 * m + 3 ∨ n = 4 * m + 1 :=
-begin
-  obtain ⟨m, hm⟩ := hodd,
-  cases int.even_or_odd m with h h;
-    obtain ⟨k, hk⟩ := h;
-    use k;
-    [right, left];
-    rw [hm, hk];
-    ring,
-end
-
 lemma int.four_dvd_add_or_sub_of_odd {a b : ℤ}
   (ha : odd a)
   (hb : odd b) :
   4 ∣ a + b ∨ 4 ∣ a - b :=
 begin
-  obtain ⟨m, hm⟩ := int.mod_four_of_odd' ha,
-  obtain ⟨n, hn⟩ := int.mod_four_of_odd' hb,
-  cases hm; cases hn; rw [hm, hn],
-  any_goals
+  obtain ⟨m, rfl⟩ := ha,
+  obtain ⟨n, rfl⟩ := hb,
+  obtain h|h := int.even_or_odd (m + n),
   { right,
-    rw [add_sub_add_right_eq_sub, ←mul_sub_left_distrib],
-    apply dvd_mul_right },
-  all_goals
+    rw [int.even_add, ←int.even_sub] at h,
+    obtain ⟨k, hk⟩ := h,
+    convert dvd_mul_right 4 k,
+    rw [eq_add_of_sub_eq hk],
+    ring },
   { left,
-    rw add_assoc,
-    apply dvd_add (dvd_mul_right _ _),
-    rw [add_comm, add_assoc],
-    apply dvd_add (dvd_mul_right _ _),
-    apply dvd_refl },
+    obtain ⟨k, hk⟩ := h,
+    convert dvd_mul_right 4 (k + 1),
+    rw [eq_sub_of_add_eq hk],
+    ring },
 end
 
 @[norm_cast]
