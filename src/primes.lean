@@ -330,6 +330,14 @@ begin
   { right, exact eq_neg_of_eq_neg h }
 end
 
+lemma abs_eq_abs_iff {a b : α} : abs a = abs b ↔ a = b ∨ a = -b :=
+begin
+  split; intro h,
+  { cases abs_eq' a with h₁ h₁; cases abs_eq' b with h₂ h₂;
+    rw [h₁, h₂]; simp only [h, true_or, eq_self_iff_true, eq_self_iff_true, or_true, neg_neg] },
+  { cases h; simp only [h, abs_neg] },
+end
+
 end
 
 section
@@ -365,10 +373,6 @@ end
 
 lemma int.abs_odd {p : ℤ} (hp : odd p) : odd (abs p) :=
 by rwa [←int.nat_abs_odd, int.nat_abs_abs, int.nat_abs_odd]
-
--- todo consider removing
-lemma int.abs_eq_abs_iff {a b : ℤ} (h : abs a = abs b) : a = b ∨ a = -b :=
-by rwa [←int.nat_abs_eq_nat_abs_iff, ←int.coe_nat_inj', ←int.abs_eq_nat_abs, ←int.abs_eq_nat_abs]
 
 theorem int.exists_prime_and_dvd {n : ℤ} (n2 : 2 ≤ n.nat_abs) : ∃ p, prime p ∧ p ∣ n :=
 begin
