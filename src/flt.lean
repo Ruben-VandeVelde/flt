@@ -34,17 +34,14 @@ end
 theorem flt {n : ℕ} {a b c : ℤ} (h : 2 < n) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) :
   a ^ n + b ^ n ≠ c ^ n :=
 begin
-  by_contradiction H,
-  push_neg at H,
+  intro H,
   zify at h,
   obtain ⟨p, hdvd, hp⟩ := odd_prime_or_four.exists_and_dvd h,
   rw [int.coe_nat_dvd_right] at hdvd,
   obtain ⟨a', b', c', ha', hb', hc', hcomp⟩ := flt_composite hdvd ha hb hc H,
-  cases hp,
-  { subst hp,
-    exact flt_four ha' hb' hc' hcomp },
-  { obtain ⟨hp, hodd⟩ := hp,
-    by_cases h3 : p.nat_abs = 3,
+  obtain rfl|⟨hp, hodd⟩ := hp,
+  { exact flt_four ha' hb' hc' hcomp },
+  { by_cases h3 : p.nat_abs = 3,
     { rw h3 at hcomp,
       apply flt_three ha' hb' hc' hcomp },
     { rw int.prime_iff_nat_abs_prime at hp,
