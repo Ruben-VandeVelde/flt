@@ -6,13 +6,7 @@ import tactic
 import number_theory.fermat4
 import .primes
 import .odd_prime_or_four
-
-lemma flt_three
-  {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) :
-  a ^ 3 + b ^ 3 ≠ c ^ 3 :=
-begin
-  sorry,
-end
+import .euler
 
 lemma flt_four
   {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) :

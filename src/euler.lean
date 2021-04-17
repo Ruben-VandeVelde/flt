@@ -793,7 +793,7 @@ begin
 end
 
 lemma flt_three
-  (a b c : ℤ)
+  {a b c : ℤ}
   (ha : a ≠ 0)
   (hb : b ≠ 0)
   (hc : c ≠ 0) :
