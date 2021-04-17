@@ -343,16 +343,18 @@ lemma obscure'
   (hcoprime : is_coprime p q)
   (hparity : even p ↔ ¬even q)
   (hcube : ∃ r, p ^ 2 + 3 * q ^ 2 = r ^ 3) :
-  ∃ a b : ℤ,
-    (p : ℤ) = a ^ 3 - 9 * a * b ^ 2 ∧
-    (q : ℤ) = 3 * a ^ 2 * b - 3 * b ^ 3 ∧
+  ∃ a b,
+    p = a * (a - 3 * b) * (a + 3 * b) ∧
+    q = 3 * b * (a - b) * (a + b) ∧
     is_coprime a b ∧
     (even a ↔ ¬even b) :=
 begin
   obtain ⟨u, hu⟩ := hcube,
 
   obtain ⟨a, b, hp', hq'⟩ := step6 p q u hcoprime hu.symm,
-  refine ⟨a, b, hp', hq', _, _⟩,
+  refine ⟨a, b, _, _, _, _⟩,
+  { rw hp', ring },
+  { rw hq', ring },
   { apply is_coprime_of_dvd,
     { rintro ⟨rfl, rfl⟩,
       norm_num at hp' },
@@ -487,16 +489,14 @@ begin
   have hposleft : 2 * p ≠ 0 := mul_ne_zero two_ne_zero hp,
   have hposright : p ^ 2 + 3 * q ^ 2 ≠ 0 := spts.not_zero_of_coprime hcoprime,
   obtain ⟨hcubeleft, hcuberight⟩ := int.eq_pow_of_mul_eq_pow_bit1 hposleft hposright hgcd hr,
-  -- todo shadowing hp hq
-  obtain ⟨u, v, hp, hq, huvcoprime, huvodd⟩ := obscure' p q hp hq hcoprime hodd hcuberight,
+  -- todo shadowing hq
+  obtain ⟨u, v, hpfactor, hq, huvcoprime, huvodd⟩ := obscure' p q hp hq hcoprime hodd hcuberight,
   have u_ne_zero : u ≠ 0,
   { rintro rfl,
-    apply ‹p ≠ 0›,
-    rwa [zero_pow zero_lt_three, mul_zero, zero_mul, sub_zero] at hp },
-  have hpfactor : p = u * (u - 3 * v) * (u + 3 * v),
-  { rw hp, ring },
+    rw [zero_mul, zero_mul] at hpfactor,
+    contradiction },
   have haaa : 2 * p = (2 * u) * (u - 3 * v) * (u + 3 * v),
-  { rw hp, ring },
+  { rw hpfactor, ring },
   have : ¬even (u - 3 * v),
   { simp [huvodd] with parity_simps },
   have : ¬even (u + 3 * v),
@@ -709,19 +709,16 @@ begin
   obtain ⟨haddcoprime, hsubcoprime, haddsubcoprime⟩ := gcd3_coprime huvcoprime huvodd,
 
   -- 7.
-  obtain ⟨t, ht⟩ : ∃ t, 2 * v * (u - v) * (u + v) = t ^ 3,
-  { obtain ⟨e, he⟩ := hcubeleft,
-    have hxxx : 3 ^ 3 * (2 * (u ^ 2 * v - v ^ 3)) = e ^ 3,
-    { rw [←he, hs],
-      ring },
-    obtain ⟨g, rfl⟩ : 3 ∣ e,
-    { rw ←int.pow_dvd_pow_iff (by norm_num : 0 < 3),
-      rw ←hxxx,
-      exact dvd_mul_right _ _ },
-    use g,
-    have : (3 ^ 3 : ℤ) ≠ 0,
+  obtain ⟨e, he⟩ := hcubeleft,
+  obtain ⟨t, rfl⟩ : 3 ∣ e,
+  { rw [←int.pow_dvd_pow_iff (by norm_num : 0 < 3), ←he, hs],
+    convert dvd_mul_right _ (2 * v * (u - v) * (u + v)) using 1,
+    norm_num,
+    ring },
+  have ht : 2 * v * (u - v) * (u + v) = t ^ 3,
+  { have : (3 ^ 3 : ℤ) ≠ 0,
     { norm_num },
-    rw [←mul_right_inj' this, ←mul_pow, ←hxxx],
+    rw [←mul_right_inj' this, ←mul_pow, ←he, hs],
     ring },
 
   obtain ⟨A, B, C, HApos, HBpos, HCpos, HA, HB, HC⟩ : ∃ X Y Z : ℤ,
