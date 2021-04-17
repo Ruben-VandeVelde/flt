@@ -664,14 +664,10 @@ begin
     rw int.is_unit_iff_nat_abs_eq at this,
     norm_num at this },
   -- 2.
-  obtain ⟨s, hs⟩ := h3_dvd_p,
-  have hspos : s ≠ 0,
-  { apply right_ne_zero_of_mul,
-    rwa ←hs },
-  have hps : 2 * p * (p ^ 2 + 3 * q ^ 2) = 3 ^ 2 * 2 * s * (q ^ 2 + 3 * s ^ 2),
-  { calc 2 * p * (p ^ 2 + 3 * q ^ 2)
-        = 2 * (3 * s) * ((3 * s) ^ 2 + 3 * q ^ 2) : by rw hs
-    ... = _ : by ring },
+  obtain ⟨s, rfl⟩ := h3_dvd_p,
+  have hspos : s ≠ 0 := right_ne_zero_of_mul hp,
+  have hps : 2 * (3 * s) * ((3 * s) ^ 2 + 3 * q ^ 2) = 3 ^ 2 * 2 * s * (q ^ 2 + 3 * s ^ 2),
+  { ring },
   -- 3.
   have hcoprime' : is_coprime s q,
   { apply int.is_coprime_of_dvd',
@@ -680,18 +676,15 @@ begin
     intros k hknu hknz hkprime hkdvdleft hkdvdright,
     apply hknu,
     apply hcoprime.is_unit_of_dvd' _ hkdvdright,
-    rw hs,
     exact dvd_mul_of_dvd_right hkdvdleft 3 },
 
   have hodd' : even q ↔ ¬even s,
-  { have : even p ↔ even s,
-    { simp [hs] with parity_simps },
-    rw this at hodd,
-    tauto },
+  { rw [iff.comm, not_iff_comm, iff.comm],
+  simpa with parity_simps using hodd },
   have hcoprime'' : is_coprime (3^2 * 2 * s) (q ^ 2 + 3 * s ^ 2),
   { exact descent_gcd3_coprime h3_ndvd_q hspos hcoprime' hodd' },
   -- 4.
-  obtain ⟨r, hr⟩ : ∃ r, 2 * p * (p ^ 2 + 3 * q ^ 2) = r ^ 3,
+  obtain ⟨r, hr⟩ : ∃ r, 2 * (3 * s) * ((3 * s) ^ 2 + 3 * q ^ 2) = r ^ 3,
   { rcases hcube with (_|_|_);
     [use a, use b, use c];
     exact hcube },
@@ -728,8 +721,7 @@ begin
     use g,
     have : (3 ^ 3 : ℤ) ≠ 0,
     { norm_num },
-    rw [←mul_right_inj' this, ←mul_pow],
-    convert hxxx using 1,
+    rw [←mul_right_inj' this, ←mul_pow, ←hxxx],
     ring },
 
   obtain ⟨A, B, C, HApos, HBpos, HCpos, HA, HB, HC⟩ : ∃ X Y Z : ℤ,
@@ -746,7 +738,7 @@ begin
 
   refine ⟨A, B, C, HApos, HBpos, HCpos, _, _⟩,
   -- 9.
-  { rw [mul_comm, ←mul_assoc (C ^ 3), ←HA, ←HB, ←HC],
+  { rw [←mul_assoc, mul_comm, ←mul_assoc (C ^ 3), ←HA, ←HB, ←HC],
     set x := v * (u - v) * (u + v) with hx,
     calc ((u + v) * (2 * v) * (u - v)).nat_abs
         = (2 * x).nat_abs : by { rw hx, congr' 1, ring }
@@ -754,11 +746,8 @@ begin
     ... ≤ 3 * x.nat_abs : nat.mul_le_mul_right _ (by norm_num)
     ... = (3 * x).nat_abs : by { rw [int.nat_abs_mul 3], refl }
     ... = s.nat_abs : by { rw [hx, hs], congr' 1, ring }
-    ... ≤ 3 * s.nat_abs : nat.le_mul_of_pos_left (by norm_num)
-    ... = (3 * s).nat_abs : by { rw [int.nat_abs_mul 3], refl }
-    ... = p.nat_abs : by rw ‹p = 3 * s›
-    ... ≤ 2 * p.nat_abs : nat.le_mul_of_pos_left (by norm_num)
-    ... = (2 * p).nat_abs : by { rw [int.nat_abs_mul 2], refl } },
+    ... ≤ (2 * 3) * s.nat_abs : nat.le_mul_of_pos_left (by norm_num)
+    ... = (2 * 3 * s).nat_abs : by { rw [int.nat_abs_mul (2 * 3)], refl } },
   { rw [←HA, ←HB, ←HC], ring },
 end
 
