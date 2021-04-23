@@ -76,7 +76,7 @@ begin
       simp only [zero_lt_two, zero_pow, add_zero, mul_zero] at hcd,
       rw [int.prime_iff_nat_abs_prime, hcd] at hprime,
       exact nat.prime.pow_not_prime le_rfl hprime },
-    { rwa ←int.gcd_eq_one_iff_coprime at hcoprime, },
+    { rwa [←nat.coprime_iff_gcd_eq_one, ←int.coprime_iff_nat_coprime] },
     { rwa [int.nat_abs_even, ←int.odd_iff_not_even] },
     { rw [←int.nat_abs_pow_two a, ←int.nat_abs_pow_two b] at hfactor,
       norm_cast at hfactor,

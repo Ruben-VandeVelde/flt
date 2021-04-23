@@ -385,19 +385,11 @@ theorem int.is_coprime_of_dvd' {x y : ℤ}
   (H : ∀ z ∈ nonunits ℤ, z ≠ 0 → prime z → z ∣ x → ¬ z ∣ y) :
   is_coprime x y :=
 begin
-  rw [←int.gcd_eq_one_iff_coprime],
-  simp only [int.gcd],
-  change nat.coprime _ _,
+  rw int.coprime_iff_nat_coprime,
   apply nat.coprime_of_dvd,
   intros k kprime ka kb,
-  apply H k,
-  { intro H,
-    apply kprime.ne_one,
-    rwa [int.is_unit_iff_nat_abs_eq, int.nat_abs_of_nat] at H },
-  { simp only [int.coe_nat_eq_zero, ne.def], exact kprime.ne_zero },
-  { rwa ←nat.prime_iff_prime_int },
-  { exact int.coe_nat_dvd_left.mpr ka },
-  { exact int.coe_nat_dvd_left.mpr kb },
+  rw nat.prime_iff_prime_int at kprime,
+  apply H k kprime.not_unit kprime.ne_zero kprime; rwa int.coe_nat_dvd_left,
 end
 
 theorem int.associated_pow_of_mul_eq_pow {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
@@ -405,7 +397,7 @@ theorem int.associated_pow_of_mul_eq_pow {a b c : ℤ} (ha : a ≠ 0) (hb : b �
 begin
   have : a.nat_abs * b.nat_abs = c.nat_abs ^ k,
   { rw [←int.nat_abs_mul, ←int.nat_abs_pow, h] },
-  rw ←int.gcd_eq_one_iff_coprime at hab,
+  rw int.coprime_iff_nat_coprime at hab,
   obtain ⟨d, hd⟩ := nat.eq_pow_of_mul_eq_pow
     (int.nat_abs_pos_of_ne_zero ha) (int.nat_abs_pos_of_ne_zero hb) hab this,
   use d,
@@ -446,8 +438,7 @@ end
 theorem int.prime.coprime_iff_not_dvd {p n : ℤ} (pp : prime p) : is_coprime p n ↔ ¬ p ∣ n :=
 begin
   rw int.prime_iff_nat_abs_prime at pp,
-  rw [←int.nat_abs_dvd_abs_iff, ←nat.prime.coprime_iff_not_dvd pp, ←int.gcd_eq_one_iff_coprime],
-  refl,
+  rw [←int.nat_abs_dvd_abs_iff, ←nat.prime.coprime_iff_not_dvd pp, int.coprime_iff_nat_coprime]
 end
 
 lemma int.dvd_mul_cancel_prime' {p k m n : ℤ}

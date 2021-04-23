@@ -86,9 +86,7 @@ begin
   have contra : ∀ {x y : ℤ}, is_coprime x y → even x → even y → false,
   { intros x y hcoprime hx hy,
     rw even_iff_two_dvd at hx hy,
-    have := int.dvd_gcd hx hy,
-    rw ←int.gcd_eq_one_iff_coprime at hcoprime,
-    rw hcoprime at this,
+    have := int.is_unit_eq_one_or (hcoprime.is_unit_of_dvd' hx hy),
     norm_num at this },
   by_cases haparity : even a;
   by_cases hbparity : even b;
