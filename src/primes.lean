@@ -82,8 +82,6 @@ begin
   rw [int.even_pow], tauto,
 end
 
-theorem int.nat_abs_ne_zero {a : ℤ} : a.nat_abs ≠ 0 ↔ a ≠ 0 := not_congr int.nat_abs_eq_zero
-
 lemma int.four_dvd_add_or_sub_of_odd {a b : ℤ}
   (ha : odd a)
   (hb : odd b) :
