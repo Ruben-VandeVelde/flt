@@ -17,44 +17,27 @@ lemma factors2
 begin
   have hparity : even a ↔ even b,
   { simpa [two_ne_zero] with parity_simps using heven },
+  simp only [iff_iff_and_or_not_and_not, ←nat.odd_iff_not_even] at hparity,
 
-  by_cases h : even a,
-  { obtain ⟨d, hd⟩ := hparity.mp h,
-    obtain ⟨c, hc⟩ := h,
-    use [c, d],
+  obtain ⟨⟨c, hc⟩, ⟨d, hd⟩⟩|⟨ha, hb⟩ := hparity,
+  { use [c, d],
     rw [hc, hd],
     ring },
-  { have : ¬even b,
-    { rwa ←hparity },
-
-    have h4 : (4 : ℤ) ∣ a + b ∨ (4 : ℤ) ∣ a - b,
-    { apply int.four_dvd_add_or_sub_of_odd;
-      rwa [int.odd_coe_nat, nat.odd_iff_not_even] },
+  { have h4 : (4 : ℤ) ∣ a + b ∨ (4 : ℤ) ∣ a - b,
+    { apply int.four_dvd_add_or_sub_of_odd; rwa [int.odd_coe_nat] },
     cases h4,
-    { obtain ⟨u, hu⟩ : (4 : ℤ) ∣ a - 3 * b,
-      { convert dvd_sub h4 (dvd_mul_right 4 b) using 1,
-        ring },
-      obtain ⟨v, hv⟩ := h4,
-      use [u.nat_abs, v.nat_abs],
-      apply nat.eq_of_mul_eq_mul_left (by norm_num : 0 < 4),
+    { obtain ⟨v, hv⟩ := h4,
+      use [(v - b).nat_abs, v.nat_abs],
+      rw [eq_comm, ←sub_eq_iff_eq_add] at hv,
       zify,
-      rw [int.nat_abs_pow_two u, int.nat_abs_pow_two v],
-      calc (4 * (a ^ 2 + 3 * b ^ 2) : ℤ)
-          = (a - 3 * b) ^ 2 + 3 * (a + b) ^ 2 : by ring
-      ... = (4 * u) ^ 2 + 3 * (4 * v) ^ 2 : by rw [hu, hv]
-      ... = 4 * (4 * (u ^ 2 + 3 * v ^ 2)) : by ring },
-    { obtain ⟨u, hu⟩ : (4 : ℤ) ∣ a + 3 * b,
-      { convert dvd_add h4 (dvd_mul_right 4 b) using 1,
-        ring },
-      obtain ⟨v, hv⟩ := h4,
-      use [u.nat_abs, v.nat_abs],
-      apply nat.eq_of_mul_eq_mul_left (by norm_num : 0 < 4),
+      simp only [←hv, int.nat_abs_pow_two],
+      ring },
+    { obtain ⟨v, hv⟩ := h4,
+      use [(v + b).nat_abs, v.nat_abs],
+      rw [sub_eq_iff_eq_add] at hv,
       zify,
-      rw [int.nat_abs_pow_two u, int.nat_abs_pow_two v],
-      calc (4 * (a ^ 2 + 3 * b ^ 2) : ℤ)
-          = (a + 3 * b) ^ 2 + 3 * (a - b) ^ 2 : by ring
-      ... = (4 * u) ^ 2 + 3 * (4 * v) ^ 2 : by rw [hu, hv]
-      ... = 4 * (4 * (u ^ 2 + 3 * v ^ 2)) : by ring } }
+      simp only [hv, int.nat_abs_pow_two],
+      ring } }
 end
 
 lemma int.sq_plus_three_sq_eq_zero_iff {a b : ℤ} : a ^ 2 + 3 * b ^ 2 = 0 ↔ a = 0 ∧ b = 0 :=
