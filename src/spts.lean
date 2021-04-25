@@ -10,6 +10,7 @@ import ring_theory.int.basic
 import data.zsqrtd.basic
 import .primes
 
+-- Edwards p49 step (2')
 lemma factors2
   {a b : ℕ}
   (heven : even (a ^ 2 + 3 * b ^ 2)) :
@@ -144,6 +145,7 @@ begin
   obtain ⟨rfl, rfl⟩|⟨rfl, rfl⟩ := huv; ring
 end
 
+-- Edwards p49 step (3')
 lemma sq_plus_three_sq_prime_dvd (p q a b: ℕ)
   (hprime : nat.prime (p ^ 2 + 3 * q ^ 2))
   (h : p ^ 2 + 3 * q ^ 2 ∣ a ^ 2 + 3 * b ^ 2) :
@@ -157,6 +159,7 @@ begin
   { rw nat.prime_iff_prime_int at hprime, convert hprime }
 end
 
+-- Edwards p49 step (4'), contraposed
 lemma factors'
   (a b f g : ℕ)
   (hodd : ¬even f)
@@ -231,6 +234,7 @@ begin
       { rw [←nat.mul_right_inj pprime.pos, hcd, ←hfactor, mul_left_comm] } } }
 end
 
+-- Edwards p49 introduction
 lemma factor_div (a x : ℕ)
   (hodd : ¬even x)
   (h0' : 0 < x) :
@@ -275,6 +279,7 @@ begin
       } },
 end
 
+-- Edwards p50 step (5')
 lemma factors
   (a b x : ℕ)
   (hcoprime : nat.gcd a b = 1)
