@@ -323,28 +323,20 @@ begin
   obtain ⟨m, c, ha, hc⟩ := factor_div a x hodd h0',
   obtain ⟨n, d, hb, hd⟩ := factor_div b x hodd h0',
 
-  set e : ℤ := m ^ 2 * x + 2 * m * c + 3 * n ^ 2 * x + 6 * n * d with he,
-
-  have h1 : (a ^ 2 + 3 * b ^ 2 : ℤ) = x * e + c ^ 2 + 3 * d ^ 2,
-  { rw [he, ←ha, ←hb],
-    ring },
-
-  have h2 : (x : ℤ) ∣ c ^ 2 + 3 * d ^ 2,
-  { have : c ^ 2 + 3 * d ^ 2 = x * e + c ^ 2 + 3 * d ^ 2 - x * e,
-    { ring },
-    rw this,
-    apply dvd_sub,
-    { rw ←h1,
-      norm_cast,
-      exact hfactor },
-    { exact dvd_mul_right _ _ }
-  },
-
   obtain ⟨y, hy⟩ : x ∣ c.nat_abs ^ 2 + 3 * d.nat_abs ^ 2,
   { rw ←int.coe_nat_dvd,
-    push_cast,
-    rw [int.nat_abs_pow_two c, int.nat_abs_pow_two d],
-    exact h2 },
+    simp only [int.coe_nat_add, int.coe_nat_pow, int.coe_nat_mul, int.nat_abs_pow_two],
+    norm_cast,
+    set e : ℤ := m ^ 2 * x + 2 * m * c + 3 * n ^ 2 * x + 6 * n * d with he,
+
+    have h1 : c ^ 2 + 3 * d ^ 2 = (a ^ 2 + 3 * b ^ 2 : ℤ) - x * e,
+    { rw [he, ←ha, ←hb],
+      ring },
+    rw h1,
+    apply dvd_sub,
+    { norm_cast,
+      exact hfactor },
+    { exact dvd_mul_right _ _ } },
 
   have h3 : y < x,
   {
