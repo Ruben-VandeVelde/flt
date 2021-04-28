@@ -7,7 +7,52 @@ import ring_theory.int.basic
 import tactic
 
 section
+variables {α : Type*} [linear_ordered_add_comm_group α]
 
+lemma abs_choice (x : α) : abs x = x ∨ abs x = -x := max_choice _ _
+
+lemma abs_eq' (x : α) : x = abs x ∨ x = -abs x :=
+begin
+  obtain h|h := abs_choice x,
+  { left, exact h.symm },
+  { right, exact eq_neg_of_eq_neg h }
+end
+
+lemma abs_eq_abs_iff {a b : α} : abs a = abs b ↔ a = b ∨ a = -b :=
+begin
+  split; intro h,
+  { cases abs_eq' a with h₁ h₁; cases abs_eq' b with h₂ h₂;
+    rw [h₁, h₂]; simp only [h, true_or, eq_self_iff_true, eq_self_iff_true, or_true, neg_neg] },
+  { cases h; simp only [h, abs_neg] },
+end
+
+end
+
+section
+
+variables {α : Type*} [linear_ordered_comm_ring α]
+
+@[simp] lemma abs_dvd (a b : α) : abs a ∣ b ↔ a ∣ b :=
+begin
+  cases abs_choice a with h h; rw h,
+  exact neg_dvd a b,
+end
+
+lemma abs_dvd_self (a : α) : abs a ∣ a :=
+(abs_dvd a a).mpr (dvd_refl a)
+
+@[simp] lemma dvd_abs (a b : α) : a ∣ abs b ↔ a ∣ b :=
+begin
+  cases abs_choice b with h h; rw h,
+  exact dvd_neg a b,
+end
+
+lemma self_dvd_abs (a : α) : a ∣ abs a :=
+(dvd_abs a a).mpr (dvd_refl a)
+
+end
+
+section
 variables {α : Type*} [ordered_semiring α] [nontrivial α] {a b c d : α}
 
 @[field_simps] lemma three_ne_zero : (3:α) ≠ 0 :=
@@ -315,28 +360,6 @@ end
 
 lemma int.is_unit_iff_abs {x : ℤ} : is_unit x ↔ abs x = 1 :=
 by rw [int.is_unit_iff_nat_abs_eq, int.abs_eq_nat_abs, ←int.coe_nat_one, int.coe_nat_inj']
-
-section
-variables {α : Type*} [linear_ordered_add_comm_group α]
-
-lemma abs_choice (x : α) : abs x = x ∨ abs x = -x := max_choice _ _
-
-lemma abs_eq' (x : α) : x = abs x ∨ x = -abs x :=
-begin
-  obtain h|h := abs_choice x,
-  { left, exact h.symm },
-  { right, exact eq_neg_of_eq_neg h }
-end
-
-lemma abs_eq_abs_iff {a b : α} : abs a = abs b ↔ a = b ∨ a = -b :=
-begin
-  split; intro h,
-  { cases abs_eq' a with h₁ h₁; cases abs_eq' b with h₂ h₂;
-    rw [h₁, h₂]; simp only [h, true_or, eq_self_iff_true, eq_self_iff_true, or_true, neg_neg] },
-  { cases h; simp only [h, abs_neg] },
-end
-
-end
 
 section
 variables {α : Type*} [ring α]
