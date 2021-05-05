@@ -538,7 +538,7 @@ begin
   have : (4 - 3 : ℤ) = 1 ^ 2,
   { norm_num },
   rw [hq', one_pow, mul_one, ←eq_sub_iff_add_eq, this] at hfour,
-  refine ⟨(eq_or_eq_neg_of_pow_two_eq_pow_two _ _ hfour).resolve_right _, hq'⟩,
+  refine ⟨(eq_or_eq_neg_of_sq_eq_sq _ _ hfour).resolve_right _, hq'⟩,
   apply ne_of_gt,
   calc -1 < 0 : by norm_num
   ... ≤ abs p : abs_nonneg _,
