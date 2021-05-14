@@ -32,7 +32,7 @@ begin
   rw [←zsqrtd.norm_eq_one_iff, zsqrt3.norm, ←int.coe_nat_inj', int.coe_nat_one],
   rw int.nat_abs_of_nonneg (spts.nonneg _ _),
   refine ⟨spts.eq_one, λ h, _⟩,
-  rw [h.2, ←pow_two_abs, h.1],
+  rw [h.2, ←sq_abs, h.1],
   norm_num,
 end
 
