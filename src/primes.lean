@@ -11,18 +11,14 @@ variables {α : Type*} [linear_ordered_add_comm_group α]
 
 lemma abs_choice (x : α) : abs x = x ∨ abs x = -x := max_choice _ _
 
-lemma abs_eq' (x : α) : x = abs x ∨ x = -abs x :=
-begin
-  obtain h|h := abs_choice x,
-  { left, exact h.symm },
-  { right, exact eq_neg_of_eq_neg h }
-end
-
 lemma abs_eq_abs_iff {a b : α} : abs a = abs b ↔ a = b ∨ a = -b :=
 begin
   split; intro h,
-  { cases abs_eq' a with h₁ h₁; cases abs_eq' b with h₂ h₂;
-    rw [h₁, h₂]; simp only [h, true_or, eq_self_iff_true, eq_self_iff_true, or_true, neg_neg] },
+  { cases abs_choice a with h₁ h₁; cases abs_choice b with h₂ h₂; rw [h₁, h₂] at h,
+    { exact or.inl h },
+    { exact or.inr h },
+    { exact or.inr (eq_neg_of_eq_neg h.symm) },
+    { exact or.inl (neg_inj.mp h) } },
   { cases h; simp only [h, abs_neg] },
 end
 
