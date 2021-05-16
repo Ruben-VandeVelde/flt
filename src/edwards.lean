@@ -433,7 +433,7 @@ begin
     rw int.odd_iff_not_even at ha,
     refine ha.2 (dvd_trans _ h),
     norm_num },
-  { rwa int.prime_dvd_prime_iff_associated hp.1 ha.1 at h }
+  { rwa prime_dvd_prime_iff_associated hp.1 ha.1 at h }
 
 end
 
