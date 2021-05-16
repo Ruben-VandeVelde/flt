@@ -113,15 +113,11 @@ begin
   rw [←associated_iff_eq, ←associates.mk_eq_mk_iff_associated, hd, associates.mk_pow],
 end
 
-lemma nat.even_pow' {m n : nat} (h : n ≠ 0) : even (m^n) ↔ even m :=
-begin
-  rw [nat.even_pow], tauto,
-end
+lemma nat.even_pow' {m n : ℕ} (h : n ≠ 0) : even (m^n) ↔ even m :=
+nat.even_pow.trans $ and_iff_left h
 
 lemma int.even_pow' {m : ℤ} {n : ℕ} (h : n ≠ 0) : even (m^n) ↔ even m :=
-begin
-  rw [int.even_pow], tauto,
-end
+int.even_pow.trans $ and_iff_left h
 
 lemma int.four_dvd_add_or_sub_of_odd {a b : ℤ}
   (ha : odd a)
@@ -159,7 +155,7 @@ variables {R : Type*} [comm_semiring R] {x y z : R}
 variables {m n : ℕ}
 
 lemma not_coprime_zero_zero [nontrivial R] : ¬ is_coprime (0 : R) 0 :=
-by simp only [add_zero, is_coprime, exists_false, zero_ne_one, mul_zero, not_false_iff]
+(mt is_coprime_zero_right.mp) not_is_unit_zero
 
 theorem is_coprime.of_pow_left (hm : 0 < m) (H : is_coprime (x ^ m) y) : is_coprime x y :=
 begin
@@ -206,9 +202,7 @@ lemma int.div_ne_zero_of_dvd {a b : ℤ} (ha : a ≠ 0) (hb : b ≠ 0) (hadvd: b
 begin
   obtain ⟨c, rfl⟩ := hadvd,
   rw [mul_comm, int.mul_div_cancel _ hb],
-  rintro rfl,
-  rw mul_zero at ha,
-  exact ha rfl,
+  exact right_ne_zero_of_mul ha,
 end
 
 lemma int.factor_div (a: ℤ) (x : ℕ)
