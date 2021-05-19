@@ -7,14 +7,6 @@ import ring_theory.int.basic
 import tactic
 
 section
-variables {α : Type*} [linear_ordered_add_comm_group α]
-
-lemma abs_eq_abs_iff {a b : α} : abs a = abs b ↔ a = b ∨ a = -b :=
-abs_eq_abs
-
-end
-
-section
 variables {α : Type*} [ordered_semiring α] [nontrivial α] {a b c d : α}
 
 @[field_simps] lemma three_ne_zero : (3:α) ≠ 0 :=

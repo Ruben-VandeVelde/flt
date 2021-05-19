@@ -648,7 +648,7 @@ end
 lemma associated'_of_abs_eq {x y : ℤ√-3} (hre : abs x.re = abs y.re) (him : abs x.im = abs y.im) :
   associated' x y :=
 begin
-  rw abs_eq_abs_iff at hre him,
+  rw abs_eq_abs at hre him,
   cases hre with h1 h1;
   cases him with h2 h2;
   [{ left, use 1}, {right, use 1}, {right, use -1}, {left, use -1}];
