@@ -9,42 +9,8 @@ import tactic
 section
 variables {α : Type*} [linear_ordered_add_comm_group α]
 
-lemma abs_choice (x : α) : abs x = x ∨ abs x = -x := max_choice _ _
-
 lemma abs_eq_abs_iff {a b : α} : abs a = abs b ↔ a = b ∨ a = -b :=
-begin
-  split; intro h,
-  { cases abs_choice a with h₁ h₁; cases abs_choice b with h₂ h₂; rw [h₁, h₂] at h,
-    { exact or.inl h },
-    { exact or.inr h },
-    { exact or.inr (eq_neg_of_eq_neg h.symm) },
-    { exact or.inl (neg_inj.mp h) } },
-  { cases h; simp only [h, abs_neg] },
-end
-
-end
-
-section
-
-variables {α : Type*} [linear_ordered_comm_ring α]
-
-@[simp] lemma abs_dvd (a b : α) : abs a ∣ b ↔ a ∣ b :=
-begin
-  cases abs_choice a with h h; rw h,
-  exact neg_dvd a b,
-end
-
-lemma abs_dvd_self (a : α) : abs a ∣ a :=
-(abs_dvd a a).mpr (dvd_refl a)
-
-@[simp] lemma dvd_abs (a b : α) : a ∣ abs b ↔ a ∣ b :=
-begin
-  cases abs_choice b with h h; rw h,
-  exact dvd_neg a b,
-end
-
-lemma self_dvd_abs (a : α) : a ∣ abs a :=
-(dvd_abs a a).mpr (dvd_refl a)
+abs_eq_abs
 
 end
 
@@ -103,7 +69,7 @@ begin
   { intros d da db dprime,
     obtain ⟨d', rfl⟩ := associates.exists_rep d,
     rw associates.mk_dvd_mk at da db,
-    rw [associates.prime_mk, ←nat.prime_iff_prime] at dprime,
+    rw [associates.prime_mk, ←nat.prime_iff] at dprime,
     exact nat.not_coprime_of_dvd_of_dvd dprime.one_lt da db hab },
   have h' : associates.mk a * associates.mk b = (associates.mk c) ^ k,
   { rw [associates.mk_mul_mk, ←associates.mk_pow, h] },
