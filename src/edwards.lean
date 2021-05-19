@@ -653,9 +653,7 @@ begin
   cases him with h2 h2;
   [{ left, use 1}, {right, use 1}, {right, use -1}, {left, use -1}];
   simp only [units.coe_one, mul_one, units.coe_neg_one, mul_neg_one, zsqrtd.ext, zsqrtd.neg_im,
-    zsqrtd.neg_re, h1, h2, neg_neg, zsqrtd.conj_re, zsqrtd.conj_im];
-  split;
-  refl,
+    zsqrtd.neg_re, h1, h2, neg_neg, zsqrtd.conj_re, zsqrtd.conj_im, eq_self_iff_true, and_self],
 end
 
 lemma associated'_of_associated_norm {x y : ℤ√-3} (h : associated (zsqrtd.norm x) (zsqrtd.norm y))
