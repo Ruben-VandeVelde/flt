@@ -477,9 +477,9 @@ end
 
 theorem int.is_coprime_of_dvd' {x y : ℤ}
   (z : ¬ (x = 0 ∧ y = 0))
-  (H : ∀ z ∈ nonunits ℤ, z ≠ 0 → prime z → z ∣ x → ¬ z ∣ y) :
+  (H : ∀ z : ℤ, prime z → z ∣ x → ¬ z ∣ y) :
   is_coprime x y :=
-is_coprime_of_dvd' z $ λ z zi, H z zi.not_unit zi.ne_zero $ gcd_monoid.prime_of_irreducible zi
+is_coprime_of_dvd' z $ λ z zi, H z $ gcd_monoid.prime_of_irreducible zi
 
 lemma int.dvd_mul_cancel_prime' {p k m n : ℤ}
   (hdvd1 : ¬(p ∣ m))
