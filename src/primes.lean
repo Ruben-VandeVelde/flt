@@ -94,15 +94,6 @@ end
 
 section
 variables {R : Type*} [comm_ring R] {x y z : R}
-variables {m n : ℕ}
-lemma is_coprime.add_self_right
-  (h : is_coprime x y) :
-  is_coprime x (x + y) :=
-begin
-  convert is_coprime.mul_add_left_right h 1,
-  rw mul_one,
-end
-
 lemma coprime_add_self_pow
   {n : ℕ}
   (hn : 0 < n)
@@ -110,8 +101,8 @@ lemma coprime_add_self_pow
   (hxx : is_coprime x y)
    : is_coprime x z :=
 begin
-  rw [←is_coprime.pow_iff hn hn, ←hsoln],
-  exact hxx.pow.add_self_right,
+  have := is_coprime.mul_add_left_right hxx.pow 1,
+  rwa [mul_one, hsoln, is_coprime.pow_iff hn hn] at this,
 end
 end
 
