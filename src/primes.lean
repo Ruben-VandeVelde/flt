@@ -71,12 +71,6 @@ begin
   rw [←associated_iff_eq, ←associates.mk_eq_mk_iff_associated, hd, associates.mk_pow],
 end
 
-lemma nat.even_pow' {m n : ℕ} (h : n ≠ 0) : even (m^n) ↔ even m :=
-nat.even_pow.trans $ and_iff_left h
-
-lemma int.even_pow' {m : ℤ} {n : ℕ} (h : n ≠ 0) : even (m^n) ↔ even m :=
-int.even_pow.trans $ and_iff_left h
-
 lemma int.four_dvd_add_or_sub_of_odd {a b : ℤ}
   (ha : odd a)
   (hb : odd b) :
@@ -98,38 +92,21 @@ begin
     ring },
 end
 
-@[norm_cast]
-lemma int.odd_coe_nat {n : ℕ} : odd (n : ℤ) ↔ odd n :=
-by { rw [int.odd_iff, nat.odd_iff], norm_cast }
-
-@[parity_simps] lemma int.nat_abs_even {n : ℤ} : even n.nat_abs ↔ even n :=
-int.coe_nat_dvd_left.symm
-
-@[parity_simps] lemma int.nat_abs_odd {n : ℤ} : odd n.nat_abs ↔ odd n :=
-by rw [int.odd_iff_not_even, nat.odd_iff_not_even, int.nat_abs_even]
-
 section
 variables {R : Type*} [comm_semiring R] {x y z : R}
 variables {m n : ℕ}
 
-lemma not_coprime_zero_zero [nontrivial R] : ¬ is_coprime (0 : R) 0 :=
-(mt is_coprime_zero_right.mp) not_is_unit_zero
-
 theorem is_coprime.of_pow_left (hm : 0 < m) (H : is_coprime (x ^ m) y) : is_coprime x y :=
-begin
-  rw [← finset.card_range m, ← finset.prod_const] at H,
-  apply is_coprime.of_prod_left H 0,
-  exact finset.mem_range.mpr hm,
-end
+(is_coprime.pow_left_iff hm).mp H
 
 theorem is_coprime.of_pow_right (hm : 0 < m) (H : is_coprime x (y ^ m)) : is_coprime x y :=
-(is_coprime.of_pow_left hm H.symm).symm
+(is_coprime.pow_right_iff hm).mp H
 
 theorem is_coprime.of_pow
  (hm : 0 < m)
  (hn : 0 < n)
  (H1 : is_coprime (x ^ m) (y ^ n)) : is_coprime x y :=
-(H1.of_pow_left hm).of_pow_right hn
+(is_coprime.pow_iff hm hn).mp H1
 
 end
 section
@@ -198,50 +175,6 @@ by rw [←int.gcd_eq_one_iff_coprime, int.gcd_div (int.gcd_dvd_left m n) (int.gc
 lemma int.gcd_ne_zero_iff {i j : ℤ} : int.gcd i j ≠ 0 ↔ i ≠ 0 ∨ j ≠ 0 :=
 iff.trans (not_congr int.gcd_eq_zero_iff) not_and_distrib
 
-section
-variables {R : Type*} [comm_semiring R]
-
-lemma is_coprime.is_unit_of_dvd' {a b x : R} (h : is_coprime a b) (ha : x ∣ a) (hb : x ∣ b) :
-is_unit x :=
-begin
-  rw is_unit_iff_dvd_one,
-  obtain ⟨c, d, h1⟩ := h,
-  rw ←h1,
-  apply dvd_add; { apply dvd_mul_of_dvd_right, assumption },
-end
-
-end
-
-section
-variables {R : Type*} [comm_ring R]
-
-lemma is_coprime.neg_left {a b : R} (h : is_coprime a b) : is_coprime (-a) b :=
-begin
-  obtain ⟨x, y, h⟩ := h,
-  use [-x, y],
-  simpa only [neg_mul_eq_neg_mul_symm, mul_neg_eq_neg_mul_symm, neg_neg] using h,
-end
-
-lemma is_coprime.neg_left_iff (a b : R) : is_coprime (-a) b ↔ is_coprime a b :=
-⟨λ h, (neg_neg a) ▸ is_coprime.neg_left h, is_coprime.neg_left⟩
-
-lemma is_coprime.neg_right {a b : R} (h : is_coprime a b) : is_coprime a (-b) :=
-begin
-  obtain ⟨x, y, h⟩ := h,
-  use [x, -y],
-  simpa only [neg_mul_eq_neg_mul_symm, mul_neg_eq_neg_mul_symm, neg_neg] using h,
-end
-
-lemma is_coprime.neg_right_iff (a b : R) : is_coprime a (-b) ↔ is_coprime a b :=
-⟨λ h, (neg_neg b) ▸ is_coprime.neg_right h, is_coprime.neg_right⟩
-
-lemma is_coprime.neg_neg {a b : R} (h : is_coprime a b) : is_coprime (-a) (-b) :=
-h.neg_left.neg_right
-
-lemma is_coprime.neg_neg_iff (a b : R) : is_coprime (-a) (-b) ↔ is_coprime a b :=
-(is_coprime.neg_left_iff _ _).trans (is_coprime.neg_right_iff _ _)
-
-end
 section
 theorem is_unit_of_pow {α} [comm_monoid α] {x : α} {n : ℕ} (hn : 0 < n)
   (h : is_unit (x ^ n)) : is_unit x
