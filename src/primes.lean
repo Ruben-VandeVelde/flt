@@ -93,23 +93,6 @@ begin
 end
 
 section
-variables {R : Type*} [comm_semiring R] {x y z : R}
-variables {m n : ℕ}
-
-theorem is_coprime.of_pow_left (hm : 0 < m) (H : is_coprime (x ^ m) y) : is_coprime x y :=
-(is_coprime.pow_left_iff hm).mp H
-
-theorem is_coprime.of_pow_right (hm : 0 < m) (H : is_coprime x (y ^ m)) : is_coprime x y :=
-(is_coprime.pow_right_iff hm).mp H
-
-theorem is_coprime.of_pow
- (hm : 0 < m)
- (hn : 0 < n)
- (H1 : is_coprime (x ^ m) (y ^ n)) : is_coprime x y :=
-(is_coprime.pow_iff hm hn).mp H1
-
-end
-section
 variables {R : Type*} [comm_ring R] {x y z : R}
 variables {m n : ℕ}
 lemma is_coprime.add_self_right
@@ -127,8 +110,7 @@ lemma coprime_add_self_pow
   (hxx : is_coprime x y)
    : is_coprime x z :=
 begin
-  apply is_coprime.of_pow hn hn,
-  rw ←hsoln,
+  rw [←is_coprime.pow_iff hn hn, ←hsoln],
   exact hxx.pow.add_self_right,
 end
 end
