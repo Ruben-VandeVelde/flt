@@ -149,28 +149,26 @@ lemma int.gcd_ne_zero_iff {i j : ℤ} : int.gcd i j ≠ 0 ↔ i ≠ 0 ∨ j ≠ 
 iff.trans (not_congr int.gcd_eq_zero_iff) not_and_distrib
 
 section
-theorem is_unit_of_pow {α} [comm_monoid α] {x : α} {n : ℕ} (hn : 0 < n)
-  (h : is_unit (x ^ n)) : is_unit x
-:=
+theorem is_unit.pow_iff {α} [comm_monoid α] {x : α} {n : ℕ} (hn : 0 < n) :
+  is_unit (x ^ n) ↔ is_unit x :=
 begin
-  cases n,
-  { norm_num at hn },
-  { rw pow_succ at h,
-    exact is_unit_of_mul_is_unit_left h }
+  refine ⟨λ h, _, is_unit.pow n⟩,
+  obtain ⟨k, rfl⟩ := nat.exists_eq_succ_of_ne_zero hn.ne',
+  rw pow_succ at h,
+  exact is_unit_of_mul_is_unit_left h
 end
 
 theorem of_irreducible_pow {α} [comm_monoid α] {x : α} {n : ℕ} (hn : 1 < n) :
-  irreducible (x ^ n) → is_unit x
-:=
+  irreducible (x ^ n) → is_unit x :=
 begin
   intro h,
-  rcases n with rfl|rfl|_,
-  { norm_num at hn },
-  { norm_num at hn },
-  { rw pow_succ at h,
-    cases of_irreducible_mul h with hu hu,
-    { assumption },
-    { exact is_unit_of_pow (nat.succ_pos n) hu } },
+  obtain ⟨k, rfl⟩ := nat.exists_eq_succ_of_ne_zero (zero_lt_one.trans hn).ne',
+  rw nat.succ_lt_succ_iff at hn,
+  obtain ⟨k, rfl⟩ := nat.exists_eq_succ_of_ne_zero hn.ne',
+  rw pow_succ at h,
+  cases of_irreducible_mul h with hu hu,
+  { assumption },
+  { rwa ←is_unit.pow_iff (nat.succ_pos _) },
 end
 
 
@@ -370,9 +368,8 @@ begin
   obtain (rfl|ha') := ha.eq_or_lt,
   { rw [eq_comm, ←associated_zero_iff_eq_zero], exact h.symm },
   { obtain ⟨u, rfl⟩ := h,
-    have := u.is_unit,
-    rw [int.is_unit_iff_abs, abs_of_nonneg (nonneg_of_mul_nonneg_left hb ha')] at this,
-    rw [this, mul_one] }
+    rw [←int.nat_abs_of_nonneg (nonneg_of_mul_nonneg_left hb ha'),
+      int.is_unit_iff_nat_abs_eq.mp u.is_unit, int.coe_nat_one, mul_one] }
 end
 
 lemma int.nonneg_of_normalize_eq_self {z : ℤ} (hz : normalize z = z) : 0 ≤ z :=
