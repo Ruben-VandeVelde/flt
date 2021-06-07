@@ -9,8 +9,7 @@ import tactic
 import data.nat.modeq
 import data.complex.is_R_or_C
 import data.complex.exponential
-import data.zsqrtd.basic
-import data.zsqrtd.gaussian_int
+import number_theory.zsqrtd.basic
 import .primes
 import .spts
 import .multiset

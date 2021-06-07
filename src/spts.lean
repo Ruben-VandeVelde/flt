@@ -7,7 +7,7 @@ import algebra.gcd_monoid
 import tactic
 import data.nat.modeq
 import ring_theory.int.basic
-import data.zsqrtd.basic
+import number_theory.zsqrtd.basic
 import .primes
 
 -- Edwards p49 step (2')
