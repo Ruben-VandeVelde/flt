@@ -47,7 +47,7 @@ begin
   { intro h,
     have hposleft := pow_two_nonneg a,
     have hposright := mul_nonneg (by norm_num : (0 : ℤ) ≤ 3) (pow_two_nonneg b),
-    obtain ⟨ha, hb⟩ := (add_eq_zero_iff_eq_zero_of_nonneg hposleft hposright).mp h,
+    obtain ⟨ha, hb⟩ := (add_eq_zero_iff' hposleft hposright).mp h,
     split,
     { exact pow_eq_zero ha },
     { rw [mul_eq_zero, eq_false_intro (by norm_num : (3 : ℤ) ≠ 0), false_or] at hb,
