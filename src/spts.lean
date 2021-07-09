@@ -264,7 +264,7 @@ begin
         rw neg_sub,
         zify,
         rw ←int.abs_eq_nat_abs,
-        rw abs_of_nonneg _,
+        rw abs_of_nonneg,
         { rw mul_sub,
           rw sub_lt_iff_lt_add,
           rw two_mul,
@@ -274,9 +274,7 @@ begin
           { convert H, },
           { contrapose! hodd with heqtwomul,
             exact ⟨_, heqtwomul⟩ } },
-        rw sub_nonneg,
-        exact le_of_lt this,
-      } },
+        exact sub_nonneg_of_le this.le } },
 end
 
 -- Edwards p50 step (5')
