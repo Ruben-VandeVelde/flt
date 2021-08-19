@@ -1,5 +1,5 @@
 import data.multiset
-
+import algebra.big_operators.basic
 section
 variables {α : Type*} {s : multiset α}
 
@@ -127,35 +127,6 @@ end
 
 end
 
-lemma multiset.induction_on_repeat
-  {α : Type*}
-  [decidable_eq α]
-  (s : multiset α)
-  (P : multiset α → Prop)
-  (h0 : P 0)
-  (hnext : ∀ t {a}, a ∈ s → P t → P (t + multiset.repeat a (s.count a))) :
-  P s :=
-begin
-  revert hnext,
-  refine s.strong_induction_on _,
-  clear s,
-  intros s ih hnext,
-  by_cases hs : s = 0,
-  { simp only [hs, h0] },
-  { obtain ⟨b, hb⟩ := multiset.exists_mem_of_ne_zero hs,
-    rw ←multiset.filter_add_not (ne b) s,
-    simp only [ne.def, not_not, multiset.filter_eq],
-    convert hnext (multiset.filter (ne b) s) hb _,
-    apply ih,
-    { apply lt_of_le_of_ne (multiset.filter_le _ _),
-      intro H,
-      rw multiset.filter_eq_self at H,
-      exact H b hb rfl },
-    { intros t a h1 h2,
-      rw multiset.count_filter_of_pos (multiset.of_mem_filter h1),
-      exact hnext _ (multiset.mem_of_mem_filter h1) h2 } }
-end
-
 lemma multiset.exists_nsmul_of_dvd
   {α : Type*}
   [decidable_eq α]
@@ -164,19 +135,9 @@ lemma multiset.exists_nsmul_of_dvd
   (h : ∀ x ∈ s, k ∣ multiset.count x s) :
   ∃ t : multiset α, s = k • t :=
 begin
-  obtain (rfl|hk) := nat.eq_zero_or_pos k,
-  { use 0,
-    simp only [nsmul_zero],
-    apply multiset.eq_zero_of_forall_not_mem,
-    intros x hx,
-    have := h x hx,
-    rw zero_dvd_iff at this,
-    rw [←multiset.count_pos, this] at hx,
-    exact lt_irrefl 0 hx },
-  { refine s.induction_on_repeat _ _ _,
-    { use 0, rw [nsmul_zero] },
-    { rintros t a ha ⟨u, hu⟩,
-      obtain ⟨n, hn⟩ := h a ha,
-      use u + multiset.repeat a n,
-      rw [nsmul_add, multiset.nsmul_repeat, hu, hn] } }
+  apply multiset.exists_smul_of_dvd_count,
+  intros x,
+  by_cases hx : x ∈ s,
+  { exact h x hx },
+  { rw multiset.count_eq_zero_of_not_mem hx, exact dvd_zero _ }
 end
