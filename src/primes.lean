@@ -4,6 +4,10 @@ import data.nat.gcd
 import data.pnat.basic
 import ring_theory.coprime
 import ring_theory.int.basic
+import ring_theory.euclidean_domain
+import ring_theory.noetherian
+import ring_theory.principal_ideal_domain
+import ring_theory.unique_factorization_domain
 import tactic
 
 section
@@ -177,7 +181,7 @@ variables [comm_cancel_monoid_with_zero α]
 
 
 lemma pow_not_prime {x : α} {n : ℕ} (hn : 1 < n) : ¬ prime (x ^ n) :=
-λ hp, hp.not_unit $ is_unit.pow _ $ of_irreducible_pow hn $ irreducible_of_prime hp
+λ hp, hp.not_unit $ is_unit.pow _ $ of_irreducible_pow hn $ hp.irreducible
 
 end
 
@@ -284,7 +288,7 @@ lemma int.dvd_mul_cancel_prime {p : ℕ} {n k : ℤ}
   (hk : prime k)
   (h : k ∣ p * n) : k ∣ n :=
 begin
-  apply (prime.div_or_div hk h).resolve_left,
+  apply (prime.dvd_or_dvd hk h).resolve_left,
   rw int.prime_iff_nat_abs_prime at hk,
   rwa [int.coe_nat_dvd_right, nat.prime_dvd_prime_iff_eq hk hp]
 end
@@ -294,13 +298,13 @@ section
 lemma irreducible_dvd_irreducible_iff_associated {α : Type*} [comm_cancel_monoid_with_zero α]
   {p q : α} (pp : irreducible p) (qp : irreducible q) :
   p ∣ q ↔ associated p q :=
-⟨associated_of_irreducible_of_dvd pp qp, dvd_of_associated⟩
+⟨irreducible.associated_of_dvd pp qp, associated.dvd⟩
 
 variables {R : Type*} [euclidean_domain R]
 
 theorem prime_dvd_prime_iff_associated {p q : R} (pp : prime p) (qp : prime q) :
   p ∣ q ↔ associated p q :=
-irreducible_dvd_irreducible_iff_associated (irreducible_of_prime pp) (irreducible_of_prime qp)
+irreducible_dvd_irreducible_iff_associated pp.irreducible qp.irreducible
 
 theorem is_coprime_of_dvd' {x y : R}
   (z : ¬ (x = 0 ∧ y = 0))
@@ -328,12 +332,12 @@ begin
     { rintro ⟨hp, -⟩,
       apply pp.ne_zero hp },
     rintro z zi zp zn,
-    refine (nd $ dvd_trans (dvd_of_associated _) zn),
-    exact (associated_of_irreducible_of_dvd zi pp zp).symm },
+    refine (nd $ dvd_trans (associated.dvd _) zn),
+    exact (zi.associated_of_dvd pp zp).symm },
 end
 
 theorem prime.coprime_iff_not_dvd {p n : R} (pp : prime p) : is_coprime p n ↔ ¬ p ∣ n :=
-(irreducible_of_prime pp).coprime_iff_not_dvd
+pp.irreducible.coprime_iff_not_dvd
 
 end
 
@@ -417,4 +421,3 @@ begin
   obtain ⟨b', hb', rfl⟩ := multiset.mem_map.mp hb,
   simp only [ring_hom.coe_monoid_hom, int.coe_nat_nonneg, ring_hom.eq_nat_cast, int.nat_cast_eq_coe_nat],
 end
-

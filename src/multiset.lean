@@ -1,5 +1,4 @@
 import data.multiset
-import algebra.big_operators.basic
 section
 variables {α : Type*} {s : multiset α}
 
@@ -125,19 +124,4 @@ begin
     simp only [h1, h2, if_congr, if_true, if_false, add_left_inj, eq_self_iff_true] }
 end
 
-end
-
-lemma multiset.exists_nsmul_of_dvd
-  {α : Type*}
-  [decidable_eq α]
-  (s : multiset α)
-  (k : ℕ)
-  (h : ∀ x ∈ s, k ∣ multiset.count x s) :
-  ∃ t : multiset α, s = k • t :=
-begin
-  apply multiset.exists_smul_of_dvd_count,
-  intros x,
-  by_cases hx : x ∈ s,
-  { exact h x hx },
-  { rw multiset.count_eq_zero_of_not_mem hx, exact dvd_zero _ }
 end

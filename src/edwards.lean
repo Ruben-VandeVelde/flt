@@ -1,3 +1,4 @@
+import algebra.big_operators.basic
 import data.int.basic
 import data.int.parity
 import data.nat.gcd
@@ -453,7 +454,7 @@ begin
       convert h' using 1,
       { rw pow_succ' },
       { ring } },
-    have := (hp.div_or_div this).resolve_left h,
+    have := (hp.dvd_or_dvd this).resolve_left h,
     rw pow_succ',
     exact mul_dvd_mul_left (p ^ n) this }
 end 
@@ -473,7 +474,7 @@ begin
       apply dvd_blah int.prime_two,
       { rw [←even_iff_two_dvd, ←int.odd_iff_not_even], exact ha.2 },
       { rwa [hp, this] at hdvd } } },
-  { exact (hp.1.div_or_div hdvd) }
+  { exact (hp.1.dvd_or_dvd hdvd) }
 end 
 
 lemma exists_associated_mem_of_dvd_prod''
@@ -512,11 +513,11 @@ begin
     intros x hx,
     apply (hg x hx).not_unit,
     rw is_unit_iff_dvd_one,
-    exact dvd.trans (multiset.dvd_prod hx) (dvd_of_associated h.symm) },
+    exact dvd_trans (multiset.dvd_prod hx) h.symm.dvd },
   { intros p f ih g hf hg hfg,
     have hp := hf p (multiset.mem_cons_self _ _),
     have hdvd : p ∣ g.prod,
-    { rw [←dvd_iff_dvd_of_rel_right hfg, multiset.prod_cons],
+    { rw [←hfg.dvd_iff_dvd_right, multiset.prod_cons],
       exact dvd_mul_right _ _ },
     obtain ⟨b, hbg, hb⟩ := exists_associated_mem_of_dvd_prod'' hp hg hdvd,
     rw ← multiset.cons_erase hbg,
@@ -524,7 +525,7 @@ begin
     apply ih _ _ _,
     exact (λ q hq, hf _ (by simp [hq])),
     exact (λ q (hq : q ∈ g.erase b), hg q (multiset.mem_of_mem_erase hq)),
-    { apply associated_mul_left_cancel _ hb hp.ne_zero,
+    { apply associated.of_mul_left _ hb hp.ne_zero,
       rwa [← multiset.prod_cons, ← multiset.prod_cons, multiset.cons_erase hbg] } },
 end
 
@@ -807,7 +808,7 @@ begin
   by_cases ha : a = 0,
   { simp only [ha, dvd_zero] },
   apply dvd_trans (multiset.dvd_prod hm),
-  apply dvd_of_associated,
+  apply associated.dvd,
   exact unique_factorization_monoid.factors_prod ha,
 end
 
@@ -859,7 +860,7 @@ begin
     apply associated.trans _ this,
     rw [even_and_odd_factors' _, multiset.prod_add],
     simp [factors_odd_prime_or_four],
-    apply associated_mul_mul,
+    apply associated.mul_mul,
     { obtain ⟨m, hm⟩ := factors_2_even' a b hcoprime,
       rw [hm, nat.mul_div_right _ zero_lt_two, pow_mul],
       refl },
@@ -1054,7 +1055,7 @@ begin
     { rw [←zsqrt3.norm, prod_map_norm, heqprod] } },
   rw [heqnsmulthree, hf'] at this,
 
-  apply multiset.exists_nsmul_of_dvd,
+  apply multiset.exists_smul_of_dvd_count,
 
   intros x hx,
   have h2x := h2 x hx,
