@@ -5,7 +5,7 @@ import data.nat.gcd
 import data.nat.parity
 import data.pnat.basic
 import algebra.euclidean_domain
-import algebra.gcd_monoid
+import algebra.gcd_monoid.basic
 import tactic
 import data.nat.modeq
 import data.complex.is_R_or_C

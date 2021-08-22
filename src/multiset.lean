@@ -48,18 +48,16 @@ begin
       exact multiset.eq_of_mem_repeat hb } },
 end
 
-lemma multiset.nsmul_cons (n : ℕ) (a : α) : n • (a ::ₘ s) = n • (↑[a]) + n • s :=
+lemma multiset.nsmul_cons (n : ℕ) (a : α) : n • (a ::ₘ s) = n • ({a} : multiset α) + n • s :=
 begin
   induction n with n ih,
   { simp only [add_zero, zero_nsmul] },
   { simp only [add_nsmul, one_nsmul, ih, ←multiset.singleton_add, nsmul_add] }
 end
-lemma multiset.nsmul_cons' (n : ℕ) (a : α) : n • (a ::ₘ s) = n • (a ::ₘ 0) +  n • s :=
-multiset.nsmul_cons n a
 
 theorem multiset.filter_cons {a : α} (s : multiset α)
   (p : α → Prop) [decidable_pred p] :
-  multiset.filter p (a ::ₘ s) = (ite (p a) ↑[a] 0) + multiset.filter p s :=
+  multiset.filter p (a ::ₘ s) = (ite (p a) {a} 0) + multiset.filter p s :=
 begin
   split_ifs with h,
   { rw [multiset.filter_cons_of_pos _ h, multiset.singleton_add] },
@@ -80,7 +78,7 @@ begin
       split_ifs with hp;
       { simp only [multiset.filter_eq_self, nsmul_zero, multiset.filter_eq_nil],
         intros b hb,
-        rw [multiset.mem_nsmul hn, multiset.mem_coe, list.mem_singleton] at hb,
+        rw [multiset.mem_nsmul hn, multiset.mem_singleton] at hb,
         rwa hb } } }
 end
 
