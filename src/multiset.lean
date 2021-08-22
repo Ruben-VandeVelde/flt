@@ -95,16 +95,19 @@ begin
   simp only [h, multiset.countp_cons_of_pos, add_zero, multiset.countp_cons_of_neg, not_false_iff],
 end
 
-lemma multiset.count_map (b : β)
-  [decidable_eq β]
-  (f : α → β) :
-  multiset.count b (s.map f) = multiset.countp (λ x, b = f x) s :=
+
+namespace multiset
+lemma countp_map {α : Type*} {β : Type*}
+  (f : α → β) (s : multiset α) (p : β → Prop) [decidable_pred p] :
+  countp p (map f s) = (s.filter (λ a, p (f a))).card :=
 begin
-  refine s.induction_on _ _,
-  { simp only [multiset.countp_zero, multiset.count_zero, multiset.map_zero] },
-  { intros a ha ih,
-    rw [multiset.map_cons, multiset.count_cons, multiset.countp_cons, ih] },
+  refine multiset.induction_on s _ (λ a t IH, _),
+  { rw [map_zero, countp_zero, filter_zero, card_zero] },
+  { rw [map_cons, countp_cons, IH, filter_cons, card_add, apply_ite card, card_zero,
+      card_singleton, add_comm] },
 end
+
+end multiset
 
 -- TODO: should be countp_congr?
 lemma multiset.countp_eq (p1 p2 : α → Prop)

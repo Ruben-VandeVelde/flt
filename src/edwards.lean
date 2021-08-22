@@ -1066,7 +1066,7 @@ begin
 
   classical,
   have : 3 ∣ multiset.countp (associated' x) f,
-  { rw multiset.count_map at this,
+  { rw [multiset.count, hf', multiset.countp_map, ←multiset.countp_eq_card_filter] at this,
     convert this using 1,
     apply multiset.countp_eq,
     intros A HA,
