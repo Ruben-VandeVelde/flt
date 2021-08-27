@@ -320,23 +320,28 @@ lemma step3
       odd_prime_or_four pq.norm
   :=
 begin
-  suffices : ∀ n : ℕ, a^2 + 3 * b ^ 2 = n →
+  suffices : ∀ n : ℕ, (a^2 + 3 * b ^ 2).nat_abs = n →
     ∃ f : multiset ℤ√-3,
     ((⟨a, b⟩ : ℤ√-3) = f.prod ∨ (⟨a, b⟩ : ℤ√-3) = - f.prod) ∧
     ∀ pq : ℤ√-3, pq ∈ f →
       0 ≤ pq.re ∧
       pq.im ≠ 0 ∧
       odd_prime_or_four pq.norm,
-  { exact this (a^2 + 3 * b ^ 2).nat_abs (int.nat_abs_of_nonneg (spts.nonneg a b)).symm },
+  { exact this (a^2 + 3 * b ^ 2).nat_abs rfl },
 
   intros n hn,
   induction n using nat.strong_induction_on with n ih generalizing a b,
   dsimp only at ih,
-  have hn' : (a ^ 2 + 3 * b ^ 2).nat_abs = n,
-  { rw hn, exact int.nat_abs_of_nat n },
 
-  by_cases h : a^2 + 3 * b ^ 2 = 1,
-  { have : abs a = 1 ∧ b = 0 := spts.eq_one h,
+  have h0 : 1 ≤ a^2 + 3 * b ^ 2,
+  { rw [←int.sub_one_lt_iff, sub_self],
+    apply lt_of_le_of_ne (spts.nonneg a b),
+    intro H,
+    rw [eq_comm, int.sq_plus_three_sq_eq_zero_iff] at H,
+    rw [H.1, H.2] at hcoprime,
+    exact not_coprime_zero_zero hcoprime },
+  cases h0.eq_or_lt with h h,
+  { have : abs a = 1 ∧ b = 0 := spts.eq_one h.symm,
     use 0,
     split,
     { simp only [multiset.prod_zero, zsqrtd.ext, zsqrtd.one_re, zsqrtd.one_im, zsqrtd.neg_im,
@@ -345,25 +350,14 @@ begin
       exact zero_le_one },
     { intros pq hpq,
       simpa only [multiset.not_mem_zero] using hpq } },
-  { have : 1 < a ^ 2 + 3 * b ^ 2,
-    { apply lt_of_le_of_ne _ (ne.symm h),
-      have : (0 + 1 : ℤ) = _ := zero_add 1,
-      conv_lhs { rw [←this] },
-      rw [int.add_one_le_iff],
-      apply lt_of_le_of_ne (spts.nonneg a b),
-      intro H,
-      rw [eq_comm, int.sq_plus_three_sq_eq_zero_iff] at H,
-      rw [H.1, H.2] at hcoprime,
-      exact not_coprime_zero_zero hcoprime },
-    have : 2 < a ^ 2 + 3 * b ^ 2,
-    { apply lt_of_le_of_ne _ (spts.not_two a b).symm,
-      exact this },
+  { have : 2 < a ^ 2 + 3 * b ^ 2,
+    { rw [←int.add_one_le_iff, ←mul_two, one_mul] at h,
+      exact lt_of_le_of_ne h (spts.not_two a b).symm },
     obtain ⟨u, v, q, hc, hd, hp, huv, huvcoprime, descent⟩ := odd_prime_or_four.factors'
       this hcoprime,
     replace descent := int.nat_abs_lt_nat_abs_of_nonneg_of_lt (spts.nonneg _ _) descent,
-    rw hn' at descent,
-    obtain ⟨g, hgprod, hgfactors⟩ := ih (u ^ 2 + 3 * v ^ 2).nat_abs descent huvcoprime
-      (int.nat_abs_of_nonneg (spts.nonneg _ _)).symm,
+    rw hn at descent,
+    obtain ⟨g, hgprod, hgfactors⟩ := ih (u ^ 2 + 3 * v ^ 2).nat_abs descent huvcoprime rfl,
     use q ::ₘ g,
     split,
     { rw huv,
