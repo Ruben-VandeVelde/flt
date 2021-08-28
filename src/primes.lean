@@ -117,33 +117,6 @@ begin
   exact right_ne_zero_of_mul ha,
 end
 
-lemma int.factor_div (a: ℤ) (x : ℕ)
-  (hodd : odd x)
-  (h0' : 0 < x) :
-  ∃ (m c : ℤ), c + m * x = a ∧ 2 * c.nat_abs < x :=
-begin
-  set c : ℤ := a % x with hc,
-  have hcnonneg : 0 ≤ c := int.mod_nonneg _ (int.coe_nat_ne_zero_iff_pos.mpr h0'),
-  have : c < x := int.mod_lt_of_pos a (int.coe_nat_lt.mpr h0'),
-  by_cases H : 2 * c < x,
-  { refine ⟨a/x, c, _, _⟩,
-    { rw [mul_comm], exact int.mod_add_div a x },
-    { zify, rwa [int.nat_abs_of_nonneg hcnonneg] } },
-  { push_neg at H,
-    set c' : ℤ := c - x with hc',
-    refine ⟨a / x + 1, c', _, _⟩,
-    { rw [add_mul, one_mul, hc'],
-      conv_rhs { rw ←int.mod_add_div a x },
-      ring },
-    { zify at ⊢ H,
-      rw [hc', ←int.nat_abs_neg, neg_sub, int.nat_abs_of_nonneg (sub_nonneg_of_le this.le),
-        mul_sub, sub_lt_iff_lt_add, two_mul, add_lt_add_iff_left, hc],
-      apply lt_of_le_of_ne H,
-      rw [nat.odd_iff_not_even, ←int.even_coe_nat] at hodd,
-      contrapose! hodd with heqtwomul,
-      exact ⟨_,  heqtwomul⟩ } },
-end
-
 theorem int.coprime_div_gcd_div_gcd {m n : ℤ} (H : 0 < int.gcd m n) :
   is_coprime (m / int.gcd m n) (n / int.gcd m n) :=
 by rw [←int.gcd_eq_one_iff_coprime, int.gcd_div (int.gcd_dvd_left m n) (int.gcd_dvd_right m n),
