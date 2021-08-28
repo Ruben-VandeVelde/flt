@@ -235,11 +235,14 @@ begin
 end
 
 -- Edwards p49 introduction
-lemma factor_div (a x : ℕ)
-  (hodd : ¬even x)
-  (h0' : 0 < x) :
+lemma factor_div (a x : ℕ) (hodd : ¬even x) :
   ∃ (m : ℕ) (c : ℤ), c + ↑m * ↑x = ↑a ∧ 2 * c.nat_abs < x :=
 begin
+  have h0' : 0 < x,
+  { rw pos_iff_ne_zero,
+    rintro rfl,
+    simpa only [nat.even_zero, not_true, nat.odd_iff_not_even] using hodd },
+
     set c : ℤ := a % x with hc,
     have : c < x,
     { rw hc,
@@ -312,8 +315,8 @@ begin
     { symmetry,
       exact h } },
 
-  obtain ⟨m, c, ha, hc⟩ := factor_div a x hodd h0',
-  obtain ⟨n, d, hb, hd⟩ := factor_div b x hodd h0',
+  obtain ⟨m, c, ha, hc⟩ := factor_div a x hodd,
+  obtain ⟨n, d, hb, hd⟩ := factor_div b x hodd,
 
   obtain ⟨y, hy⟩ : x ∣ c.nat_abs ^ 2 + 3 * d.nat_abs ^ 2,
   { rw ←int.coe_nat_dvd,
