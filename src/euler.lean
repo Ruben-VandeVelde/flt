@@ -188,9 +188,9 @@ end
 lemma descent11 {a b c d : ℤ} (h : d = a ∨ d = b ∨ d = c) : d ∣ (a * b * c) :=
 begin
   rcases h with rfl | rfl | rfl,
-  { apply dvd_mul_of_dvd_left, apply dvd_mul_right },
-  { apply dvd_mul_of_dvd_left, apply dvd_mul_left },
-  { apply dvd_mul_left }
+  { exact (dvd_mul_right _ _).mul_right _ },
+  { exact (dvd_mul_left _ _).mul_right _ },
+  { exact dvd_mul_left _ _ }
 end
 
 lemma descent2 (a b c : ℤ)
@@ -354,12 +354,11 @@ begin
       apply dvd_sub,
       { exact dvd_pow hkdvdleft (by norm_num) },
       { rw [mul_comm (9 : ℤ), mul_assoc],
-        exact dvd_mul_of_dvd_left hkdvdleft _ } },
+        exact hkdvdleft.mul_right _ } },
     { rw hq',
       apply dvd_sub,
-      { exact dvd_mul_of_dvd_right hkdvdright _ },
-      { apply dvd_mul_of_dvd_right,
-        exact dvd_pow hkdvdright (by norm_num) } } },
+      { exact hkdvdright.mul_left _ },
+      { exact (hkdvdright.pow (by norm_num)).mul_left _ } } },
 
   { by_cases haparity : even a; by_cases hbparity : even b;
     [skip, tauto, tauto, skip];
@@ -407,7 +406,7 @@ begin
   { exact int.dvd_mul_cancel_prime' notdvd_2_2 hkdvdright int.prime_two hkprime hkdvdleft },
   { apply int.dvd_mul_cancel_prime' not_3_dvd_2 hkdvdright int.prime_three hkprime,
     apply int.dvd_mul_cancel_prime' notdvd_2_2 hkdvdright int.prime_two hkprime,
-    convert dvd_sub hkdvdleft (dvd_mul_of_dvd_right hkdvdright 2),
+    convert dvd_sub hkdvdleft (hkdvdright.mul_left 2),
     ring },
 end
 
@@ -426,7 +425,7 @@ begin
   { exact int.dvd_mul_cancel_prime' this hkdvdright int.prime_two hkprime hkdvdleft },
   { apply int.dvd_mul_cancel_prime' notdvd_3_3 hkdvdright int.prime_three hkprime,
     apply int.dvd_mul_cancel_prime' this hkdvdright int.prime_two hkprime,
-    convert dvd_sub (dvd_mul_of_dvd_right hkdvdright 2) hkdvdleft,
+    convert dvd_sub (hkdvdright.mul_left 2) hkdvdleft,
     ring },
 end
 
@@ -496,9 +495,9 @@ begin
     have : 3 ∣ p ^ 2 + 3 * q ^ 2,
     { apply dvd_add,
       { rw pow_two,
-        apply dvd_mul_of_dvd_right H },
+        exact H.mul_left _ },
       { apply dvd_mul_right } },
-    have : 3 ∣ 2 * p := dvd_mul_of_dvd_right H 2,
+    have : 3 ∣ 2 * p := H.mul_left 2,
     have := is_coprime.is_unit_of_dvd' hgcd ‹_› ‹_›,
     rw is_unit_iff_dvd_one at this,
     norm_num at this },
@@ -506,13 +505,12 @@ begin
   { intro hd2,
     apply hddd,
     rw hpfactor,
-    apply dvd_mul_of_dvd_left _,
-    apply dvd_mul_of_dvd_right hd2 },
+    exact (hd2.mul_left _).mul_right _ },
   have notdvd_3_3 : ¬(3 ∣ (u + 3 * v)),
   { intro hd3,
     apply hddd,
     rw hpfactor,
-    apply dvd_mul_of_dvd_right hd3 },
+    exact hd3.mul_left _ },
 
   obtain ⟨s, hs⟩ := hcubeleft,
   obtain ⟨C, A, B, HCpos, HApos, HBpos, HC, HA, HB⟩ : ∃ X Y Z : ℤ,
@@ -619,7 +617,7 @@ begin
     ring },
   apply hcoprime'.is_unit_of_dvd' this,
   apply hkprime.dvd_of_dvd_pow,
-  rw dvd_add_iff_left (dvd_mul_of_dvd_right (dvd_pow this two_ne_zero) _),
+  rw dvd_add_iff_left ((this.pow two_ne_zero).mul_left _),
   exact hkdvdright
 end
 
@@ -664,7 +662,7 @@ begin
     intros k hkprime hkdvdleft hkdvdright,
     apply hkprime.not_unit,
     apply hcoprime.is_unit_of_dvd' _ hkdvdright,
-    exact dvd_mul_of_dvd_right hkdvdleft 3 },
+    exact hkdvdleft.mul_left 3 },
 
   have hodd' : even q ↔ ¬even s,
   { rw [iff.comm, not_iff_comm, iff.comm],
