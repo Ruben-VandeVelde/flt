@@ -214,8 +214,26 @@ end
 
 end
 
-lemma int.abs_odd {p : ℤ} (hp : odd p) : odd (abs p) :=
-by rwa [←int.nat_abs_odd, int.nat_abs_abs, int.nat_abs_odd]
+lemma neg_odd
+  {α : Type*}
+  [ring α]
+  {p : α} (hp : odd p) : odd (-p) :=
+begin
+  obtain ⟨k, hk⟩ := hp,
+  use -(k + 1),
+  rw [mul_neg_eq_neg_mul_symm, mul_add, neg_add, add_assoc, two_mul (1 : α), neg_add,
+    neg_add_cancel_right, ←neg_add, hk],
+end
+
+lemma abs_odd
+  {α : Type*}
+  [ring α] [linear_order α]
+  {p : α} (hp : odd p) : odd (abs p) :=
+begin
+  obtain h|h := abs_choice p; rw h,
+  { exact hp },
+  { exact neg_odd hp },
+end
 
 theorem int.exists_prime_and_dvd {n : ℤ} (n2 : 2 ≤ n.nat_abs) : ∃ p, prime p ∧ p ∣ n :=
 begin
