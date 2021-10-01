@@ -291,11 +291,12 @@ lemma irreducible_dvd_irreducible_iff_associated {α : Type*} [comm_cancel_monoi
   p ∣ q ↔ associated p q :=
 ⟨irreducible.associated_of_dvd pp qp, associated.dvd⟩
 
-variables {R : Type*} [euclidean_domain R]
-
-theorem prime_dvd_prime_iff_associated {p q : R} (pp : prime p) (qp : prime q) :
+theorem prime_dvd_prime_iff_associated {R : Type*} [comm_cancel_monoid_with_zero R]
+  {p q : R} (pp : prime p) (qp : prime q) :
   p ∣ q ↔ associated p q :=
 irreducible_dvd_irreducible_iff_associated pp.irreducible qp.irreducible
+
+variables {R : Type*} [euclidean_domain R]
 
 theorem is_coprime_of_dvd' {x y : R}
   (z : ¬ (x = 0 ∧ y = 0))
