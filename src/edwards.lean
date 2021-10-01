@@ -792,20 +792,6 @@ begin
   dec_trivial,
 end
 
-lemma unique_factorization_monoid.dvd_of_mem_factors
-  {α : Type*}
-  [comm_cancel_monoid_with_zero α] [decidable_eq α] [nontrivial α] [normalization_monoid α]
-  [unique_factorization_monoid α]
-  {a p : α}
-  (hm : p ∈ unique_factorization_monoid.factors a) : p ∣ a :=
-begin
-  by_cases ha : a = 0,
-  { simp only [ha, dvd_zero] },
-  apply dvd_trans (multiset.dvd_prod hm),
-  apply associated.dvd,
-  exact unique_factorization_monoid.factors_prod ha,
-end
-
 lemma factors_2_even' (a b : ℤ) (hcoprime : is_coprime a b) : even (even_factor_exp (a ^ 2 + 3 * b ^ 2)) :=
 begin
   suffices : ∀ n : ℕ, a^2 + 3 * b ^ 2 = n → even (even_factor_exp n),
