@@ -126,9 +126,11 @@ lemma int.gcd_ne_zero_iff {i j : ℤ} : int.gcd i j ≠ 0 ↔ i ≠ 0 ∨ j ≠ 
 iff.trans (not_congr int.gcd_eq_zero_iff) not_and_distrib
 
 section
-theorem of_irreducible_pow {α} [comm_monoid α] {x : α} {n : ℕ} (hn : 1 < n) :
+theorem of_irreducible_pow {α} [comm_monoid α] {x : α} {n : ℕ} (hn : n ≠ 1) :
   irreducible (x ^ n) → is_unit x :=
 begin
+  obtain hn|hn := hn.lt_or_lt,
+  { simp only [nat.lt_one_iff.mp hn, forall_false_left, not_irreducible_one, pow_zero] },
   intro h,
   obtain ⟨k, rfl⟩ := nat.exists_eq_succ_of_ne_zero (zero_lt_one.trans hn).ne',
   rw nat.succ_lt_succ_iff at hn,
@@ -144,7 +146,7 @@ variables {α : Type*} {β : Type*} {γ : Type*} {δ : Type*}
 variables [comm_cancel_monoid_with_zero α]
 
 
-lemma pow_not_prime {x : α} {n : ℕ} (hn : 1 < n) : ¬ prime (x ^ n) :=
+lemma pow_not_prime {x : α} {n : ℕ} (hn : n ≠ 1) : ¬ prime (x ^ n) :=
 λ hp, hp.not_unit $ is_unit.pow _ $ of_irreducible_pow hn $ hp.irreducible
 
 end

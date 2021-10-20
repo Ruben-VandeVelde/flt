@@ -91,5 +91,5 @@ begin
   { rw [is_coprime_zero_right, int.is_unit_iff_abs] at hcoprime,
     rw [←sq_abs, hcoprime] at h,
     norm_num at h },
-  { exact pow_not_prime one_lt_two hp }
+  { exact pow_not_prime one_lt_two.ne' hp }
 end
