@@ -359,19 +359,19 @@ end
 lemma int.prime_two : prime (2 : ℤ) := nat.prime_iff_prime_int.mp nat.prime_two
 lemma int.prime_three : prime (3 : ℤ) := nat.prime_iff_prime_int.mp nat.prime_three
 
-lemma eq_of_associated_of_nonneg {a b : ℤ} (h : associated a b) (ha : 0 ≤ a) (hb : 0 ≤ b) : a = b :=
-begin
-  obtain (rfl|ha') := ha.eq_or_lt,
-  { rw [eq_comm, ←associated_zero_iff_eq_zero], exact h.symm },
-  { obtain ⟨u, rfl⟩ := h,
-    rw [←int.nat_abs_of_nonneg (nonneg_of_mul_nonneg_left hb ha'),
-      int.is_unit_iff_nat_abs_eq.mp u.is_unit, int.coe_nat_one, mul_one] }
-end
-
 lemma int.nonneg_of_normalize_eq_self {z : ℤ} (hz : normalize z = z) : 0 ≤ z :=
 calc 0 ≤ (z.nat_abs : ℤ) : int.coe_zero_le _
 ... = normalize z : int.coe_nat_abs_eq_normalize _
 ... = z : hz
+
+lemma int.nonneg_iff_normalize_eq_self (z : ℤ) : normalize z = z ↔ 0 ≤ z :=
+⟨int.nonneg_of_normalize_eq_self, int.normalize_of_nonneg⟩
+
+lemma eq_of_associated_of_nonneg {a b : ℤ} (h : associated a b) (ha : 0 ≤ a) (hb : 0 ≤ b) : a = b :=
+begin
+  apply dvd_antisymm_of_normalize_eq _ _ h.dvd h.symm.dvd;
+    rwa int.nonneg_iff_normalize_eq_self,
+end
 
 lemma int.factors_nonneg {z a : ℤ} (ha : a ∈ unique_factorization_monoid.normalized_factors z) : 0 ≤ a :=
 int.nonneg_of_normalize_eq_self (unique_factorization_monoid.normalize_normalized_factor a ha)
