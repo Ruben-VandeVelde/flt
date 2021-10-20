@@ -126,15 +126,6 @@ lemma int.gcd_ne_zero_iff {i j : ℤ} : int.gcd i j ≠ 0 ↔ i ≠ 0 ∨ j ≠ 
 iff.trans (not_congr int.gcd_eq_zero_iff) not_and_distrib
 
 section
-theorem is_unit.pow_iff {α} [comm_monoid α] {x : α} {n : ℕ} (hn : 0 < n) :
-  is_unit (x ^ n) ↔ is_unit x :=
-begin
-  refine ⟨λ h, _, is_unit.pow n⟩,
-  obtain ⟨k, rfl⟩ := nat.exists_eq_succ_of_ne_zero hn.ne',
-  rw pow_succ at h,
-  exact is_unit_of_mul_is_unit_left h
-end
-
 theorem of_irreducible_pow {α} [comm_monoid α] {x : α} {n : ℕ} (hn : 1 < n) :
   irreducible (x ^ n) → is_unit x :=
 begin
@@ -145,7 +136,7 @@ begin
   rw pow_succ at h,
   cases of_irreducible_mul h with hu hu,
   { assumption },
-  { rwa ←is_unit.pow_iff (nat.succ_pos _) },
+  { rwa ←is_unit_pos_pow_iff (nat.succ_pos _) },
 end
 
 
