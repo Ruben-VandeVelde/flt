@@ -772,24 +772,14 @@ end
 
 lemma factors_2_even {z : ℤ} (hz : z ≠ 0) : even_factor_exp (4 * z) = 2 + even_factor_exp z :=
 begin
+  have h₀ : (4 : ℤ) ≠ 0 := four_ne_zero,
+  have h₁ : (2 : int) ^ 2 = 4,
+  { norm_num },
   simp [even_factor_exp],
-  rw unique_factorization_monoid.normalized_factors_mul (by norm_num : (4 : ℤ) ≠ 0) hz,
-  rw multiset.count_add,
-  congr,
-  rw int.factors_eq,
-  have : [2, 2] ~ nat.factors (int.nat_abs 4),
-  { apply nat.factors_unique,
-    { norm_num },
-    intros p hp,
-    convert nat.prime_two,
-    rw [list.mem_cons_iff, list.mem_cons_iff] at hp,
-    simp only [list.not_mem_nil, or_false, or_self] at hp,
-    exact hp, },
-  rw ←multiset.coe_eq_coe at this,
-  rw ←this,
-  simp only [multiset.coe_map, int.coe_nat_zero, zero_add, ring_hom.eq_nat_cast,
-    int.nat_cast_eq_coe_nat, list.map, multiset.coe_count],
-  dec_trivial,
+  rw [unique_factorization_monoid.normalized_factors_mul h₀ hz, multiset.count_add, ←h₁,
+    unique_factorization_monoid.normalized_factors_pow, multiset.count_nsmul,
+    unique_factorization_monoid.normalized_factors_irreducible int.prime_two.irreducible,
+    int.normalize_of_nonneg zero_le_two, multiset.count_singleton_self, mul_one],
 end
 
 lemma factors_2_even' (a b : ℤ) (hcoprime : is_coprime a b) : even (even_factor_exp (a ^ 2 + 3 * b ^ 2)) :=
