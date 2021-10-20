@@ -196,7 +196,7 @@ end
 end
 
 section
-variables {α : Type*} [linear_ordered_comm_ring α]
+variables {α : Type*} [comm_ring α] [linear_order α]
 
 lemma prime.abs {p : α} (hp : prime p) : prime (abs p) :=
 begin
