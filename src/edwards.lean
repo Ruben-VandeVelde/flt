@@ -422,7 +422,7 @@ begin
   { exfalso,
     have h : abs p ∣ 4,
     { rwa [int.abs_eq_nat_abs, int.nat_abs_dvd] },
-    exact norm_not_dvd_four_of_odd_prime (abs_nonneg _) hp.1.abs (abs_odd hp.2) h },
+    exact norm_not_dvd_four_of_odd_prime (abs_nonneg _) hp.1.abs (odd_abs.mpr hp.2) h },
   { exfalso,
     rw int.odd_iff_not_even at ha,
     refine ha.2 (dvd_trans _ h),

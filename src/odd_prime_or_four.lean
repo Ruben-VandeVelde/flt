@@ -38,7 +38,7 @@ lemma odd_prime_or_four.abs {z : ℤ} (h : odd_prime_or_four z) : odd_prime_or_f
 begin
   obtain rfl|⟨hp, ho⟩ := h,
   { left, rw abs_eq_self, norm_num },
-  { right, exact ⟨hp.abs, abs_odd ho⟩ }
+  { right, exact ⟨hp.abs, odd_abs.mpr ho⟩ }
 end
 
 lemma exists_odd_prime_and_dvd_or_two_pow
