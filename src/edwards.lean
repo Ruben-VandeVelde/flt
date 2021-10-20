@@ -705,7 +705,7 @@ begin
   rw [←hu, zsqrtd.norm_mul, (zsqrtd.norm_eq_one_iff' hd u).mpr u.is_unit, mul_one],
 end
 
-noncomputable def odd_factors (x : ℤ) := multiset.filter odd (unique_factorization_monoid.factors x)
+noncomputable def odd_factors (x : ℤ) := multiset.filter odd (unique_factorization_monoid.normalized_factors x)
 
 lemma odd_factors.zero : odd_factors 0 = 0 := rfl
 
@@ -715,25 +715,25 @@ begin
     and_false, multiset.mem_filter],
 end
 
-noncomputable def even_factor_exp (x : ℤ) := multiset.count 2 (unique_factorization_monoid.factors x)
+noncomputable def even_factor_exp (x : ℤ) := multiset.count 2 (unique_factorization_monoid.normalized_factors x)
 
-lemma even_factor_exp.def (x : ℤ) : even_factor_exp x = multiset.count 2 (unique_factorization_monoid.factors x) := rfl
+lemma even_factor_exp.def (x : ℤ) : even_factor_exp x = multiset.count 2 (unique_factorization_monoid.normalized_factors x) := rfl
 
 lemma even_factor_exp.zero : even_factor_exp 0 = 0 := rfl
 
 lemma even_and_odd_factors'' (x : ℤ) :
-  unique_factorization_monoid.factors x = (unique_factorization_monoid.factors x).filter (eq 2) + odd_factors x :=
+  unique_factorization_monoid.normalized_factors x = (unique_factorization_monoid.normalized_factors x).filter (eq 2) + odd_factors x :=
 begin
   by_cases hx : x = 0,
-  { rw [hx, unique_factorization_monoid.factors_zero, odd_factors.zero, multiset.filter_zero,
+  { rw [hx, unique_factorization_monoid.normalized_factors_zero, odd_factors.zero, multiset.filter_zero,
     add_zero] },
   simp [even_factor_exp, odd_factors],
   rw multiset.filter_add_filter,
   convert (add_zero _).symm,
   { rw multiset.filter_eq_self,
     intros a ha,
-    have hprime : prime a := unique_factorization_monoid.prime_of_factor a ha,
-    have := unique_factorization_monoid.normalize_factor a ha,
+    have hprime : prime a := unique_factorization_monoid.prime_of_normalized_factor a ha,
+    have := unique_factorization_monoid.normalize_normalized_factor a ha,
     rw ←int.coe_nat_abs_eq_normalize at this,
     rw ←this at hprime,
     rw ←this,
@@ -747,7 +747,7 @@ begin
 end
 
 lemma even_and_odd_factors' (x : ℤ) :
-  unique_factorization_monoid.factors x = multiset.repeat 2 (even_factor_exp x) + odd_factors x :=
+  unique_factorization_monoid.normalized_factors x = multiset.repeat 2 (even_factor_exp x) + odd_factors x :=
 begin
   convert even_and_odd_factors'' x,
   simp [even_factor_exp],
@@ -762,7 +762,7 @@ end
 
 lemma even_and_odd_factors (x : ℤ) (hx : x ≠ 0) : associated x (2 ^ (even_factor_exp x) * (odd_factors x).prod) :=
 begin
-  convert (unique_factorization_monoid.factors_prod hx).symm,
+  convert (unique_factorization_monoid.normalized_factors_prod hx).symm,
   simp [even_factor_exp, odd_factors],
   rw [multiset.pow_count, ←multiset.prod_add],
   congr,
@@ -773,7 +773,7 @@ end
 lemma factors_2_even {z : ℤ} (hz : z ≠ 0) : even_factor_exp (4 * z) = 2 + even_factor_exp z :=
 begin
   simp [even_factor_exp],
-  rw unique_factorization_monoid.factors_mul (by norm_num : (4 : ℤ) ≠ 0) hz,
+  rw unique_factorization_monoid.normalized_factors_mul (by norm_num : (4 : ℤ) ≠ 0) hz,
   rw multiset.count_add,
   congr,
   rw int.factors_eq,
@@ -814,7 +814,7 @@ begin
     convert nat.even_zero, 
     simp [even_factor_exp],
     contrapose! hparity with hfactor,
-    exact unique_factorization_monoid.dvd_of_mem_factors hfactor }
+    exact unique_factorization_monoid.dvd_of_mem_normalized_factors hfactor }
 end
 
 -- most useful with  (hz : even (even_factor_exp z))
@@ -836,7 +836,7 @@ lemma factors_odd_prime_or_four.prod
   (factors_odd_prime_or_four (a ^ 2 + 3 * b ^ 2)).prod = a ^ 2 + 3 * b ^ 2 :=
 begin
   apply eq_of_associated_of_nonneg,
-  { have := unique_factorization_monoid.factors_prod (spts.not_zero_of_coprime hcoprime),
+  { have := unique_factorization_monoid.normalized_factors_prod (spts.not_zero_of_coprime hcoprime),
     apply associated.trans _ this,
     rw [even_and_odd_factors' _, multiset.prod_add],
     simp [factors_odd_prime_or_four],
@@ -865,7 +865,7 @@ begin
     { left, exact multiset.eq_of_mem_repeat hx },
     { right,
       simp only [odd_factors, multiset.mem_filter] at hx,
-      exact and.imp_left (unique_factorization_monoid.prime_of_factor _) hx } },
+      exact and.imp_left (unique_factorization_monoid.prime_of_normalized_factor _) hx } },
   { rwa factors_odd_prime_or_four.prod hcoprime }
 end
 
@@ -887,13 +887,13 @@ end
 lemma even_factor_exp.pow (z : ℤ) (n : ℕ) : even_factor_exp (z ^ n) = n * even_factor_exp z :=
 begin
   simp only [even_factor_exp],
-  rw [unique_factorization_monoid.factors_pow, multiset.count_nsmul]
+  rw [unique_factorization_monoid.normalized_factors_pow, multiset.count_nsmul]
 end
 
 lemma odd_factors.pow (z : ℤ) (n : ℕ) : odd_factors (z ^ n) = n • odd_factors z :=
 begin
   simp only [odd_factors],
-  rw [unique_factorization_monoid.factors_pow, multiset.filter_nsmul],
+  rw [unique_factorization_monoid.normalized_factors_pow, multiset.filter_nsmul],
 end
 
 lemma factors_odd_prime_or_four.pow
