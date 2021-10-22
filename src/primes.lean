@@ -132,7 +132,7 @@ begin
   obtain hn|hn := hn.lt_or_lt,
   { simp only [nat.lt_one_iff.mp hn, forall_false_left, not_irreducible_one, pow_zero] },
   intro h,
-  obtain ⟨k, rfl⟩ := nat.exists_eq_succ_of_ne_zero (zero_lt_one.trans hn).ne',
+  obtain ⟨k, rfl⟩ := nat.exists_eq_succ_of_ne_zero (pos_of_gt hn).ne',
   rw nat.succ_lt_succ_iff at hn,
   obtain ⟨k, rfl⟩ := nat.exists_eq_succ_of_ne_zero hn.ne',
   rw pow_succ at h,
