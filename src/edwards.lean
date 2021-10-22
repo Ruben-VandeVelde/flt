@@ -427,7 +427,7 @@ begin
     rw int.odd_iff_not_even at ha,
     refine ha.2 (dvd_trans _ h),
     norm_num },
-  { rwa prime_dvd_prime_iff_associated hp.1 ha.1 at h }
+  { rwa prime.dvd_prime_iff_associated hp.1 ha.1 at h }
 
 end
 
@@ -659,7 +659,7 @@ begin
   have heq : x.norm = y.norm,
   { have hd : (-3 : ℤ) ≤ 0,
     { norm_num },
-    exact eq_of_associated_of_nonneg h (zsqrtd.norm_nonneg hd _) (zsqrtd.norm_nonneg hd _) },
+    exact int.eq_of_associated_of_nonneg h (zsqrtd.norm_nonneg hd _) (zsqrtd.norm_nonneg hd _) },
   rw [zsqrt3.norm, zsqrt3.norm] at heq,
   rw zsqrt3.norm at h',
   obtain ⟨hre, him⟩ := step4_3 x.re x.im y.re y.im hx hy h' heq,
@@ -825,7 +825,7 @@ lemma factors_odd_prime_or_four.prod
   (hcoprime : is_coprime a b) :
   (factors_odd_prime_or_four (a ^ 2 + 3 * b ^ 2)).prod = a ^ 2 + 3 * b ^ 2 :=
 begin
-  apply eq_of_associated_of_nonneg,
+  apply int.eq_of_associated_of_nonneg,
   { have := unique_factorization_monoid.normalized_factors_prod (spts.not_zero_of_coprime hcoprime),
     apply associated.trans _ this,
     rw [even_and_odd_factors' _, multiset.prod_add],
@@ -871,7 +871,7 @@ begin
   rw ←multiset.rel_eq,
   apply multiset.rel.mono (factors_odd_prime_or_four.associated hcoprime hf hassoc),
   intros x hx y hy hxy,
-  exact eq_of_associated_of_nonneg hxy (hf' x hx) (factors_odd_prime_or_four.nonneg hy)
+  exact int.eq_of_associated_of_nonneg hxy (hf' x hx) (factors_odd_prime_or_four.nonneg hy)
 end
 
 lemma even_factor_exp.pow (z : ℤ) (n : ℕ) : even_factor_exp (z ^ n) = n * even_factor_exp z :=

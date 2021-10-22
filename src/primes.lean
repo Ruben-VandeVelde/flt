@@ -7,6 +7,7 @@ import ring_theory.int.basic
 import ring_theory.euclidean_domain
 import ring_theory.noetherian
 import ring_theory.principal_ideal_domain
+import ring_theory.prime
 import ring_theory.unique_factorization_domain
 import tactic
 
@@ -44,15 +45,6 @@ begin
   { rw le_add_iff_nonneg_left (2 : nat),
     exact zero_le _ }
 end
-
-section comm_monoid_with_zero
-
-variables {α : Type*} [comm_monoid_with_zero α]
-
-@[simp] theorem associates.mk_ne_zero {a : α} : associates.mk a ≠ 0 ↔ a ≠ 0 :=
-not_congr associates.mk_eq_zero
-
-end comm_monoid_with_zero
 
 theorem nat.eq_pow_of_mul_eq_pow {a b c : ℕ} (ha : 0 < a) (hb : 0 < b)
   (hab : nat.coprime a b) {k : ℕ} (h : a * b = c ^ k) : ∃ d, a = d ^ k :=
@@ -176,37 +168,6 @@ end
 lemma int.is_unit_iff_abs {x : ℤ} : is_unit x ↔ abs x = 1 :=
 by rw [int.is_unit_iff_nat_abs_eq, int.abs_eq_nat_abs, ←int.coe_nat_one, int.coe_nat_inj']
 
-section
-variables {α : Type*} [ring α]
-
-lemma is_unit.neg_iff (u : α) : is_unit (-u) ↔ is_unit u :=
-⟨λ h, neg_neg u ▸ h.neg, is_unit.neg⟩
-
-end
-
-section
-variables {α : Type*} [comm_ring α]
-
-lemma prime.neg {p : α} (hp : prime p) : prime (-p) :=
-begin
-  obtain ⟨h1, h2, h3⟩ := hp,
-  exact ⟨neg_ne_zero.mpr h1, by rwa is_unit.neg_iff, by simpa [neg_dvd] using h3⟩
-end
-
-end
-
-section
-variables {α : Type*} [comm_ring α] [linear_order α]
-
-lemma prime.abs {p : α} (hp : prime p) : prime (abs p) :=
-begin
-  obtain h|h := abs_choice p; rw h,
-  { exact hp },
-  { exact hp.neg }
-end
-
-end
-
 theorem int.exists_prime_and_dvd {n : ℤ} (n2 : 2 ≤ n.nat_abs) : ∃ p, prime p ∧ p ∣ n :=
 begin
   obtain ⟨p, pp, pd⟩ := nat.exists_prime_and_dvd n2,
@@ -257,16 +218,6 @@ begin
 end
 
 section
-
-lemma irreducible_dvd_irreducible_iff_associated {α : Type*} [comm_cancel_monoid_with_zero α]
-  {p q : α} (pp : irreducible p) (qp : irreducible q) :
-  p ∣ q ↔ associated p q :=
-⟨irreducible.associated_of_dvd pp qp, associated.dvd⟩
-
-theorem prime_dvd_prime_iff_associated {R : Type*} [comm_cancel_monoid_with_zero R]
-  {p q : R} (pp : prime p) (qp : prime q) :
-  p ∣ q ↔ associated p q :=
-irreducible_dvd_irreducible_iff_associated pp.irreducible qp.irreducible
 
 variables {R : Type*} [euclidean_domain R]
 
@@ -330,20 +281,6 @@ end
 -- todo norm_num for prime ℤ
 lemma int.prime_two : prime (2 : ℤ) := nat.prime_iff_prime_int.mp nat.prime_two
 lemma int.prime_three : prime (3 : ℤ) := nat.prime_iff_prime_int.mp nat.prime_three
-
-lemma int.nonneg_of_normalize_eq_self {z : ℤ} (hz : normalize z = z) : 0 ≤ z :=
-calc 0 ≤ (z.nat_abs : ℤ) : int.coe_zero_le _
-... = normalize z : int.coe_nat_abs_eq_normalize _
-... = z : hz
-
-lemma int.nonneg_iff_normalize_eq_self (z : ℤ) : normalize z = z ↔ 0 ≤ z :=
-⟨int.nonneg_of_normalize_eq_self, int.normalize_of_nonneg⟩
-
-lemma eq_of_associated_of_nonneg {a b : ℤ} (h : associated a b) (ha : 0 ≤ a) (hb : 0 ≤ b) : a = b :=
-begin
-  apply dvd_antisymm_of_normalize_eq _ _ h.dvd h.symm.dvd;
-    rwa int.nonneg_iff_normalize_eq_self,
-end
 
 lemma int.factors_nonneg {z a : ℤ} (ha : a ∈ unique_factorization_monoid.normalized_factors z) : 0 ≤ a :=
 int.nonneg_of_normalize_eq_self (unique_factorization_monoid.normalize_normalized_factor a ha)
