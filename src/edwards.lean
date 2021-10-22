@@ -1001,7 +1001,7 @@ begin
     rw [←even_factor_exp.pow r 3, hcube, zsqrt3.norm],
     exact factors_2_even' a.re a.im hcoprime },
   rw [←multiset.count_nsmul x.norm, ←factors_odd_prime_or_four.pow _ _ this, hcube, multiset.count,
-    multiset.countp_eq _ ((eq x.norm) ∘ zsqrtd.norm), multiset.countp_eq_card_filter,
+    multiset.countp_eq_card_filter, multiset.filter_congr,
     ←multiset.countp_map zsqrtd.norm f (λ y, x.norm = y), multiset.count],
   congr',
   { rw zsqrt3.norm,
