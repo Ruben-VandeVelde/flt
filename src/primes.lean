@@ -163,21 +163,17 @@ begin
 end
 
 theorem int.associated_pow_of_mul_eq_pow {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
-  (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ k) : ∃ d, associated a (d ^ k) :=
+  (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ k) : ∃ d, associated (d ^ k) a :=
 begin
-  have : a.nat_abs * b.nat_abs = c.nat_abs ^ k,
-  { rw [←int.nat_abs_mul, ←int.nat_abs_pow, h] },
-  rw int.coprime_iff_nat_coprime at hab,
-  obtain ⟨d, hd⟩ := nat.eq_pow_of_mul_eq_pow
-    (int.nat_abs_pos_of_ne_zero ha) (int.nat_abs_pos_of_ne_zero hb) hab this,
-  use d,
-  rw [int.associated_iff_nat_abs, hd, int.nat_abs_pow, int.nat_abs_of_nat]
+  refine exists_associated_pow_of_mul_eq_pow _ h,
+  rwa [int.is_unit_iff_nat_abs_eq, int.nat_abs_gcd, int.gcd_eq_one_iff_coprime],
 end
 
 theorem int.eq_pow_of_mul_eq_pow_bit1_left {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
   (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ (bit1 k)) : ∃ d, a = d ^ (bit1 k) :=
 begin
   obtain ⟨d, hd⟩ := int.associated_pow_of_mul_eq_pow ha hb hab h,
+  replace hd := hd.symm,
   rw [int.associated_iff_nat_abs, int.nat_abs_eq_nat_abs_iff] at hd,
   obtain rfl|rfl := hd,
   { use d, },
