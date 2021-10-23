@@ -49,22 +49,10 @@ end
 theorem nat.eq_pow_of_mul_eq_pow {a b c : ℕ} (ha : 0 < a) (hb : 0 < b)
   (hab : nat.coprime a b) {k : ℕ} (h : a * b = c ^ k) : ∃ d, a = d ^ k :=
 begin
-  have ha' : associates.mk a ≠ 0,
-  { rwa [associates.mk_ne_zero, ←pos_iff_ne_zero] },
-  have hb' : associates.mk b ≠ 0,
-  { rwa [associates.mk_ne_zero, ←pos_iff_ne_zero] },
-  have hab' : ∀ (d : associates ℕ), d ∣ associates.mk a → d ∣ associates.mk b → ¬prime d,
-  { intros d da db dprime,
-    obtain ⟨d', rfl⟩ := associates.exists_rep d,
-    rw associates.mk_dvd_mk at da db,
-    rw [associates.prime_mk, ←nat.prime_iff] at dprime,
-    exact nat.not_coprime_of_dvd_of_dvd dprime.one_lt da db hab },
-  have h' : associates.mk a * associates.mk b = (associates.mk c) ^ k,
-  { rw [associates.mk_mul_mk, ←associates.mk_pow, h] },
-  obtain ⟨d, hd⟩ := associates.eq_pow_of_mul_eq_pow ha' hb' hab' h',
-  obtain ⟨d', rfl⟩ := associates.exists_rep d,
-  use d',
-  rw [←associated_iff_eq, ←associates.mk_eq_mk_iff_associated, hd, associates.mk_pow],
+  obtain ⟨d, hd⟩ := exists_associated_pow_of_mul_eq_pow _ h,
+  exact ⟨d, associated_iff_eq.mp hd.symm⟩,
+  rw [gcd_eq_nat_gcd, hab.gcd_eq_one],
+  exact is_unit_one,
 end
 
 lemma int.four_dvd_add_or_sub_of_odd {a b : ℤ}
