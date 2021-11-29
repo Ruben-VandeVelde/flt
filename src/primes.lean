@@ -166,10 +166,7 @@ end
 
 theorem int.associated_pow_of_mul_eq_pow {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
   (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ k) : ∃ d, associated (d ^ k) a :=
-begin
-  refine exists_associated_pow_of_mul_eq_pow _ h,
-  rwa [int.is_unit_iff_nat_abs_eq, int.nat_abs_gcd, int.gcd_eq_one_iff_coprime],
-end
+exists_associated_pow_of_mul_eq_pow ((gcd_is_unit_iff _ _).mpr hab) h
 
 theorem int.eq_pow_of_mul_eq_pow_bit1_left {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
   (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ (bit1 k)) : ∃ d, a = d ^ (bit1 k) :=
@@ -239,6 +236,10 @@ end
 
 theorem prime.coprime_iff_not_dvd {p n : R} (pp : prime p) : is_coprime p n ↔ ¬ p ∣ n :=
 pp.irreducible.coprime_iff_not_dvd
+
+theorem associated_pow_of_mul_eq_pow {a b c : R} (ha : a ≠ 0) (hb : b ≠ 0)
+  (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ k) : ∃ d, associated (d ^ k) a :=
+exists_associated_pow_of_mul_eq_pow ((gcd_is_unit_iff _ _).mpr hab) h
 
 end
 
