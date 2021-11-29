@@ -57,6 +57,49 @@ let ⟨d, hd⟩ := exists_associated_pow_of_mul_eq_pow hab h in ⟨d, associated
 
 end
 
+section
+
+variables {R : Type*} [comm_ring R] [is_domain R] [is_principal_ideal_ring R] [gcd_monoid R]
+
+theorem is_coprime_of_dvd' {x y : R}
+  (z : ¬ (x = 0 ∧ y = 0))
+  (H : ∀ z : R, irreducible z → z ∣ x → ¬ z ∣ y) :
+  is_coprime x y :=
+begin
+  apply is_coprime_of_dvd x y z,
+  intros z znu znz zx zy,
+  obtain ⟨i, h1, h2⟩ := wf_dvd_monoid.exists_irreducible_factor znu znz,
+  apply H i h1;
+  { apply dvd_trans h2, assumption },
+end
+
+theorem irreducible.coprime_iff_not_dvd {p n : R} (pp : irreducible p) : is_coprime p n ↔ ¬ p ∣ n :=
+begin
+  split,
+  { intros co H,
+    apply pp.not_unit,
+    rw is_unit_iff_dvd_one,
+    apply is_coprime.dvd_of_dvd_mul_left co,
+    rw mul_one n,
+    exact H },
+  { intro nd,
+    apply is_coprime_of_dvd',
+    { rintro ⟨hp, -⟩,
+      apply pp.ne_zero hp },
+    rintro z zi zp zn,
+    refine (nd $ dvd_trans (associated.dvd _) zn),
+    exact (zi.associated_of_dvd pp zp).symm },
+end
+
+theorem prime.coprime_iff_not_dvd {p n : R} (pp : prime p) : is_coprime p n ↔ ¬ p ∣ n :=
+pp.irreducible.coprime_iff_not_dvd
+
+theorem associated_pow_of_mul_eq_pow {a b c : R} (ha : a ≠ 0) (hb : b ≠ 0)
+  (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ k) : ∃ d, associated (d ^ k) a :=
+exists_associated_pow_of_mul_eq_pow ((gcd_is_unit_iff _ _).mpr hab) h
+
+end
+
 lemma int.four_dvd_add_or_sub_of_odd {a b : ℤ}
   (ha : odd a)
   (hb : odd b) :
@@ -198,49 +241,6 @@ begin
   apply (prime.dvd_or_dvd hk h).resolve_left,
   rw int.prime_iff_nat_abs_prime at hk,
   rwa [int.coe_nat_dvd_right, nat.prime_dvd_prime_iff_eq hk hp]
-end
-
-section
-
-variables {R : Type*} [comm_ring R] [is_domain R] [is_principal_ideal_ring R] [gcd_monoid R]
-
-theorem is_coprime_of_dvd' {x y : R}
-  (z : ¬ (x = 0 ∧ y = 0))
-  (H : ∀ z : R, irreducible z → z ∣ x → ¬ z ∣ y) :
-  is_coprime x y :=
-begin
-  apply is_coprime_of_dvd x y z,
-  intros z znu znz zx zy,
-  obtain ⟨i, h1, h2⟩ := wf_dvd_monoid.exists_irreducible_factor znu znz,
-  apply H i h1;
-  { apply dvd_trans h2, assumption },
-end
-
-theorem irreducible.coprime_iff_not_dvd {p n : R} (pp : irreducible p) : is_coprime p n ↔ ¬ p ∣ n :=
-begin
-  split,
-  { intros co H,
-    apply pp.not_unit,
-    rw is_unit_iff_dvd_one,
-    apply is_coprime.dvd_of_dvd_mul_left co,
-    rw mul_one n,
-    exact H },
-  { intro nd,
-    apply is_coprime_of_dvd',
-    { rintro ⟨hp, -⟩,
-      apply pp.ne_zero hp },
-    rintro z zi zp zn,
-    refine (nd $ dvd_trans (associated.dvd _) zn),
-    exact (zi.associated_of_dvd pp zp).symm },
-end
-
-theorem prime.coprime_iff_not_dvd {p n : R} (pp : prime p) : is_coprime p n ↔ ¬ p ∣ n :=
-pp.irreducible.coprime_iff_not_dvd
-
-theorem associated_pow_of_mul_eq_pow {a b c : R} (ha : a ≠ 0) (hb : b ≠ 0)
-  (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ k) : ∃ d, associated (d ^ k) a :=
-exists_associated_pow_of_mul_eq_pow ((gcd_is_unit_iff _ _).mpr hab) h
-
 end
 
 theorem int.is_coprime_of_dvd' {x y : ℤ}
