@@ -94,7 +94,7 @@ end
 theorem prime.coprime_iff_not_dvd {p n : R} (pp : prime p) : is_coprime p n ↔ ¬ p ∣ n :=
 pp.irreducible.coprime_iff_not_dvd
 
-theorem associated_pow_of_mul_eq_pow {a b c : R} (ha : a ≠ 0) (hb : b ≠ 0)
+theorem exists_associated_pow_of_mul_eq_pow' {a b c : R} (ha : a ≠ 0) (hb : b ≠ 0)
   (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ k) : ∃ d, associated (d ^ k) a :=
 exists_associated_pow_of_mul_eq_pow ((gcd_is_unit_iff _ _).mpr hab) h
 
@@ -207,14 +207,10 @@ begin
   exact ⟨p, nat.prime_iff_prime_int.mp pp, int.coe_nat_dvd_left.mpr pd⟩,
 end
 
-theorem int.associated_pow_of_mul_eq_pow {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
-  (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ k) : ∃ d, associated (d ^ k) a :=
-exists_associated_pow_of_mul_eq_pow ((gcd_is_unit_iff _ _).mpr hab) h
-
 theorem int.eq_pow_of_mul_eq_pow_bit1_left {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
   (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ (bit1 k)) : ∃ d, a = d ^ (bit1 k) :=
 begin
-  obtain ⟨d, hd⟩ := int.associated_pow_of_mul_eq_pow ha hb hab h,
+  obtain ⟨d, hd⟩ := exists_associated_pow_of_mul_eq_pow' ha hb hab h,
   replace hd := hd.symm,
   rw [int.associated_iff_nat_abs, int.nat_abs_eq_nat_abs_iff] at hd,
   obtain rfl|rfl := hd,
