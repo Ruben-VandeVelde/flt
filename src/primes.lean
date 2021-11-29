@@ -46,13 +46,15 @@ begin
     exact zero_le _ }
 end
 
-theorem nat.eq_pow_of_mul_eq_pow {a b c : ℕ} (ha : 0 < a) (hb : 0 < b)
-  (hab : nat.coprime a b) {k : ℕ} (h : a * b = c ^ k) : ∃ d, a = d ^ k :=
-begin
-  obtain ⟨d, hd⟩ := exists_associated_pow_of_mul_eq_pow _ h,
-  exact ⟨d, associated_iff_eq.mp hd.symm⟩,
-  rw [gcd_eq_nat_gcd, hab.gcd_eq_one],
-  exact is_unit_one,
+section
+
+variables {α : Type*} [comm_cancel_monoid_with_zero α] [unique (units α)]
+
+theorem exists_eq_pow_of_mul_eq_pow [gcd_monoid α] [unique (units α)] {a b c : α}
+  (hab : is_unit (gcd a b)) {k : ℕ}
+  (h : a * b = c ^ k) : ∃ (d : α), d ^ k = a :=
+let ⟨d, hd⟩ := exists_associated_pow_of_mul_eq_pow hab h in ⟨d, associated_iff_eq.mp hd⟩
+
 end
 
 lemma int.four_dvd_add_or_sub_of_odd {a b : ℤ}
