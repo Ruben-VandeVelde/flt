@@ -216,15 +216,14 @@ begin
   obtain rfl|rfl := hd; exact ⟨_, rfl⟩,
 end
 
+theorem int.eq_pow_of_mul_eq_pow_bit1_right {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
+  (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ (bit1 k)) : ∃ d, b = d ^ (bit1 k) :=
+int.eq_pow_of_mul_eq_pow_bit1_left hb ha hab.symm (by rwa mul_comm at h)
+
 theorem int.eq_pow_of_mul_eq_pow_bit1 {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
   (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ (bit1 k)) :
   (∃ d, a = d ^ (bit1 k)) ∧ (∃ e, b = e ^ (bit1 k)) :=
-begin
-  split,
-  { exact int.eq_pow_of_mul_eq_pow_bit1_left ha hb hab h },
-  { rw mul_comm at h,
-    exact int.eq_pow_of_mul_eq_pow_bit1_left hb ha hab.symm h }
-end
+⟨int.eq_pow_of_mul_eq_pow_bit1_left ha hb hab h, int.eq_pow_of_mul_eq_pow_bit1_right ha hb hab h⟩
 
 lemma int.dvd_mul_cancel_prime {p : ℕ} {n k : ℤ}
   (hne : k.nat_abs ≠ p)
