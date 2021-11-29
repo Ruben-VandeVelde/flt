@@ -212,10 +212,8 @@ theorem int.eq_pow_of_mul_eq_pow_bit1_left {a b c : ℤ} (ha : a ≠ 0) (hb : b 
 begin
   obtain ⟨d, hd⟩ := exists_associated_pow_of_mul_eq_pow' ha hb hab h,
   replace hd := hd.symm,
-  rw [int.associated_iff_nat_abs, int.nat_abs_eq_nat_abs_iff] at hd,
-  obtain rfl|rfl := hd,
-  { use d, },
-  { use -d, rw neg_pow_bit1 },
+  rw [int.associated_iff_nat_abs, int.nat_abs_eq_nat_abs_iff, ←neg_pow_bit1] at hd,
+  obtain rfl|rfl := hd; exact ⟨_, rfl⟩,
 end
 
 theorem int.eq_pow_of_mul_eq_pow_bit1 {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
