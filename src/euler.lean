@@ -151,7 +151,7 @@ begin
     exact flt_not_add_self hpnezero h.symm rfl },
 
   refine ⟨p, q, hpnezero, hqnezero, _, _, _⟩,
-  { apply is_coprime_of_dvd (not_and_of_not_left _ hpnezero),
+  { apply is_coprime_of_dvd _ _ (not_and_of_not_left _ hpnezero),
     intros z hznu hznz hzp hzq,
     apply hznu,
     exact hbccoprime.is_unit_of_dvd' (dvd_sub hzq hzp) (dvd_add hzp hzq) },

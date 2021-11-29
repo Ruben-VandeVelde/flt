@@ -205,14 +205,14 @@ end
 
 section
 
-variables {R : Type*} [euclidean_domain R]
+variables {R : Type*} [comm_ring R] [is_domain R] [is_principal_ideal_ring R] [gcd_monoid R]
 
 theorem is_coprime_of_dvd' {x y : R}
   (z : ¬ (x = 0 ∧ y = 0))
   (H : ∀ z : R, irreducible z → z ∣ x → ¬ z ∣ y) :
   is_coprime x y :=
 begin
-  apply is_coprime_of_dvd z,
+  apply is_coprime_of_dvd x y z,
   intros z znu znz zx zy,
   obtain ⟨i, h1, h2⟩ := wf_dvd_monoid.exists_irreducible_factor znu znz,
   apply H i h1;
