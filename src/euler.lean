@@ -370,9 +370,9 @@ lemma int.cube_of_coprime (a b c s : ℤ)
   (hs : a * b * c = s ^ 3) :
   ∃ A B C, A ≠ 0 ∧ B ≠ 0 ∧ C ≠ 0 ∧ a = A ^ 3 ∧ b = B ^ 3 ∧ c = C ^ 3 :=
 begin
-  obtain ⟨⟨AB, HAB⟩, ⟨C, HC⟩⟩ := int.eq_pow_of_mul_eq_pow_bit1 (mul_ne_zero ha hb) hc
+  obtain ⟨⟨AB, HAB⟩, ⟨C, HC⟩⟩ := int.eq_pow_of_mul_eq_pow_bit1
     (is_coprime.mul_left hcoprimeac hcoprimebc) hs,
-  obtain ⟨⟨A, HA⟩, ⟨B, HB⟩⟩ := int.eq_pow_of_mul_eq_pow_bit1 ha hb hcoprimeab HAB,
+  obtain ⟨⟨A, HA⟩, ⟨B, HB⟩⟩ := int.eq_pow_of_mul_eq_pow_bit1 hcoprimeab HAB,
   refine ⟨A, B, C, _, _, _, HA, HB, HC⟩; apply ne_zero_pow three_ne_zero,
   { rwa [←HA] },
   { rwa [←HB] },
@@ -461,9 +461,7 @@ begin
   { rcases hcube with (_|_|_);
     [use a, use b, use c];
     exact hcube },
-  have hposleft : 2 * p ≠ 0 := mul_ne_zero two_ne_zero hp,
-  have hposright : p ^ 2 + 3 * q ^ 2 ≠ 0 := spts.not_zero_of_coprime hcoprime,
-  obtain ⟨hcubeleft, hcuberight⟩ := int.eq_pow_of_mul_eq_pow_bit1 hposleft hposright hgcd hr,
+  obtain ⟨hcubeleft, hcuberight⟩ := int.eq_pow_of_mul_eq_pow_bit1 hgcd hr,
   -- todo shadowing hq
   obtain ⟨u, v, hpfactor, hq, huvcoprime, huvodd⟩ := obscure' p q hp hq hcoprime hodd hcuberight,
   have u_ne_zero : u ≠ 0,
@@ -662,12 +660,8 @@ begin
   { rcases hcube with (_|_|_);
     [use a, use b, use c];
     exact hcube },
-  have h1 : 3 ^ 2 * 2 * s ≠ 0,
-  { apply mul_ne_zero _ hspos,
-    norm_num },
-  have h2 : q ^ 2 + 3 * s ^ 2 ≠ 0 := spts.not_zero_of_coprime hcoprime'.symm,
   rw hps at hr,
-  obtain ⟨hcubeleft, hcuberight⟩ := int.eq_pow_of_mul_eq_pow_bit1 h1 h2 hcoprime'' hr,
+  obtain ⟨hcubeleft, hcuberight⟩ := int.eq_pow_of_mul_eq_pow_bit1 hcoprime'' hr,
 
   -- 5.
   -- todo shadows hq hq

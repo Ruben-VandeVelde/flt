@@ -94,7 +94,7 @@ end
 theorem prime.coprime_iff_not_dvd {p n : R} (pp : prime p) : is_coprime p n ↔ ¬ p ∣ n :=
 pp.irreducible.coprime_iff_not_dvd
 
-theorem exists_associated_pow_of_mul_eq_pow' {a b c : R} (ha : a ≠ 0) (hb : b ≠ 0)
+theorem exists_associated_pow_of_mul_eq_pow' {a b c : R}
   (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ k) : ∃ d, associated (d ^ k) a :=
 exists_associated_pow_of_mul_eq_pow ((gcd_is_unit_iff _ _).mpr hab) h
 
@@ -207,23 +207,23 @@ begin
   exact ⟨p, nat.prime_iff_prime_int.mp pp, int.coe_nat_dvd_left.mpr pd⟩,
 end
 
-theorem int.eq_pow_of_mul_eq_pow_bit1_left {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
+theorem int.eq_pow_of_mul_eq_pow_bit1_left {a b c : ℤ}
   (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ (bit1 k)) : ∃ d, a = d ^ (bit1 k) :=
 begin
-  obtain ⟨d, hd⟩ := exists_associated_pow_of_mul_eq_pow' ha hb hab h,
+  obtain ⟨d, hd⟩ := exists_associated_pow_of_mul_eq_pow' hab h,
   replace hd := hd.symm,
   rw [int.associated_iff_nat_abs, int.nat_abs_eq_nat_abs_iff, ←neg_pow_bit1] at hd,
   obtain rfl|rfl := hd; exact ⟨_, rfl⟩,
 end
 
-theorem int.eq_pow_of_mul_eq_pow_bit1_right {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
+theorem int.eq_pow_of_mul_eq_pow_bit1_right {a b c : ℤ}
   (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ (bit1 k)) : ∃ d, b = d ^ (bit1 k) :=
-int.eq_pow_of_mul_eq_pow_bit1_left hb ha hab.symm (by rwa mul_comm at h)
+int.eq_pow_of_mul_eq_pow_bit1_left hab.symm (by rwa mul_comm at h)
 
-theorem int.eq_pow_of_mul_eq_pow_bit1 {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0)
+theorem int.eq_pow_of_mul_eq_pow_bit1 {a b c : ℤ}
   (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ (bit1 k)) :
   (∃ d, a = d ^ (bit1 k)) ∧ (∃ e, b = e ^ (bit1 k)) :=
-⟨int.eq_pow_of_mul_eq_pow_bit1_left ha hb hab h, int.eq_pow_of_mul_eq_pow_bit1_right ha hb hab h⟩
+⟨int.eq_pow_of_mul_eq_pow_bit1_left hab h, int.eq_pow_of_mul_eq_pow_bit1_right hab h⟩
 
 lemma int.dvd_mul_cancel_prime {p : ℕ} {n k : ℤ}
   (hne : k.nat_abs ≠ p)
