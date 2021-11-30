@@ -61,7 +61,7 @@ section
 
 variables {R : Type*} [comm_ring R] [is_domain R] [is_principal_ideal_ring R] [gcd_monoid R]
 
-theorem is_coprime_of_dvd' {x y : R}
+theorem is_coprime_of_dvd_irreducible {x y : R}
   (z : ¬ (x = 0 ∧ y = 0))
   (H : ∀ z : R, irreducible z → z ∣ x → ¬ z ∣ y) :
   is_coprime x y :=
@@ -73,6 +73,12 @@ begin
   { apply dvd_trans h2, assumption },
 end
 
+theorem is_coprime_of_dvd_prime {x y : R}
+  (z : ¬ (x = 0 ∧ y = 0))
+  (H : ∀ z : R, prime z → z ∣ x → ¬ z ∣ y) :
+  is_coprime x y :=
+is_coprime_of_dvd_irreducible z $ λ z zi, H z $ gcd_monoid.prime_of_irreducible zi
+
 theorem irreducible.coprime_iff_not_dvd {p n : R} (pp : irreducible p) : is_coprime p n ↔ ¬ p ∣ n :=
 begin
   split,
@@ -83,12 +89,11 @@ begin
     rw mul_one n,
     exact H },
   { intro nd,
-    apply is_coprime_of_dvd',
+    apply is_coprime_of_dvd_irreducible,
     { rintro ⟨hp, -⟩,
-      apply pp.ne_zero hp },
+      exact pp.ne_zero hp },
     rintro z zi zp zn,
-    refine (nd $ dvd_trans (associated.dvd _) zn),
-    exact (zi.associated_of_dvd pp zp).symm },
+    exact nd (((zi.associated_of_dvd pp zp).symm.dvd).trans zn) },
 end
 
 theorem prime.coprime_iff_not_dvd {p n : R} (pp : prime p) : is_coprime p n ↔ ¬ p ∣ n :=
@@ -138,7 +143,7 @@ end
 lemma int.div_ne_zero_of_dvd {a b : ℤ} (ha : a ≠ 0) (hb : b ≠ 0) (hadvd: b ∣ a) : a / b ≠ 0 :=
 begin
   obtain ⟨c, rfl⟩ := hadvd,
-  rw [mul_comm, int.mul_div_cancel _ hb],
+  rw int.mul_div_cancel_left c hb,
   exact right_ne_zero_of_mul ha,
 end
 
@@ -151,7 +156,7 @@ lemma int.gcd_ne_zero_iff {i j : ℤ} : int.gcd i j ≠ 0 ↔ i ≠ 0 ∨ j ≠ 
 iff.trans (not_congr int.gcd_eq_zero_iff) not_and_distrib
 
 section
-theorem of_irreducible_pow {α} [comm_monoid α] {x : α} {n : ℕ} (hn : n ≠ 1) :
+theorem is_unit_of_irreducible_pow {α} [comm_monoid α] {x : α} {n : ℕ} (hn : n ≠ 1) :
   irreducible (x ^ n) → is_unit x :=
 begin
   obtain hn|hn := hn.lt_or_lt,
@@ -172,7 +177,7 @@ variables [comm_cancel_monoid_with_zero α]
 
 
 lemma pow_not_prime {x : α} {n : ℕ} (hn : n ≠ 1) : ¬ prime (x ^ n) :=
-λ hp, hp.not_unit $ is_unit.pow _ $ of_irreducible_pow hn $ hp.irreducible
+λ hp, hp.not_unit $ is_unit.pow _ $ is_unit_of_irreducible_pow hn $ hp.irreducible
 
 end
 
@@ -191,8 +196,7 @@ lemma int.two_not_cube (r : ℤ) : r ^ 3 ≠ 2 :=
 begin
   intro H,
   apply two_not_cube r.nat_abs,
-  rw ←int.nat_abs_pow,
-  rw H,
+  rw [←int.nat_abs_pow, H],
   norm_num,
 end
 
@@ -240,7 +244,7 @@ theorem int.is_coprime_of_dvd' {x y : ℤ}
   (z : ¬ (x = 0 ∧ y = 0))
   (H : ∀ z : ℤ, prime z → z ∣ x → ¬ z ∣ y) :
   is_coprime x y :=
-is_coprime_of_dvd' z $ λ z zi, H z $ gcd_monoid.prime_of_irreducible zi
+is_coprime_of_dvd_prime z H
 
 lemma int.dvd_mul_cancel_prime' {p k m n : ℤ}
   (hdvd1 : ¬(p ∣ m))
