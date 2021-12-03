@@ -48,17 +48,6 @@ end
 
 section
 
-variables {α : Type*} [comm_cancel_monoid_with_zero α] [unique (units α)]
-
-theorem exists_eq_pow_of_mul_eq_pow [gcd_monoid α] [unique (units α)] {a b c : α}
-  (hab : is_unit (gcd a b)) {k : ℕ}
-  (h : a * b = c ^ k) : ∃ (d : α), d ^ k = a :=
-let ⟨d, hd⟩ := exists_associated_pow_of_mul_eq_pow hab h in ⟨d, associated_iff_eq.mp hd⟩
-
-end
-
-section
-
 variables {R : Type*} [comm_ring R] [is_domain R] [is_principal_ideal_ring R] [gcd_monoid R]
 
 theorem is_coprime_of_dvd_irreducible {x y : R}
@@ -98,10 +87,6 @@ end
 
 theorem prime.coprime_iff_not_dvd {p n : R} (pp : prime p) : is_coprime p n ↔ ¬ p ∣ n :=
 pp.irreducible.coprime_iff_not_dvd
-
-theorem exists_associated_pow_of_mul_eq_pow' {a b c : R}
-  (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ k) : ∃ d, associated (d ^ k) a :=
-exists_associated_pow_of_mul_eq_pow ((gcd_is_unit_iff _ _).mpr hab) h
 
 end
 
@@ -210,24 +195,6 @@ begin
   obtain ⟨p, pp, pd⟩ := nat.exists_prime_and_dvd n2,
   exact ⟨p, nat.prime_iff_prime_int.mp pp, int.coe_nat_dvd_left.mpr pd⟩,
 end
-
-theorem int.eq_pow_of_mul_eq_pow_bit1_left {a b c : ℤ}
-  (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ (bit1 k)) : ∃ d, a = d ^ (bit1 k) :=
-begin
-  obtain ⟨d, hd⟩ := exists_associated_pow_of_mul_eq_pow' hab h,
-  replace hd := hd.symm,
-  rw [int.associated_iff_nat_abs, int.nat_abs_eq_nat_abs_iff, ←neg_pow_bit1] at hd,
-  obtain rfl|rfl := hd; exact ⟨_, rfl⟩,
-end
-
-theorem int.eq_pow_of_mul_eq_pow_bit1_right {a b c : ℤ}
-  (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ (bit1 k)) : ∃ d, b = d ^ (bit1 k) :=
-int.eq_pow_of_mul_eq_pow_bit1_left hab.symm (by rwa mul_comm at h)
-
-theorem int.eq_pow_of_mul_eq_pow_bit1 {a b c : ℤ}
-  (hab : is_coprime a b) {k : ℕ} (h : a * b = c ^ (bit1 k)) :
-  (∃ d, a = d ^ (bit1 k)) ∧ (∃ e, b = e ^ (bit1 k)) :=
-⟨int.eq_pow_of_mul_eq_pow_bit1_left hab h, int.eq_pow_of_mul_eq_pow_bit1_right hab h⟩
 
 lemma int.dvd_mul_cancel_prime {p : ℕ} {n k : ℤ}
   (hne : k.nat_abs ≠ p)

@@ -221,7 +221,7 @@ begin
   { apply nat.le_of_dvd,
     { rw [pos_iff_ne_zero, int.nat_abs_ne_zero, ←mul_pow, ←mul_pow],
       exact pow_ne_zero 3 (mul_ne_zero (mul_ne_zero hapos hbpos) hcpos) },
-    { rw int.nat_abs_dvd_abs_iff,
+    { rw int.nat_abs_dvd_iff_dvd,
       exact descent11 hcube } }
 end
 
