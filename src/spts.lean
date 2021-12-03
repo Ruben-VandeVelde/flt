@@ -551,7 +551,7 @@ lemma spts.four_of_coprime
 begin
   apply spts.four hfour,
   rintro rfl,
-  rw [is_coprime_zero_right, int.is_unit_iff_abs] at hcoprime,
+  rw [is_coprime_zero_right, int.is_unit_iff_abs_eq] at hcoprime,
   rw [zero_pow zero_lt_two, mul_zero, add_zero, ←int.nat_abs_pow_two, ←int.abs_eq_nat_abs, hcoprime] at hfour,
   norm_num at hfour
 end

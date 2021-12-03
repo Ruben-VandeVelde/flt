@@ -40,7 +40,7 @@ lemma zsqrt3.coe_of_is_unit {z : ℤ√-3} (h : is_unit z) : ∃ u : units ℤ, 
 begin
   obtain ⟨u, hu⟩ := zsqrt3.is_unit_iff.mp h,
   obtain ⟨v, hv⟩ : is_unit z.re,
-  { rwa int.is_unit_iff_abs },
+  { rwa int.is_unit_iff_abs_eq },
   use v,
   rw [zsqrtd.ext, hu, ←hv],
   simp only [zsqrtd.coe_int_re, and_true, eq_self_iff_true, coe_coe, zsqrtd.coe_int_im],
@@ -51,7 +51,7 @@ begin
   obtain ⟨u, hu⟩ := zsqrt3.coe_of_is_unit h,
   refine ⟨u, _, _⟩,
   { rw [hu, coe_coe] },
-  { exact int.is_unit_iff_abs.mp u.is_unit },
+  { exact int.is_unit_iff_abs_eq.mp u.is_unit },
 end
 
 lemma odd_prime_or_four.factors
@@ -607,7 +607,7 @@ begin
     simp only [him, add_zero, zero_mul, zsqrtd.mul_im, zsqrtd.mul_re, mul_zero] at hcoprime,
     rw zsqrt3.is_unit_iff,
     simp only [him, and_true, eq_self_iff_true],
-    rw ←int.is_unit_iff_abs,
+    rw ←int.is_unit_iff_abs_eq,
     apply is_coprime.is_unit_of_dvd' hcoprime; apply dvd_mul_right },
   { have : p.conj ≠ p,
     { rw [ne.def, zsqrtd.ext],

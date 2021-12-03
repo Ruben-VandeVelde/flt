@@ -88,7 +88,7 @@ begin
   rintro rfl,
   simp only [zero_pow, zero_lt_two, add_zero, mul_zero] at h,
   obtain h|⟨hp, hodd⟩ := h,
-  { rw [is_coprime_zero_right, int.is_unit_iff_abs] at hcoprime,
+  { rw [is_coprime_zero_right, int.is_unit_iff_abs_eq] at hcoprime,
     rw [←sq_abs, hcoprime] at h,
     norm_num at h },
   { exact pow_not_prime one_lt_two.ne' hp }

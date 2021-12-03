@@ -187,7 +187,7 @@ end
 
 -- todo square neg_square and neg_pow_bit0
 
-lemma int.is_unit_iff_abs {x : ℤ} : is_unit x ↔ abs x = 1 :=
+lemma int.is_unit_iff_abs_eq {x : ℤ} : is_unit x ↔ abs x = 1 :=
 by rw [int.is_unit_iff_nat_abs_eq, int.abs_eq_nat_abs, ←int.coe_nat_one, int.coe_nat_inj']
 
 theorem int.exists_prime_and_dvd {n : ℤ} (n2 : 2 ≤ n.nat_abs) : ∃ p, prime p ∧ p ∣ n :=
