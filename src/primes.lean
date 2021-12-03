@@ -207,12 +207,6 @@ begin
   rwa [int.coe_nat_dvd_right, nat.prime_dvd_prime_iff_eq hk hp]
 end
 
-theorem int.is_coprime_of_dvd' {x y : ℤ}
-  (z : ¬ (x = 0 ∧ y = 0))
-  (H : ∀ z : ℤ, prime z → z ∣ x → ¬ z ∣ y) :
-  is_coprime x y :=
-is_coprime_of_prime_dvd z H
-
 lemma int.dvd_mul_cancel_prime' {p k m n : ℤ}
   (hdvd1 : ¬(p ∣ m))
   (hdvd2 : k ∣ m)

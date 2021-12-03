@@ -385,7 +385,7 @@ lemma int.gcd1_coprime12 (u v : ℤ)
   (not_3_dvd_2 : ¬3 ∣ u - 3 * v) :
   is_coprime (2 * u) (u - 3 * v) :=
 begin
-  apply int.is_coprime_of_dvd',
+  apply is_coprime_of_prime_dvd,
   { rintro ⟨-, h2⟩,
     norm_num [h2] at notdvd_2_2 },
   intros k hkprime hkdvdleft hkdvdright,
@@ -404,7 +404,7 @@ lemma int.gcd1_coprime13 (u v : ℤ)
   (notdvd_3_3 : ¬3 ∣ u + 3 * v) :
   is_coprime (2 * u) (u + 3 * v) :=
 begin
-  apply int.is_coprime_of_dvd',
+  apply is_coprime_of_prime_dvd,
   { rintro ⟨-, h2⟩,
     norm_num [h2] at this },
   intros k hkprime hkdvdleft hkdvdright,
@@ -423,7 +423,7 @@ lemma int.gcd1_coprime23 (u v : ℤ)
   (notdvd_3_3 : ¬3 ∣ u + 3 * v) :
   is_coprime (u - 3 * v) (u + 3 * v) :=
 begin
-  apply int.is_coprime_of_dvd',
+  apply is_coprime_of_prime_dvd,
   { rintro ⟨h1, -⟩,
     norm_num [h1] at notdvd_2_2 },
   intros k hkprime hkdvdleft hkdvdright,
@@ -532,7 +532,7 @@ begin
   { simp [huvodd] with parity_simps },
 
   have haddcoprime : is_coprime (u + v) (2 * v),
-  { apply int.is_coprime_of_dvd',
+  { apply is_coprime_of_prime_dvd,
     { rintro ⟨h1, -⟩,
       norm_num [h1] at haddodd },
     intros k hkprime hkdvdleft hkdvdright,
@@ -544,7 +544,7 @@ begin
     rw [←add_sub_cancel u v],
     apply dvd_sub hkdvdleft hkdvdright' },
   have hsubcoprime : is_coprime (u - v) (2 * v),
-  { apply int.is_coprime_of_dvd',
+  { apply is_coprime_of_prime_dvd,
     { rintro ⟨h1, -⟩,
       norm_num [h1] at hsubodd },
     intros k hkprime hkdvdleft hkdvdright,
@@ -557,7 +557,7 @@ begin
     rw [←sub_add_cancel u v],
     exact dvd_add hkdvdleft hkdvdright' },
   have haddsubcoprime : is_coprime (u + v) (u - v),
-  { apply int.is_coprime_of_dvd',
+  { apply is_coprime_of_prime_dvd,
     { rintro ⟨h1, -⟩,
       norm_num [h1] at haddodd },
     intros k hkprime hkdvdleft hkdvdright,
@@ -589,7 +589,7 @@ begin
     rw ←dvd_add_iff_left (dvd_mul_right _ _) at H,
     exact prime.dvd_of_dvd_pow int.prime_three H },
 
-  apply int.is_coprime_of_dvd',
+  apply is_coprime_of_prime_dvd,
   { rintro ⟨h1, -⟩,
     rw mul_eq_zero at h1,
     exact hspos (h1.resolve_left (by norm_num)) },
@@ -642,7 +642,7 @@ begin
   { ring },
   -- 3.
   have hcoprime' : is_coprime s q,
-  { apply int.is_coprime_of_dvd',
+  { apply is_coprime_of_prime_dvd,
     { rintro ⟨h1, -⟩,
       exact hspos h1 },
     intros k hkprime hkdvdleft hkdvdright,
