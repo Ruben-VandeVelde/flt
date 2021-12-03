@@ -50,7 +50,7 @@ section
 
 variables {R : Type*} [comm_ring R] [is_domain R] [is_principal_ideal_ring R] [gcd_monoid R]
 
-theorem is_coprime_of_dvd_irreducible {x y : R}
+theorem is_coprime_of_irreducible_dvd {x y : R}
   (z : ¬ (x = 0 ∧ y = 0))
   (H : ∀ z : R, irreducible z → z ∣ x → ¬ z ∣ y) :
   is_coprime x y :=
@@ -62,11 +62,11 @@ begin
   { apply dvd_trans h2, assumption },
 end
 
-theorem is_coprime_of_dvd_prime {x y : R}
+theorem is_coprime_of_prime_dvd {x y : R}
   (z : ¬ (x = 0 ∧ y = 0))
   (H : ∀ z : R, prime z → z ∣ x → ¬ z ∣ y) :
   is_coprime x y :=
-is_coprime_of_dvd_irreducible z $ λ z zi, H z $ gcd_monoid.prime_of_irreducible zi
+is_coprime_of_irreducible_dvd z $ λ z zi, H z $ gcd_monoid.prime_of_irreducible zi
 
 theorem irreducible.coprime_iff_not_dvd {p n : R} (pp : irreducible p) : is_coprime p n ↔ ¬ p ∣ n :=
 begin
@@ -78,7 +78,7 @@ begin
     rw mul_one n,
     exact H },
   { intro nd,
-    apply is_coprime_of_dvd_irreducible,
+    apply is_coprime_of_irreducible_dvd,
     { rintro ⟨hp, -⟩,
       exact pp.ne_zero hp },
     rintro z zi zp zn,
@@ -211,7 +211,7 @@ theorem int.is_coprime_of_dvd' {x y : ℤ}
   (z : ¬ (x = 0 ∧ y = 0))
   (H : ∀ z : ℤ, prime z → z ∣ x → ¬ z ∣ y) :
   is_coprime x y :=
-is_coprime_of_dvd_prime z H
+is_coprime_of_prime_dvd z H
 
 lemma int.dvd_mul_cancel_prime' {p k m n : ℤ}
   (hdvd1 : ¬(p ∣ m))
