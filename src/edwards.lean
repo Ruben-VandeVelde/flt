@@ -62,25 +62,26 @@ lemma odd_prime_or_four.factors
   ∃ c d, abs x = c ^ 2 + 3 * d ^ 2 ∧ 0 ≤ c ∧ 0 < d :=
 begin
   obtain rfl|⟨hprime, hodd⟩ := hx,
-  { use [1, 1], norm_num },
+  { exact ⟨1, 1, by norm_num, zero_le_one, zero_lt_one⟩ },
   { rw ←int.nat_abs_dvd at hfactor,
     obtain ⟨c, d, hcd⟩ := factors a.nat_abs b.nat_abs x.nat_abs _ _ _,
     refine ⟨c, d, _, _, _⟩,
-    { rw int.abs_eq_nat_abs,
-      norm_cast,
-      assumption },
+    { rw [int.abs_eq_nat_abs, hcd],
+      norm_cast },
     { exact int.coe_zero_le c },
-    { apply lt_of_le_of_ne (int.coe_zero_le d),
-      norm_cast,
+    { rw int.coe_nat_pos,
+      apply nat.pos_of_ne_zero,
       rintro rfl,
       simp only [zero_lt_two, zero_pow, add_zero, mul_zero] at hcd,
       rw [int.prime_iff_nat_abs_prime, hcd] at hprime,
       exact nat.prime.pow_not_prime le_rfl hprime },
     { rwa [←nat.coprime_iff_gcd_eq_one, ←int.coprime_iff_nat_coprime] },
     { rwa [int.nat_abs_even, ←int.odd_iff_not_even] },
-    { rw [←int.nat_abs_pow_two a, ←int.nat_abs_pow_two b] at hfactor,
-      norm_cast at hfactor,
-      assumption } }
+    { rw ←int.coe_nat_dvd,
+      convert hfactor,
+      simp only [int.nat_abs_pow_two, int.coe_nat_zero, int.coe_nat_pow, add_left_inj,
+        int.coe_nat_add, eq_self_iff_true, int.coe_nat_succ, zero_add, int.coe_nat_bit1,
+        int.coe_nat_mul] } }
 end
 
 lemma step1a
