@@ -90,10 +90,7 @@ pp.irreducible.coprime_iff_not_dvd
 
 end
 
-lemma int.four_dvd_add_or_sub_of_odd {a b : ℤ}
-  (ha : odd a)
-  (hb : odd b) :
-  4 ∣ a + b ∨ 4 ∣ a - b :=
+lemma int.four_dvd_add_or_sub_of_odd {a b : ℤ} (ha : odd a) (hb : odd b) : 4 ∣ a + b ∨ 4 ∣ a - b :=
 begin
   obtain ⟨m, rfl⟩ := ha,
   obtain ⟨n, rfl⟩ := hb,
