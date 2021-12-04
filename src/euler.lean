@@ -37,41 +37,51 @@ lemma exists_coprime
     flt_coprime n a' b' c' :=
 begin
   set d := int.gcd a b with hd',
-  have ha : ↑d ∣ a := int.gcd_dvd_left a b,
-  have hb : ↑d ∣ b := int.gcd_dvd_right a b,
-  have hc : ↑d ∣ c,
-  { rw [←int.pow_dvd_pow_iff hn, ←h],
-    apply dvd_add; rwa int.pow_dvd_pow_iff hn },
+  obtain ⟨A, HA⟩ : ↑d ∣ a := int.gcd_dvd_left a b,
+  obtain ⟨B, HB⟩ : ↑d ∣ b := int.gcd_dvd_right a b,
+  obtain ⟨C, HC⟩ : ↑d ∣ c,
+  { rw [←int.pow_dvd_pow_iff hn, ←h, HA, HB, mul_pow, mul_pow, ←mul_add],
+    exact dvd_mul_right (↑d ^ n) (A ^ n + B ^ n) },
   have hdpos : 0 < d := int.gcd_pos_of_non_zero_left _ ha',
   have hd := int.coe_nat_ne_zero_iff_pos.mpr hdpos,
-  have hsoln : (a / d) ^ n + (b / d) ^ n = (c / d) ^ n,
-  { apply int.eq_of_mul_eq_mul_right (pow_ne_zero n hd),
-    calc ((a / d) ^ n + (b / d) ^ n) * d ^ n
-        = (a / d * d) ^ n  + (b / d * d) ^ n : by rw [add_mul, mul_pow (a / d), mul_pow (b / d)]
-    ... = a ^ n + b ^ n : by rw [int.div_mul_cancel ha, int.div_mul_cancel hb]
-    ... = c ^ n : h
-    ... = (c / d * d) ^ n : by rw [int.div_mul_cancel hc]
-    ... = (c / d) ^ n * d ^ n : by rw mul_pow },
-  have hsoln' : (b / d) ^ n + (a / d) ^ n = (c / d) ^ n,
+  have hsoln : A ^ n + B ^ n = C ^ n,
+  { apply int.eq_of_mul_eq_mul_left (pow_ne_zero n hd),
+    simp only [mul_add, ←mul_pow, ←HA, ←HB, ←HC, h] },
+  have hsoln' : B ^ n + A ^ n = C ^ n,
   { rwa add_comm at hsoln },
-  have hcoprime_div : is_coprime (a / d) (b / d) := int.coprime_div_gcd_div_gcd hdpos,
+  have hcoprime : is_coprime A B,
+  { rw ←int.gcd_eq_one_iff_coprime,
+    apply nat.eq_of_mul_eq_mul_left hdpos,
+    rw [←int.nat_abs_of_nat d, ←int.gcd_mul_left, ←HA, ←HB, hd', int.nat_abs_of_nat, mul_one] },
+  have HA' : A.nat_abs ≤ a.nat_abs,
+  { rw HA,
+    simp only [int.nat_abs_of_nat, int.nat_abs_mul],
+    exact le_mul_of_one_le_left' (nat.succ_le_iff.mpr hdpos) },
+  have HB' : B.nat_abs ≤ b.nat_abs,
+  { rw HB,
+    simp only [int.nat_abs_of_nat, int.nat_abs_mul],
+    exact le_mul_of_one_le_left' (nat.succ_le_iff.mpr hdpos) },
+  have HC' : C.nat_abs ≤ c.nat_abs,
+  { rw HC,
+    simp only [int.nat_abs_of_nat, int.nat_abs_mul],
+    exact le_mul_of_one_le_left' (nat.succ_le_iff.mpr hdpos) },
   exact ⟨
-    a / d,
-    b / d,
-    c / d,
-    (int.nat_abs_div _ _ ha).trans_le (nat.div_le_self _ _),
-    (int.nat_abs_div _ _ hb).trans_le (nat.div_le_self _ _),
-    (int.nat_abs_div _ _ hc).trans_le (nat.div_le_self _ _),
+    A,
+    B,
+    C,
+    HA',
+    HB',
+    HC',
     ⟨
-      int.div_ne_zero_of_dvd ha' hd ha,
-      int.div_ne_zero_of_dvd hb' hd hb,
-      int.div_ne_zero_of_dvd hc' hd hc,
+      right_ne_zero_of_mul (by rwa HA at ha'),
+      right_ne_zero_of_mul (by rwa HB at hb'),
+      right_ne_zero_of_mul (by rwa HC at hc'),
       hsoln
     ⟩,
-    hcoprime_div,
-    coprime_add_self_pow hn hsoln hcoprime_div,
-    coprime_add_self_pow hn hsoln' hcoprime_div.symm
-  ⟩
+    hcoprime,
+    coprime_add_self_pow hn hsoln hcoprime,
+    coprime_add_self_pow hn hsoln' hcoprime.symm
+  ⟩,
 end
 
 lemma descent1a {a b c : ℤ}

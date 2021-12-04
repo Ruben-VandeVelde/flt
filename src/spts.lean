@@ -358,9 +358,9 @@ begin
 
   set g := int.gcd c d with hg,
   have hgpos : 0 < g,
-  { rw [hg, pos_iff_ne_zero, int.gcd_ne_zero_iff],
+  { rw [hg, pos_iff_ne_zero],
     contrapose! h4 with H,
-    obtain ⟨rfl, rfl⟩ := H,
+    obtain ⟨rfl, rfl⟩ := int.gcd_eq_zero_iff.mp H,
     simp only [zero_pow, zero_lt_two, mul_zero, add_zero] },
   obtain ⟨C, D, HCDcoprime, HC, HD⟩ := nat.exists_coprime hgpos,
   rw [←int.gcd_eq_nat_abs, ←hg] at HC HD,

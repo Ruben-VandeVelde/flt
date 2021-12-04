@@ -125,21 +125,6 @@ begin
 end
 end
 
-lemma int.div_ne_zero_of_dvd {a b : ℤ} (ha : a ≠ 0) (hb : b ≠ 0) (hadvd: b ∣ a) : a / b ≠ 0 :=
-begin
-  obtain ⟨c, rfl⟩ := hadvd,
-  rw int.mul_div_cancel_left c hb,
-  exact right_ne_zero_of_mul ha,
-end
-
-theorem int.coprime_div_gcd_div_gcd {m n : ℤ} (H : 0 < int.gcd m n) :
-  is_coprime (m / int.gcd m n) (n / int.gcd m n) :=
-by rw [←int.gcd_eq_one_iff_coprime, int.gcd_div (int.gcd_dvd_left m n) (int.gcd_dvd_right m n),
-    int.nat_abs_of_nat, nat.div_self H]
-
-lemma int.gcd_ne_zero_iff {i j : ℤ} : int.gcd i j ≠ 0 ↔ i ≠ 0 ∨ j ≠ 0 :=
-iff.trans (not_congr int.gcd_eq_zero_iff) not_and_distrib
-
 section
 theorem is_unit_of_irreducible_pow {α} [comm_monoid α] {x : α} {n : ℕ} (hn : n ≠ 1) :
   irreducible (x ^ n) → is_unit x :=
