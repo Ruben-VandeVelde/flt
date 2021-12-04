@@ -136,9 +136,7 @@ begin
   rw nat.succ_lt_succ_iff at hn,
   obtain ⟨k, rfl⟩ := nat.exists_eq_succ_of_ne_zero hn.ne',
   rw pow_succ at h,
-  cases of_irreducible_mul h with hu hu,
-  { assumption },
-  { rwa ←is_unit_pos_pow_iff (nat.succ_pos _) },
+  exact (or_iff_left_of_imp ((is_unit_pos_pow_iff (nat.succ_pos _)).mp)).mp (of_irreducible_mul h)
 end
 
 
