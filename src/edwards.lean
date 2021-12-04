@@ -716,6 +716,13 @@ begin
     and_false, multiset.mem_filter],
 end
 
+lemma odd_factors.nonneg {z a : ℤ} (ha : a ∈ odd_factors z) : 0 ≤ a :=
+begin
+  simp only [odd_factors, multiset.mem_filter] at ha,
+  exact int.nonneg_of_normalize_eq_self
+    (unique_factorization_monoid.normalize_normalized_factor a ha.1)
+end
+
 noncomputable def even_factor_exp (x : ℤ) := multiset.count 2 (unique_factorization_monoid.normalized_factors x)
 
 lemma even_factor_exp.def (x : ℤ) : even_factor_exp x = multiset.count 2 (unique_factorization_monoid.normalized_factors x) := rfl
@@ -817,8 +824,7 @@ begin
   simp only [factors_odd_prime_or_four, multiset.mem_add] at ha,
   cases ha,
   { rw multiset.eq_of_mem_repeat ha, norm_num },
-  { simp only [odd_factors, multiset.mem_filter] at ha,
-    exact int.factors_nonneg ha.1 }
+  { exact odd_factors.nonneg ha }
 end
 
 lemma factors_odd_prime_or_four.prod

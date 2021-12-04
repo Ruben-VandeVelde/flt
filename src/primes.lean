@@ -226,6 +226,3 @@ end
 -- todo norm_num for prime ℤ
 lemma int.prime_two : prime (2 : ℤ) := nat.prime_iff_prime_int.mp nat.prime_two
 lemma int.prime_three : prime (3 : ℤ) := nat.prime_iff_prime_int.mp nat.prime_three
-
-lemma int.factors_nonneg {z a : ℤ} (ha : a ∈ unique_factorization_monoid.normalized_factors z) : 0 ≤ a :=
-int.nonneg_of_normalize_eq_self (unique_factorization_monoid.normalize_normalized_factor a ha)
