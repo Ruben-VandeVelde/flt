@@ -126,7 +126,7 @@ end
 end
 
 section
-theorem is_unit_of_irreducible_pow {α} [comm_monoid α] {x : α} {n : ℕ} (hn : n ≠ 1) :
+theorem is_unit_of_irreducible_pow {α} [monoid α] {x : α} {n : ℕ} (hn : n ≠ 1) :
   irreducible (x ^ n) → is_unit x :=
 begin
   obtain hn|hn := hn.lt_or_lt,
