@@ -100,12 +100,15 @@ begin
     obtain ⟨k, hk⟩ := h,
     convert dvd_mul_right 4 k,
     rw [eq_add_of_sub_eq hk],
-    ring },
+    rw [mul_add, add_assoc, add_sub_cancel, ←mul_assoc],
+    norm_num },
   { left,
     obtain ⟨k, hk⟩ := h,
     convert dvd_mul_right 4 (k + 1),
-    rw [eq_sub_of_add_eq hk],
-    ring },
+    rw [eq_sub_of_add_eq hk, add_right_comm, ←add_sub, mul_add, mul_sub, add_assoc, add_assoc,
+      sub_add, add_assoc, ←sub_sub (2 * n), sub_self, zero_sub, sub_neg_eq_add, ←mul_assoc,
+      mul_add],
+    norm_num },
 end
 
 section
