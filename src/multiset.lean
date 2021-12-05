@@ -1,7 +1,5 @@
 import data.multiset
 
-variables {α : Type*} {β : Type*} {r p : α → β → Prop} {s : multiset α} { t : multiset β}
-
 lemma multiset.filter_eq
   {α : Type*}
   [decidable_eq α]
@@ -17,6 +15,6 @@ begin
   { rw multiset.count_filter_of_neg (ne.symm ha) }
 end
 
-lemma multiset.pow_count [comm_monoid α] (a : α) [decidable_eq α] :
+lemma multiset.pow_count {α : Type*} [comm_monoid α] [decidable_eq α] {s : multiset α} (a : α) :
   a ^ (multiset.count a s) = (multiset.filter (eq a) s).prod :=
 by rw [multiset.filter_eq, multiset.prod_repeat]
