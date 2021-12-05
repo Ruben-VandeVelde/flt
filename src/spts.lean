@@ -13,26 +13,8 @@ import .primes
 lemma zsqrtd.norm_def' {d : ℤ} (n : ℤ√d) : n.norm = n.re * n.re - d * (n.im * n.im) :=
 by rw [zsqrtd.norm_def, mul_assoc]
 
-/-
-lemma zsqrtd.exists (a : ℤ√-3) (ha : a.im ≠ 0) :
-  ∃ (c : ℤ√-3), a.norm = c.norm ∧ 0 ≤ c.re ∧ 0 < c.im :=
-begin
-  cases le_or_lt a.re 0 with hre hre;
-  cases ha.lt_or_lt with him him,
-  { use -a,
-    simp only [hre, neg_pos.mpr him, zsqrtd.norm_neg, eq_self_iff_true, zsqrtd.neg_im,
-      zsqrtd.neg_re, and_self, neg_nonneg] },
-  { use -a.conj,
-      simp only [hre, him, zsqrtd.norm_conj, zsqrtd.conj_re, zsqrtd.norm_neg, eq_self_iff_true,
-        zsqrtd.neg_im, zsqrtd.neg_re, and_self, neg_neg, zsqrtd.conj_im, neg_nonneg] },
-  { use a.conj,
-      simp only [hre.le, neg_pos.mpr him, zsqrtd.norm_conj, zsqrtd.conj_re, eq_self_iff_true,
-        and_self, zsqrtd.conj_im] },
-  { use a, simp only [hre.le, him, eq_self_iff_true, and_self] },
-end
--/
-lemma zsqrtd.exists (a : ℤ√-3) (him : a.im ≠ 0) :
-  ∃ (c : ℤ√-3), a.norm = c.norm ∧ 0 ≤ c.re ∧ c.im ≠ 0 :=
+lemma zsqrtd.exists {d : ℤ} (a : ℤ√d) (him : a.im ≠ 0) :
+  ∃ (c : ℤ√d), a.norm = c.norm ∧ 0 ≤ c.re ∧ c.im ≠ 0 :=
 begin
   cases le_or_lt a.re 0 with hre hre,
   { use -a,
