@@ -75,91 +75,77 @@ begin
       ring } }
 end
 
+lemma zsqrtd.smul_re {d a : ℤ} {b : ℤ√d} : (↑a * b).re = a * b.re := by simp
+lemma zsqrtd.smul_im {d a : ℤ} {b : ℤ√d} : (↑a * b).im = a * b.im := by simp
+
+protected lemma zsqrtd.eq_of_smul_eq_smul_left {d a : ℤ} {b c : ℤ√d}
+  (ha : a ≠ 0) (h : ↑a * b = a * c) : b = c :=
+begin
+  rw zsqrtd.ext at h ⊢,
+  apply and.imp _ _ h;
+  simp only [zsqrtd.smul_re, zsqrtd.smul_im];
+  apply int.eq_of_mul_eq_mul_left ha,
+end
+
 lemma spts.mul_of_dvd'
-  (a b : ℤ)
-  (p q : ℤ)
-  (hdvd : (p ^ 2 + 3 * q ^ 2) ∣ (a ^ 2 + 3 * b ^ 2))
-  (hpprime : prime (p ^ 2 + 3 * q ^ 2)) :
-  ∃ u v,
-    (⟨a, b⟩ : ℤ√-3) = ⟨p, q⟩ * ⟨u, v⟩ ∨
-    (⟨a, b⟩ : ℤ√-3) = ⟨p, -q⟩ * ⟨u, v⟩ :=
+  {a p : ℤ√-3}
+  (hdvd : p.norm ∣ a.norm)
+  (hpprime : prime p.norm) :
+  ∃ u : ℤ√-3, a = p * u ∨ a = p.conj * u :=
 begin
   obtain ⟨f, hf⟩ := hdvd,
-  have h0 : p ^ 2 + 3 * q ^ 2 ∣ p * b - a * q ∨
-         p ^ 2 + 3 * q ^ 2 ∣ p * b + a * q,
+  have h0 : p.norm ∣ p.re * a.im - a.re * p.im ∨
+         p.norm ∣ p.re * a.im + a.re * p.im,
   { apply hpprime.dvd_or_dvd,
-    convert dvd_mul_right (p ^ 2 + 3 * q ^ 2) (b ^ 2 - q ^ 2 * f) using 1,
-    calc (p * b - a * q) * (p * b + a * q)
-        = b ^ 2 * (p ^ 2 + 3 * q ^ 2) - q ^ 2 * ((p ^ 2 + 3 * q ^ 2) * f) : by { rw ←hf, ring }
-    ... = _ : by ring },
+    convert dvd_mul_right p.norm (a.im ^ 2 - p.im ^ 2 * f) using 1,
+    transitivity a.im ^ 2 * p.norm - p.im ^ 2 * (p.norm * f),
+    { rw [←hf, zsqrtd.norm_def, zsqrtd.norm_def], ring },
+    { rw [zsqrtd.norm_def], ring } },
 
-  cases h0 with h0 h0,
-  { obtain ⟨v, hv⟩ := h0,
-    obtain ⟨u, hu⟩ : (p ^ 2 + 3 * q ^ 2) ∣ (p * a + 3 * q * b),
-    { apply @prime.dvd_of_dvd_pow _ _ _ hpprime _ 2,
-      rw dvd_add_iff_left,
-      { have h1 : (p ^ 2 + 3 * q ^ 2) * (a ^ 2 + 3 * b ^ 2) =
-          (p * a + 3 * q * b) ^ 2 + 3 * (p * b - a * q) ^ 2,
-        { ring },
-        rw ←h1,
-        exact dvd_mul_right _ _},
+  obtain ⟨A, HA⟩ : ∃ A : units ℤ, p.norm ∣ p.re * a.im + A * a.re * p.im,
+  { cases h0 with h0 h0;
+    [use -1, use 1];
+    convert h0;
+    simp, },
+
+  have HAsq : (A : ℤ) ^ 2 = 1,
+  { calc (A : ℤ) ^ 2
+        = ((A ^ 2 : units ℤ) : ℤ) : (units.coe_pow _ _).symm
+    ... = ((1 : units ℤ) : ℤ) : congr_arg _ (int.units_sq A)
+    ... = 1 : units.coe_one },
+
+  { set X : ℤ√-3 := ⟨p.re * a.re - A * 3 * p.im * a.im, p.re * a.im + A * a.re * p.im⟩ with HX,
+    obtain ⟨U, HU⟩ : (p.norm : ℤ√-3) ∣ X,
+    { rw zsqrtd.coe_int_dvd_iff,
+      refine ⟨_, HA⟩,
+      apply @prime.dvd_of_dvd_pow _ _ _ hpprime _ 2,
+      have : X.re ^ 2 = X.norm - 3 * X.im ^ 2,
+      { rw [zsqrtd.norm_def], ring },
+      rw this,
+      apply dvd_sub,
+      { use a.norm,
+        transitivity (p.re * a.re) ^ 2 + (A : ℤ) ^ 2 * (3 * p.im * a.im) ^ 2 +
+          3 * ((p.re * a.im) ^ 2 + (A : ℤ) ^ 2 * (a.re * p.im) ^ 2),
+        { simp only [zsqrtd.norm_def],
+          ring },
+        { simp only [zsqrtd.norm_def, HAsq],
+          ring } },
       { apply dvd_mul_of_dvd_right,
-        rw hv,
-        apply dvd_pow _ two_ne_zero,
-        apply dvd_mul_right } },
-    use [u, v],
-    left,
-    simp only [zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_im, neg_mul_eq_neg_mul_symm,
-      mul_neg_eq_neg_mul_symm, neg_neg, ←sub_eq_add_neg],
-    split; apply int.eq_of_mul_eq_mul_left hpprime.ne_zero,
-    { calc (p ^ 2 + 3 * q ^ 2) * a
-          = p * (p * a + 3 * q * b) - 3 * q * (p * b - a * q) : by ring
-      ... = _ : by { rw [hu, hv], ring } },
-    { calc (p ^ 2 + 3 * q ^ 2) * b
-          = p * (p * b - a * q) + q * (p * a + 3 * q * b) : by ring
-      ... = _ : by { rw [hu, hv], ring } } },
-  { obtain ⟨v, hv⟩ := h0,
-    obtain ⟨u, hu⟩ : (p ^ 2 + 3 * q ^ 2) ∣ (p * a - 3 * q * b),
-    { apply @prime.dvd_of_dvd_pow _ _ _ hpprime _ 2,
-      rw dvd_add_iff_left,
-      { have h1 : (p ^ 2 + 3 * q ^ 2) * (a ^ 2 + 3 * b ^ 2) =
-          (p * a - 3 * q * b) ^ 2 + 3 * (p * b + a * q) ^ 2,
-        { ring },
-        rw ←h1,
-        exact dvd_mul_right _ _},
-      { apply dvd_mul_of_dvd_right,
-        rw hv,
-        apply dvd_pow _ two_ne_zero,
-        apply dvd_mul_right } },
-    use [u, v],
-    right,
-    simp only [zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_im, neg_mul_eq_neg_mul_symm,
-      mul_neg_eq_neg_mul_symm, neg_neg, ←sub_eq_add_neg],
-    split; apply int.eq_of_mul_eq_mul_left hpprime.ne_zero,
-    { calc (p ^ 2 + 3 * q ^ 2) * a
-          = p * (p * a - 3 * q * b) + 3 * q * (p * b + a * q) : by ring
-      ... = _ : by { rw [hu, hv], ring } },
-    { calc (p ^ 2 + 3 * q ^ 2) * b
-          = p * (p * b + a * q) - q * (p * a - 3 * q * b) : by ring
-      ... = _ : by { rw [hu, hv], ring } } },
+        exact dvd_pow HA two_ne_zero } },
+    use U,
+    suffices : a = ⟨p.re, -A * p.im⟩ * U,
+    { apply or.imp _ _ (int.units_eq_one_or A).symm; rintro rfl; simpa [zsqrtd.ext] using this },
+    apply zsqrtd.eq_of_smul_eq_smul_left hpprime.ne_zero,
+    have : p.norm = p.re ^ 2 + 3 * ↑A ^ 2 * p.im ^ 2,
+    { rw [zsqrtd.norm_def, HAsq], ring },
+    rw [mul_comm _ U, ←mul_assoc, ←HU, HX],
+    simp only [zsqrtd.ext, neg_mul_eq_neg_mul_symm, add_zero, zsqrtd.coe_int_re, zero_mul,
+      mul_neg_eq_neg_mul_symm, zsqrtd.mul_im, zsqrtd.mul_re, neg_neg, mul_zero, neg_zero,
+      zsqrtd.coe_int_im, this],
+    split; ring },
 end
 
 -- Edwards p49 step (3')
-lemma spts.mul_of_dvd
-  (a b : ℤ)
-  (p q : ℤ)
-  (hdvd : (p ^ 2 + 3 * q ^ 2) ∣ (a ^ 2 + 3 * b ^ 2))
-  (hpprime : prime (p ^ 2 + 3 * q ^ 2)) :
-  ∃ u v,
-    ((⟨a, b⟩ : ℤ√-3) = ⟨p, q⟩ * ⟨u, v⟩ ∨ (⟨a, b⟩ : ℤ√-3) = ⟨p, -q⟩ * ⟨u, v⟩) ∧
-    (p ^ 2 + 3 * q ^ 2) * (u ^ 2 + 3 * v ^ 2) = a ^ 2 + 3 * b ^ 2 :=
-begin
-  obtain ⟨u, v, huv⟩ := spts.mul_of_dvd' a b p q hdvd hpprime,
-  use [u, v, huv],
-  simp only [zsqrtd.ext, zsqrtd.mul_re, zsqrtd.mul_im] at huv,
-  obtain ⟨rfl, rfl⟩|⟨rfl, rfl⟩ := huv; ring
-end
-
 lemma spts.mul_of_dvd''
   {a p : ℤ√-3}
   (hdvd : p.norm ∣ a.norm)
@@ -168,13 +154,11 @@ lemma spts.mul_of_dvd''
     (a = p * u ∨ a = p.conj * u) ∧
     a.norm = p.norm * u.norm :=
 begin
-  obtain ⟨u, v, h1, h2⟩ := spts.mul_of_dvd a.re a.im p.re p.im _ _,
-  refine ⟨⟨u, v⟩, _,_ ⟩,
-  { convert h1; simp only [zsqrtd.ext, zsqrtd.conj_re, zsqrtd.conj_im, eq_self_iff_true, and_self] },
-  { convert h2.symm;
-    { rw zsqrtd.norm_def, ring } },
-  { convert hdvd; ring },
-  { convert hpprime; ring }
+  obtain ⟨u, hu⟩ := spts.mul_of_dvd' hdvd hpprime,
+  refine ⟨u, hu, _⟩,
+  obtain (rfl|rfl) := hu,
+  { rw [zsqrtd.norm_mul] },
+  { rw [zsqrtd.norm_mul, zsqrtd.norm_conj] },
 end
 
 lemma spts.nonneg
