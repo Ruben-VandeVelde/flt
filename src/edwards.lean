@@ -215,7 +215,7 @@ end
 
 lemma odd_prime_or_four.factors'
   {a : ℤ√-3}
-  (h2 : 2 < a.norm)
+  (h2 : a.norm ≠ 1)
   (hcoprime : is_coprime a.re a.im) :
   ∃ (u q : ℤ√-3),
     0 ≤ q.re ∧
@@ -225,6 +225,14 @@ lemma odd_prime_or_four.factors'
     is_coprime u.re u.im ∧
     u.norm < a.norm :=
 begin
+  obtain h1|h1 := h2.lt_or_lt,
+  { have := spts.pos_of_coprime' hcoprime,
+    rw [←int.add_one_le_iff, zero_add, ←not_lt] at this,
+    exact (this h1).elim },
+  rw [←int.add_one_le_iff, ←mul_two, one_mul] at h1,
+  obtain h2|h2 := h1.eq_or_lt,
+  { rw [zsqrt3.norm, eq_comm] at h2,
+    exact (spts.not_two _ _ h2).elim },
   obtain ⟨p, hpdvd, hp⟩ := odd_prime_or_four.exists_and_dvd h2,
   obtain ⟨q', hcd, hc, hd⟩ := odd_prime_or_four.factors a p hcoprime hp hpdvd,
   rw [←abs_dvd, hcd] at hpdvd,
@@ -265,25 +273,14 @@ begin
   induction n using nat.strong_induction_on with n ih generalizing a,
   dsimp only at ih,
 
-  have h0 : 1 ≤ a.norm,
-  { rw [←int.sub_one_lt_iff, sub_self],
-    apply lt_of_le_of_ne (zsqrtd.norm_nonneg (by norm_num) a),
-    intro H,
-    rw [eq_comm, zsqrtd.norm_eq_zero_iff (by norm_num) a, zsqrtd.ext, zsqrtd.zero_re,
-      zsqrtd.zero_im] at H,
-    rw [H.1, H.2] at hcoprime,
-    exact not_coprime_zero_zero hcoprime },
-  cases h0.eq_or_lt with h h,
+  cases eq_or_ne a.norm 1 with h h,
   { use 0,
     split,
-    { simp only [multiset.prod_zero, spts.eq_one' h.symm] },
+    { simp only [multiset.prod_zero, spts.eq_one' h] },
     { intros pq hpq,
       exact absurd hpq (multiset.not_mem_zero _) } },
-  { have : 2 < a.norm,
-    { rw [←int.add_one_le_iff, ←mul_two, one_mul] at h,
-      exact lt_of_le_of_ne h (spts.not_two' a).symm },
-    obtain ⟨U, q, hc, hd, hp, huv, huvcoprime, descent⟩ := odd_prime_or_four.factors'
-      this hcoprime,
+  { obtain ⟨U, q, hc, hd, hp, huv, huvcoprime, descent⟩ := odd_prime_or_four.factors'
+      h hcoprime,
     replace descent := int.nat_abs_lt_nat_abs_of_nonneg_of_lt (zsqrtd.norm_nonneg (by norm_num) _) descent,
     rw [hn] at descent,
     obtain ⟨g, hgprod, hgfactors⟩ := ih U.norm.nat_abs descent huvcoprime rfl,
