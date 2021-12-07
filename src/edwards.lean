@@ -13,7 +13,6 @@ import data.complex.exponential
 import number_theory.zsqrtd.basic
 import .primes
 import .spts
-import .multiset
 import .odd_prime_or_four
 
 lemma zsqrt3.norm (z : ℤ√-3) : z.norm = z.re ^ 2 + 3 * z.im ^ 2 :=
