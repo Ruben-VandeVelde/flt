@@ -219,20 +219,21 @@ begin
   refine ⟨p, q, hp, hq, hcoprime, hodd, hcube, _⟩,
 
   obtain ⟨⟨hapos, hbpos, hcpos, h⟩, -⟩ := h,
-  have : (2 * p).nat_abs < (2 * p * (p ^ 2 + 3 * q ^ 2)).nat_abs,
+  set P : ℤ√-3 := ⟨p, q⟩,
+  calc (2 * p).nat_abs < (2 * p * P.norm).nat_abs : _
+  ... ≤ (a ^ 3 * b ^ 3 * c ^ 3).nat_abs : _,
   { rw [int.nat_abs_mul (2 * p)],
     apply lt_mul_of_one_lt_right (int.nat_abs_pos_of_ne_zero (mul_ne_zero two_ne_zero hp)),
     zify,
-    rw int.nat_abs_of_nonneg (spts.nonneg _ _),
-    convert spts.one_lt_of_im_ne_zero ⟨p, q⟩ hq using 1,
-    rw [zsqrtd.norm_def],
-    ring },
-  apply lt_of_lt_of_le this,
+    rw int.nat_abs_of_nonneg (zsqrtd.norm_nonneg (by norm_num) P),
+    exact spts.one_lt_of_im_ne_zero ⟨p, q⟩ hq },
   { apply nat.le_of_dvd,
     { rw [pos_iff_ne_zero, int.nat_abs_ne_zero, ←mul_pow, ←mul_pow],
       exact pow_ne_zero 3 (mul_ne_zero (mul_ne_zero hapos hbpos) hcpos) },
     { rw int.nat_abs_dvd_iff_dvd,
-      exact descent11 hcube } }
+      convert descent11 hcube,
+      rw [zsqrtd.norm],
+      ring } }
 end
 
 lemma gcd1or3
