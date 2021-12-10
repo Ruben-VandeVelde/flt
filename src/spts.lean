@@ -161,11 +161,6 @@ begin
   { rw [zsqrtd.norm_mul, zsqrtd.norm_conj] },
 end
 
-lemma spts.nonneg
-  (a b : ℤ) :
-  0 ≤ a ^ 2 + 3 * b ^ 2 :=
-add_nonneg (pow_two_nonneg a) (mul_nonneg zero_lt_three.le (pow_two_nonneg b))
-
 -- Edwards p49 step (4'), contraposed
 lemma factors'
   (a : ℤ√-3)
