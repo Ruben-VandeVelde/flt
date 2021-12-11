@@ -158,3 +158,10 @@ end
 -- todo norm_num for prime ℤ
 lemma int.prime_two : prime (2 : ℤ) := nat.prime_iff_prime_int.mp nat.prime_two
 lemma int.prime_three : prime (3 : ℤ) := nat.prime_iff_prime_int.mp nat.prime_three
+
+lemma int.abs_sign {a : ℤ} (ha : a ≠ 0) : |a.sign| = 1 :=
+begin
+  cases ha.lt_or_lt with ha ha,
+  { rw [int.sign_eq_neg_one_of_neg ha, abs_neg, abs_one] },
+  { rw [int.sign_eq_one_of_pos ha, abs_one] },
+end
