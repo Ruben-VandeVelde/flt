@@ -168,7 +168,7 @@ lemma factors'
   (g : ℤ)
   (hodd : odd f)
   (hgpos : g ≠ 0)
-  (hfactor : abs (f * g) = a.norm)
+  (hfactor : (f * g) = a.norm)
   (hnotform : ∀ (f' : ℤ), f' ∣ g → odd f' → (∃ (p : ℤ√-3), abs f' = p.norm)) :
   ∃ (p : ℤ√-3), abs f = p.norm :=
 begin
@@ -183,7 +183,7 @@ begin
         convert hodd.pow_left,
         rw sq,
         norm_num },
-      { rw [←dvd_abs, hfactor, hc],
+      { rw [hfactor, hc],
         exact dvd_mul_right _ _ } },
     have hg'pos : g' ≠ 0 := right_ne_zero_of_mul hgpos,
     have hgcdcd : 0 < int.gcd c.re c.im,
@@ -192,7 +192,7 @@ begin
       obtain rfl : c = 0,
       { simp only [zsqrtd.ext, eq_self_iff_true, zsqrtd.zero_im, and_self, zsqrtd.zero_re, H'] },
       rw [zsqrtd.norm_zero, mul_zero] at hc,
-      rw [hc, abs_eq_zero, mul_eq_zero] at hfactor,
+      rw [hc, mul_eq_zero] at hfactor,
       obtain (rfl|hg) := hfactor,
       { rw int.odd_iff_not_even at hodd,
         exact hodd int.even_zero },
@@ -201,13 +201,13 @@ begin
     { rw [←hg, int.nat_abs_mul],
       apply lt_mul_of_one_lt_left (int.nat_abs_pos_of_ne_zero hg'pos),
       norm_num },
-    { rw [←mul_right_inj' (@four_ne_zero ℤ _ _), ←hc, ←hfactor, mul_left_comm,
-        abs_mul (4 : ℤ), abs_of_nonneg (@zero_lt_four ℤ _ _).le] },
+    { rw [←mul_right_inj' (@four_ne_zero ℤ _ _), ←hc, ←hfactor, mul_left_comm] },
     { intros f' hf'dvd hf'odd,
       refine hnotform f' _ hf'odd,
       exact hf'dvd.mul_left _ } },
   { by_cases h : |g| = 1,
-    { rw [abs_mul, h, mul_one] at hfactor,
+    { apply_fun abs at hfactor,
+      rw [abs_mul, h, mul_one, abs_of_nonneg (zsqrtd.norm_nonneg (by norm_num) a)] at hfactor,
       exact ⟨_, hfactor⟩ },
     { replace h : 2 ≤ g.nat_abs,
       { rw nat.succ_le_iff,
@@ -218,48 +218,34 @@ begin
           rwa [ne_comm, ←int.abs_eq_nat_abs] } },
       obtain ⟨p, pprime, pdvd⟩ := int.exists_prime_and_dvd h,
       have : p ∣ a.norm,
-      { rw [←hfactor, dvd_abs],
+      { rw [←hfactor],
         exact pdvd.mul_left _ },
       have podd : odd p := int.odd_iff_not_even.mpr (λ X, H (dvd_trans X this)),
       obtain ⟨A, HA⟩ := hnotform p pdvd podd,
       have pprime' := pprime.abs,
       rw [HA] at pprime',
       have pdvd' : A.norm ∣ a.norm,
-      { rw [←hfactor, ←HA, abs_dvd_abs],
+      { rw [←hfactor, ←HA, abs_dvd],
         exact dvd_mul_of_dvd_right pdvd _ },
       obtain ⟨c, -, hcd⟩ := spts.mul_of_dvd'' pdvd' pprime',
       obtain ⟨q, rfl⟩ := pdvd,
       have hqpos : q ≠ 0 := right_ne_zero_of_mul hgpos,
-      refine IH q.nat_abs _ c _ hqpos _ _ rfl,
+      have : |p.sign * q| = |q|,
+      { rw [abs_mul, int.abs_sign pprime.ne_zero, one_mul] },
+      refine IH q.nat_abs _ c (p.sign * q) _ _ _ _,
       { rw [←hg, int.nat_abs_mul],
         apply lt_mul_of_one_lt_left (int.nat_abs_pos_of_ne_zero hqpos),
         rw int.prime_iff_nat_abs_prime at pprime,
         exact pprime.one_lt },
-      { rw [←mul_right_inj' pprime'.ne_zero, ←hcd, ←hfactor, ←HA, mul_left_comm, ←abs_mul] },
+      { rwa [←abs_eq_zero, this, abs_eq_zero] },
+      { rw [←mul_right_inj' pprime'.ne_zero, ←hcd, mul_left_comm, ←hfactor, ←HA, ←mul_assoc (|p|),
+          mul_comm (|p|), int.sign_mul_abs] },
       { intros f' hf'dvd hf'odd,
         refine hnotform f' _ hf'odd,
-        exact hf'dvd.mul_left _ } } }
-end
-
-lemma int.factors'
-  {a : ℤ√-3}
-  (f g : ℤ)
-  (hodd : odd f)
-  (hgpos : g ≠ 0)
-  (hfactor : f * g = a.norm)
-  (hnotform : ∀ (f' : ℤ),
-                f' ∣ g →
-                ¬even f' → (∃ (p : ℤ√-3), abs f' = p.norm)) :
-  ∃ (p : ℤ√-3), abs f = p.norm :=
-begin
-  refine factors' a f g hodd hgpos _ _,
-  { rw [hfactor],
-    refine abs_of_nonneg _,
-    apply zsqrtd.norm_nonneg,
-    norm_num },
-  { intros f fdvd fodd,
-    rw int.odd_iff_not_even at fodd,
-    exact hnotform f fdvd fodd },
+        rw [←dvd_abs, this, dvd_abs] at hf'dvd,
+        exact hf'dvd.mul_left _ },
+      { zify,
+        rw [←int.abs_eq_nat_abs, this, int.abs_eq_nat_abs] } } }
 end
 
 lemma zqrtd.factor_div (a : ℤ√-3) {x : ℤ} (hodd : odd x) :
@@ -392,9 +378,8 @@ begin
     rw h6,
     apply right_ne_zero_of_mul,
     rwa [←h5, ←hy] },
-  refine int.factors' x z hodd h8 h6 _,
+  refine factors' _ x z hodd h8 h6 _,
   intros w hwdvd hwodd,
-  rw ←int.odd_iff_not_even at hwodd,
   refine IH w.nat_abs _ C' w HCDcoprime hwodd _ rfl,
   { calc w.nat_abs
         ≤ z.nat_abs : nat.le_of_dvd (int.nat_abs_pos_of_ne_zero h8) (int.nat_abs_dvd_iff_dvd.mpr hwdvd)
