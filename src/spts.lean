@@ -272,6 +272,28 @@ begin
       rw [←mul_pow],
       exact nat.pow_lt_pow_of_lt_left hd zero_lt_two } },
 end
+lemma zsqrtd.coprime_of_dvd_coprime
+  {d : ℤ}
+  {a b : ℤ√d}
+  (hcoprime : is_coprime a.re a.im)
+  (hdvd : b ∣ a) :
+  is_coprime b.re b.im :=
+begin
+  apply is_coprime_of_dvd,
+  { rintro ⟨hre, him⟩,
+    obtain rfl : b = 0,
+    { simp only [zsqrtd.ext, hre, eq_self_iff_true, zsqrtd.zero_im, him, and_self, zsqrtd.zero_re] },
+    rw zero_dvd_iff at hdvd,
+    simpa only [hdvd, zsqrtd.zero_im, zsqrtd.zero_re, not_coprime_zero_zero] using hcoprime },
+  { intros z hz hznezero hzdvdu hzdvdv,
+    apply hz,
+    obtain ⟨ha, hb⟩ : z ∣ a.re ∧ z ∣ a.im,
+    { rw ←zsqrtd.coe_int_dvd_iff,
+      apply dvd_trans _ hdvd,
+      rw zsqrtd.coe_int_dvd_iff,
+      exact ⟨hzdvdu, hzdvdv⟩ },
+    exact hcoprime.is_unit_of_dvd' ha hb },
+end
 
 -- Edwards p50 step (5')
 lemma factors
@@ -352,19 +374,15 @@ begin
     apply is_coprime.dvd_of_dvd_mul_left _ this,
     apply is_coprime_of_prime_dvd,
     { contrapose! h0, exact h0.2 },
-    rintros p hpprime hpdvdleft ⟨X, hX⟩,
-    obtain hG := hpprime.dvd_of_dvd_pow hpdvdleft,
-    apply hpprime.not_unit,
+    intros p hpprime hpdvdleft hpdvdright,
     have : ↑p ∣ c' + m * x,
-    { rw [hX, HC'],
-      apply dvd_add,
-      { apply dvd_mul_of_dvd_left,
-        norm_cast,
-        exact hG },
-      { rw [zsqrtd.coe_int_mul],
-        exact (dvd_mul_right _ _).mul_left _ } },
-    rw zsqrtd.coe_int_dvd_iff at this,
-    exact hcoprime.is_unit_of_dvd' this.1 this.2 },
+    { rw [HC'],
+      exact dvd_add
+        (dvd_mul_of_dvd_left
+          ((zsqrtd.coe_int_dvd_coe_int _ _).mpr (hpprime.dvd_of_dvd_pow hpdvdleft)) _)
+        (dvd_mul_of_dvd_right ((zsqrtd.coe_int_dvd_coe_int _ _).mpr hpdvdright) _) },
+    have := zsqrtd.coprime_of_dvd_coprime hcoprime this,
+    simpa only [zsqrtd.coe_int_re, is_coprime_zero_right, zsqrtd.coe_int_im, hpprime.not_unit] using this },
 
   have h6 : x * z = C'.norm,
   { apply int.eq_of_mul_eq_mul_left (pow_ne_zero 2 hgnezero),
