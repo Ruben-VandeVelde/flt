@@ -46,27 +46,6 @@ begin
     exact zero_le _ }
 end
 
-lemma int.four_dvd_add_or_sub_of_odd {a b : ℤ} (ha : odd a) (hb : odd b) : 4 ∣ a + b ∨ 4 ∣ a - b :=
-begin
-  obtain ⟨m, rfl⟩ := ha,
-  obtain ⟨n, rfl⟩ := hb,
-  obtain h|h := int.even_or_odd (m + n),
-  { right,
-    rw [int.even_add, ←int.even_sub] at h,
-    obtain ⟨k, hk⟩ := h,
-    convert dvd_mul_right 4 k,
-    rw [eq_add_of_sub_eq hk],
-    rw [mul_add, add_assoc, add_sub_cancel, ←mul_assoc],
-    norm_num },
-  { left,
-    obtain ⟨k, hk⟩ := h,
-    convert dvd_mul_right 4 (k + 1),
-    rw [eq_sub_of_add_eq hk, add_right_comm, ←add_sub, mul_add, mul_sub, add_assoc, add_assoc,
-      sub_add, add_assoc, ←sub_sub (2 * n), sub_self, zero_sub, sub_neg_eq_add, ←mul_assoc,
-      mul_add],
-    norm_num },
-end
-
 section
 variables {R : Type*} [comm_ring R] {x y z : R}
 lemma coprime_add_self_pow
@@ -97,17 +76,13 @@ end
 
 
 variables {α : Type*} {β : Type*} {γ : Type*} {δ : Type*}
-variables [comm_cancel_monoid_with_zero α]
+variables [cancel_comm_monoid_with_zero α]
 
 
 lemma pow_not_prime {x : α} {n : ℕ} (hn : n ≠ 1) : ¬ prime (x ^ n) :=
 λ hp, hp.not_unit $ is_unit.pow _ $ is_unit_of_irreducible_pow hn $ hp.irreducible
 
 end
-
-@[norm_cast]
-lemma int.of_nat_is_unit {n : ℕ} : is_unit (n : ℤ) ↔ is_unit n :=
-by rw [nat.is_unit_iff, int.is_unit_iff_nat_abs_eq, int.nat_abs_of_nat]
 
 lemma two_not_cube (r : ℕ) : r ^ 3 ≠ 2 :=
 begin
@@ -125,15 +100,6 @@ begin
 end
 
 -- todo square neg_square and neg_pow_bit0
-
-lemma int.is_unit_iff_abs_eq {x : ℤ} : is_unit x ↔ abs x = 1 :=
-by rw [int.is_unit_iff_nat_abs_eq, int.abs_eq_nat_abs, ←int.coe_nat_one, int.coe_nat_inj']
-
-theorem int.exists_prime_and_dvd {n : ℤ} (n2 : 2 ≤ n.nat_abs) : ∃ p, prime p ∧ p ∣ n :=
-begin
-  obtain ⟨p, pp, pd⟩ := nat.exists_prime_and_dvd n2,
-  exact ⟨p, nat.prime_iff_prime_int.mp pp, int.coe_nat_dvd_left.mpr pd⟩,
-end
 
 lemma int.dvd_mul_cancel_prime {p : ℕ} {n k : ℤ}
   (hne : k.nat_abs ≠ p)
