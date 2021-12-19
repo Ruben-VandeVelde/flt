@@ -119,21 +119,66 @@ begin
     split; ring },
 end
 
+lemma is_coprime.mul_unit_left {R : Type*} [comm_semiring R] (x y z : R)
+  (hu : is_unit x) : is_coprime (x * y) (x * z) ↔ is_coprime y z :=
+⟨λ ⟨a, b, h⟩, ⟨a * x, b * x, by { rwa [mul_assoc, mul_assoc] }⟩,
+  λ ⟨a, b, h⟩,
+    let ⟨x', hx⟩ := hu.exists_left_inv in
+    ⟨a * x', b * x', by rwa
+      [←mul_assoc (a * x'), mul_assoc a, ←mul_assoc (b * x'), mul_assoc b, hx, mul_one, mul_one]⟩⟩
+
 lemma step1'
   {a : ℤ√-3}
   (hcoprime : is_coprime a.re a.im)
   (heven : even a.norm) :
   ∃ u : ℤ√-3,
     is_coprime u.re u.im ∧
-    (a = ⟨1, 1⟩ * u ∨ a = ⟨1, -1⟩ * u) ∧
     a.norm = 4 * u.norm :=
 begin
   obtain ⟨u', hu'⟩ := step1 hcoprime heven,
-  refine ⟨u', _, hu', _⟩,
+  refine ⟨u', _, _⟩,
   { apply zsqrtd.coprime_of_dvd_coprime hcoprime,
     obtain (rfl|rfl) := hu'; apply dvd_mul_left },
   { cases hu';
     { rw [hu', zsqrtd.norm_mul], congr } }
+end
+
+lemma step1'' {a p : ℤ√-3}
+  (hcoprime : is_coprime a.re a.im)
+  (hp : p.norm = 4)
+  (hq : p.im ≠ 0)
+  (heven : even a.norm) :
+  ∃ (u : ℤ√-3),
+    is_coprime u.re u.im ∧
+      (a = p * u ∨ a = p.conj * u) ∧ a.norm = 4 * u.norm :=
+begin
+  obtain ⟨u, h2⟩ := step1 hcoprime heven,
+  set q : ℤ√-3 := ⟨1, 1⟩,
+  replace h2 : a = q * u ∨ a = q.conj * u := h2,
+  obtain ⟨hp', hq'⟩ := spts.four hp hq,
+  refine ⟨p.re * u, _, _, _⟩,
+  { rw ←int.is_unit_iff_abs_eq at hp',
+    rwa [zsqrtd.smul_re, zsqrtd.smul_im, is_coprime.mul_unit_left _ _ _ hp'],
+    apply zsqrtd.coprime_of_dvd_coprime hcoprime,
+    obtain (rfl|rfl) := h2; apply dvd_mul_left },
+  { rw (abs_eq $ @zero_le_one ℤ _) at hp' hq',
+    cases hp',
+    { have h4 : p = q ∨ p = q.conj,
+      { apply or.imp _ _ hq';
+        { intro h5, simp [zsqrtd.ext, hp', h5] } },
+      simp only [hp', one_mul, int.cast_one],
+      cases h4; simp [h4, h2, zsqrtd.conj_conj, or_comm] },
+    { have h4 : p = -q ∨ p = -q.conj,
+      { apply or.imp _ _ hq'.symm,
+        { intro h5, simp [zsqrtd.ext, hp', h5] },
+        { intro h5, simp [zsqrtd.ext, hp', h5] } },
+      simp only [hp', one_mul, zsqrtd.norm_neg, int.cast_one, int.cast_neg, neg_one_mul],
+      cases h4,
+      simp [h4, h2],
+      simp [h4, h2, or_comm] } },
+  { rw [zsqrtd.norm_mul, zsqrtd.norm_int_cast, ←sq, ←sq_abs, hp', one_pow, one_mul],
+    cases h2;
+    { rw [h2, zsqrtd.norm_mul], congr } },
 end
 
 lemma step2
@@ -168,25 +213,7 @@ begin
     have heven : even a.norm,
     { apply dvd_trans _ hdvd,
       norm_num },
-    obtain ⟨u, h1, h2, h3⟩ := step1' hcoprime heven,
-    obtain ⟨hp', hq'⟩ := spts.four hp hq,
-    rw (abs_eq $ @zero_le_one ℤ _) at hp' hq',
-    cases hp',
-    { refine ⟨u, h1, _, h3⟩;
-      cases hq';
-      [skip, rw [or_comm]];
-      convert h2;
-      simp only [hp', zsqrtd.ext, zsqrtd.conj_re, eq_self_iff_true, hq', neg_inj, and_self,
-        zsqrtd.conj_im, neg_neg] },
-    { refine ⟨-u, _, _, _⟩,
-      { rw [zsqrtd.neg_re, zsqrtd.neg_im], exact h1.neg_neg },
-      { rw [←neg_mul_comm, ←neg_mul_comm],
-        cases hq';
-        [rw [or_comm], skip];
-        convert h2 using 3;
-        simp only [hp', zsqrtd.ext, zsqrtd.conj_re, eq_self_iff_true, zsqrtd.neg_im, zsqrtd.neg_re,
-          hq', neg_inj, and_self, neg_neg, zsqrtd.conj_im] },
-      { rwa [zsqrtd.norm_neg] } } },
+    exact step1'' hcoprime hp hq heven },
   { apply step2 hcoprime hdvd hpprime }
 end
 
@@ -665,7 +692,7 @@ begin
   induction n using nat.strong_induction_on with n ih generalizing a,
   dsimp only at ih,
   by_cases hparity : even a.norm,
-  { obtain ⟨u, huvcoprime, -, huvprod⟩ := step1' hcoprime hparity,
+  { obtain ⟨u, huvcoprime, huvprod⟩ := step1' hcoprime hparity,
     have huv := spts.pos_of_coprime' huvcoprime,
     have hu' := zsqrt3.norm_nat_abs u,
     rw [hn, huvprod, factors_2_even huv.ne', nat.even_add, ←hu'],
