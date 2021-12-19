@@ -169,7 +169,7 @@ begin
     { apply dvd_trans _ hdvd,
       norm_num },
     obtain ⟨u, h1, h2, h3⟩ := step1' hcoprime heven,
-    obtain ⟨hp', hq'⟩ := spts.four ((zsqrt3.norm p).symm.trans hp) hq,
+    obtain ⟨hp', hq'⟩ := spts.four hp hq,
     rw (abs_eq $ @zero_le_one ℤ _) at hp' hq',
     cases hp',
     { refine ⟨u, h1, _, h3⟩;
