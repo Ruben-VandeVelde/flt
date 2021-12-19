@@ -119,29 +119,6 @@ begin
     split; ring },
 end
 
-lemma step0
-  {d : ℤ}
-  {a b : ℤ√d}
-  (hcoprime : is_coprime a.re a.im)
-  (hdvd : b ∣ a) :
-  is_coprime b.re b.im :=
-begin
-  apply is_coprime_of_dvd,
-  { rintro ⟨hre, him⟩,
-    obtain rfl : b = 0,
-    { simp only [zsqrtd.ext, hre, eq_self_iff_true, zsqrtd.zero_im, him, and_self, zsqrtd.zero_re] },
-    rw zero_dvd_iff at hdvd,
-    simpa only [hdvd, zsqrtd.zero_im, zsqrtd.zero_re, not_coprime_zero_zero] using hcoprime },
-  { intros z hz hznezero hzdvdu hzdvdv,
-    apply hz,
-    obtain ⟨ha, hb⟩ : z ∣ a.re ∧ z ∣ a.im,
-    { rw ←zsqrtd.coe_int_dvd_iff,
-      apply dvd_trans _ hdvd,
-      rw zsqrtd.coe_int_dvd_iff,
-      exact ⟨hzdvdu, hzdvdv⟩ },
-    exact hcoprime.is_unit_of_dvd' ha hb },
-end
-
 lemma step1'
   {a : ℤ√-3}
   (hcoprime : is_coprime a.re a.im)
@@ -153,7 +130,7 @@ lemma step1'
 begin
   obtain ⟨u', hu'⟩ := step1 hcoprime heven,
   refine ⟨u', _, hu', _⟩,
-  { apply step0 hcoprime,
+  { apply zsqrtd.coprime_of_dvd_coprime hcoprime,
     obtain (rfl|rfl) := hu'; apply dvd_mul_left },
   { cases hu';
     { rw [hu', zsqrtd.norm_mul], congr } }
@@ -171,7 +148,7 @@ lemma step2
 begin
   obtain ⟨u', h, h'⟩ := spts.mul_of_dvd'' hdvd hpprime,
   refine ⟨u', _, h, h'⟩,
-  apply step0 hcoprime,
+  apply zsqrtd.coprime_of_dvd_coprime hcoprime,
   obtain (rfl|rfl) := h; apply dvd_mul_left
 end
 
