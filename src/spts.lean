@@ -500,41 +500,44 @@ begin
 end
 
 lemma spts.four
-  {p q : ℤ}
-  (hfour : p ^ 2 + 3 * q ^ 2 = 4)
-  (hq : q ≠ 0) :
-  abs p = 1 ∧ abs q = 1 :=
+  {p : ℤ√-3}
+  (hfour : p.norm = 4)
+  (hq : p.im ≠ 0) :
+  abs p.re = 1 ∧ abs p.im = 1 :=
 begin
-  rw [←int.nat_abs_pow_two p, ←int.nat_abs_pow_two q, ←int.abs_eq_nat_abs, ←int.abs_eq_nat_abs] at hfour,
-  have hq' : abs q = 1,
+  have hq' : abs p.im = 1,
   { apply le_antisymm,
     { contrapose! hfour with hq',
-      have : 2 ≤ abs q,
+      have : 2 ≤ abs p.im,
       { rwa ←int.add_one_le_iff at hq' },
-      have : 2 ^ 2 ≤ (abs q) ^ 2 := pow_le_pow_of_le_left zero_le_two this 2,
+      have : 2 ^ 2 ≤ (abs p.im) ^ 2 := pow_le_pow_of_le_left zero_le_two this 2,
       apply ne_of_gt,
       calc 4 < 3 * 2 ^ 2 : by norm_num
-      ... ≤ 3 * (abs q) ^ 2 : int.mul_le_mul_of_nonneg_left this (by norm_num)
-      ... ≤ abs p ^ 2 + 3 * abs q ^ 2 : le_add_of_nonneg_left (pow_two_nonneg (abs p)) },
-    { rwa [←int.zero_add 1, int.add_one_le_iff, abs_pos] } },
-  have : (4 - 3 : ℤ) = 1 ^ 2,
-  { norm_num },
-  rw [hq', one_pow, mul_one, ←eq_sub_iff_add_eq, this] at hfour,
-  refine ⟨(eq_or_eq_neg_of_sq_eq_sq _ _ hfour).resolve_right _, hq'⟩,
-  apply ne_of_gt,
-  calc -1 < 0 : by norm_num
-  ... ≤ abs p : abs_nonneg _,
+      ... ≤ 3 * (abs p.im) ^ 2 : int.mul_le_mul_of_nonneg_left this (by norm_num)
+      ... ≤ abs p.re ^ 2 + 3 * abs p.im ^ 2 : le_add_of_nonneg_left (pow_two_nonneg (abs p.re))
+      ... = p.norm : _,
+      rw [sq_abs, sq_abs, zsqrtd.norm_def],
+      ring },
+    { rwa [←int.sub_one_lt_iff, sub_self, abs_pos] } },
+  refine ⟨(eq_or_eq_neg_of_sq_eq_sq _ _ _).resolve_right _, hq'⟩,
+  { calc |p.re| ^ 2
+        = |p.re| ^ 2 + 3 * |p.im| ^ 2 - 3 : by rw [hq', one_pow, mul_one, add_sub_cancel]
+    ... = p.norm - 3 : by {rw [zsqrtd.norm_def, sq_abs, sq_abs], ring }
+    ... = 1 ^ 2 : by { rw hfour, norm_num } },
+  { apply ne_of_gt,
+    calc -1 < 0 : by norm_num
+    ... ≤ abs p.re : abs_nonneg _ }
 end
 
 lemma spts.four_of_coprime
-  {p q : ℤ}
-  (hcoprime : is_coprime p q)
-  (hfour : p ^ 2 + 3 * q ^ 2 = 4) :
-  abs p = 1 ∧ abs q = 1 :=
+  {p : ℤ√-3}
+  (hcoprime : is_coprime p.re p.im)
+  (hfour : p.norm = 4) :
+  abs p.re = 1 ∧ abs p.im = 1 :=
 begin
   apply spts.four hfour,
-  rintro rfl,
-  rw [is_coprime_zero_right, int.is_unit_iff_abs_eq] at hcoprime,
-  rw [zero_pow zero_lt_two, mul_zero, add_zero, ←int.nat_abs_pow_two, ←int.abs_eq_nat_abs, hcoprime] at hfour,
+  rintro him,
+  rw [him, is_coprime_zero_right, int.is_unit_iff_abs_eq] at hcoprime,
+  rw [zsqrtd.norm_def, him, mul_zero, sub_zero, ←sq, ←sq_abs, hcoprime] at hfour,
   norm_num at hfour
 end
