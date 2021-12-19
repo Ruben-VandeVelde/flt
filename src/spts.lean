@@ -483,29 +483,20 @@ begin
 end
 
 lemma spts.not_two
-  (a b : ℤ) :
-  a ^ 2 + 3 * b ^ 2 ≠ 2 :=
-begin
-  obtain rfl|hb := eq_or_ne b 0,
-  { rw [zero_pow zero_lt_two, mul_zero, add_zero, ←int.nat_abs_pow_two],
-    norm_cast,
-    apply (nat.pow_left_strict_mono one_le_two).monotone.ne_of_lt_of_lt_nat 1; norm_num },
-  { apply ne_of_gt,
-    apply lt_add_of_nonneg_of_lt (pow_two_nonneg a),
-    rw [←int.nat_abs_pow_two],
-    norm_cast,
-    have := int.nat_abs_ne_zero_of_ne_zero hb,
-    rw [←pos_iff_ne_zero] at this,
-    have := nat.pow_lt_pow_of_lt_left this zero_lt_two,
-    linarith }
-end
-
-lemma spts.not_two'
   (a : ℤ√-3) :
   a.norm ≠ 2 :=
 begin
-  rw zsqrt3.norm,
-  exact spts.not_two a.re a.im,
+  rw zsqrtd.norm_def,
+  obtain him|him := eq_or_ne a.im 0,
+  { rw [him, mul_zero, sub_zero, ←int.nat_abs_mul_self, ←sq],
+    norm_cast,
+    apply (nat.pow_left_strict_mono one_le_two).monotone.ne_of_lt_of_lt_nat 1; norm_num },
+  { apply ne_of_gt,
+    apply lt_add_of_nonneg_of_lt (mul_self_nonneg a.re),
+    rw ←int.add_one_le_iff,
+    rw [mul_assoc, neg_mul_eq_neg_mul, neg_neg],
+    refine le_mul_of_one_le_right zero_lt_three.le _,
+    rwa [←int.sub_one_lt_iff, sub_self, mul_self_pos] }
 end
 
 lemma spts.four
