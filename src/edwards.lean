@@ -326,18 +326,15 @@ lemma prod_map_norm {d : ℤ} {s : multiset ℤ√d} :
   (s.map zsqrtd.norm).prod = zsqrtd.norm s.prod :=
 multiset.prod_hom s zsqrtd.norm_monoid_hom
 
-lemma norm_not_dvd_four_of_odd_prime {p : ℤ} (hmin : 0 ≤ p) (hp : prime p) (hodd: odd p) :
+lemma norm_not_dvd_four_of_odd_prime {p : ℤ} (hp : prime p) (hodd: odd p) :
   ¬(p ∣ 4) :=
 begin
-  intro h,
-  have hmax := int.le_of_dvd (by norm_num) h,
-  rw ←int.lt_add_one_iff at hmax,
-  interval_cases using hmin hmax,
-  { exact hp.ne_zero rfl, },
-  { exact hp.ne_one rfl },
-  { norm_num at hodd },
-  { norm_num at h },
-  { norm_num at hodd },
+  have h0 : (4 : ℤ) = 2 ^ 2,
+  { norm_num },
+  rw h0,
+  apply mt hp.dvd_of_dvd_pow,
+  rw hp.dvd_prime_iff_associated int.prime_two,
+  exact λ h, int.even_iff_not_odd.mp h.symm.dvd hodd,
 end
 
 lemma associated_of_dvd {a p : ℤ}
@@ -348,10 +345,7 @@ begin
   obtain (rfl|ha) := ha;
   obtain (rfl|hp) := hp,
   { refl },
-  { exfalso,
-    have h : abs p ∣ 4,
-    { rwa [int.abs_eq_nat_abs, int.nat_abs_dvd] },
-    exact norm_not_dvd_four_of_odd_prime (abs_nonneg _) hp.1.abs (odd_abs.mpr hp.2) h },
+  { exact (norm_not_dvd_four_of_odd_prime hp.1 hp.2 h).elim },
   { exfalso,
     rw int.odd_iff_not_even at ha,
     refine ha.2 (dvd_trans _ h),
