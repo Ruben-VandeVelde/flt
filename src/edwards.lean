@@ -322,7 +322,7 @@ begin
     split; refl },
 end
 
-lemma prod_map_norm {s : multiset ℤ√-3} :
+lemma prod_map_norm {d : ℤ} {s : multiset ℤ√d} :
   (s.map zsqrtd.norm).prod = zsqrtd.norm s.prod :=
 multiset.prod_hom s zsqrtd.norm_monoid_hom
 
