@@ -431,28 +431,6 @@ begin
 
 end
 
-lemma dvd_blah {p a b : ℤ} (hp : prime p) (n : ℕ) (h : ¬(p ∣ a)) (h' : p ^ n ∣ a * b) : p ^ n ∣ b :=
-begin
-  induction n with n ih,
-  { rw pow_zero, exact one_dvd b },
-  { have : p ^ n ∣ p ^ n.succ,
-    { have : n ≤ n.succ := nat.le_succ n,
-      exact pow_dvd_pow p this },
-    specialize ih (dvd_trans this h'),
-    obtain ⟨c, rfl⟩ := ih,
-    clear this,
-    
-    have : p ∣ a * c,
-    { have : p ^ n ≠ 0 := pow_ne_zero _  hp.ne_zero,
-      apply int.dvd_of_mul_dvd_mul_left this,
-      convert h' using 1,
-      { rw pow_succ' },
-      { ring } },
-    have := (hp.dvd_or_dvd this).resolve_left h,
-    rw pow_succ',
-    exact mul_dvd_mul_left (p ^ n) this }
-end 
-
 lemma dvd_or_dvd {a p x : ℤ}
   (ha : odd_prime_or_four a)
   (hp : odd_prime_or_four p)
@@ -465,7 +443,7 @@ begin
       have : (4 : ℤ) = 2 ^ 2,
       { norm_num },
       rw [hp, this],
-      apply dvd_blah int.prime_two,
+      apply int.prime_two.pow_dvd_of_dvd_mul_left,
       { rw [←even_iff_two_dvd, ←int.odd_iff_not_even], exact ha.2 },
       { rwa [hp, this] at hdvd } } },
   { exact (hp.1.dvd_or_dvd hdvd) }
