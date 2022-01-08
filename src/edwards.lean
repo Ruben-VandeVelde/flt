@@ -542,41 +542,41 @@ begin
   { rwa [prod_map_norm, prod_map_norm] },
 end
 
-noncomputable def factorization
+noncomputable def factorization'
   {a b : ℤ}
   (hcoprime : is_coprime a b)
   : multiset ℤ√-3
  := classical.some (step3 hcoprime)
 
-lemma factorization_prop
+lemma factorization'_prop
   {a b : ℤ}
   (hcoprime : is_coprime a b) :
-  ((⟨a, b⟩ : ℤ√-3) = (factorization hcoprime).prod ∨ (⟨a, b⟩ : ℤ√-3) = - (factorization hcoprime).prod) ∧
-    ∀ pq : ℤ√-3, pq ∈ (factorization hcoprime) →
+  ((⟨a, b⟩ : ℤ√-3) = (factorization' hcoprime).prod ∨ (⟨a, b⟩ : ℤ√-3) = - (factorization' hcoprime).prod) ∧
+    ∀ pq : ℤ√-3, pq ∈ (factorization' hcoprime) →
       0 ≤ pq.re ∧
       pq.im ≠ 0 ∧
       odd_prime_or_four pq.norm :=
 classical.some_spec (step3 hcoprime)
 
-lemma factorization_prop'
+lemma factorization'_prop'
   {a : ℤ√-3}
   (hcoprime : is_coprime a.re a.im) :
-  (a = (factorization hcoprime).prod ∨ a = - (factorization hcoprime).prod) ∧
-    ∀ pq : ℤ√-3, pq ∈ (factorization hcoprime) →
+  (a = (factorization' hcoprime).prod ∨ a = - (factorization' hcoprime).prod) ∧
+    ∀ pq : ℤ√-3, pq ∈ (factorization' hcoprime) →
       0 ≤ pq.re ∧
       pq.im ≠ 0 ∧
       odd_prime_or_four pq.norm :=
 begin
-  convert factorization_prop hcoprime;
+  convert factorization'_prop hcoprime;
   { rw zsqrtd.ext, dsimp only, split; refl },
 end
 
-lemma factorization.coprime_of_mem
-  {a b : ℤ√-3} (h : is_coprime a.re a.im) (hmem : b ∈ factorization h) :
+lemma factorization'.coprime_of_mem
+  {a b : ℤ√-3} (h : is_coprime a.re a.im) (hmem : b ∈ factorization' h) :
   is_coprime b.re b.im :=
 begin
-  obtain ⟨h1, h2⟩ := factorization_prop' h,
-  set f := factorization h,
+  obtain ⟨h1, h2⟩ := factorization'_prop' h,
+  set f := factorization' h,
   apply is_coprime_of_dvd,
   { rintro ⟨-, H⟩,
     exact (h2 b hmem).2.1 H },
@@ -666,17 +666,17 @@ begin
   exact associated'_of_abs_eq hre him,
 end
 
-lemma factorization.associated'_of_norm_eq
+lemma factorization'.associated'_of_norm_eq
   {a b c : ℤ√-3} (h : is_coprime a.re a.im)
-  (hbmem : b ∈ factorization h) (hcmem : c ∈ factorization h)
+  (hbmem : b ∈ factorization' h) (hcmem : c ∈ factorization' h)
   (hnorm : b.norm = c.norm) :
   associated' b c :=
 begin
   apply associated'_of_associated_norm,
   { rw hnorm },
-  { exact factorization.coprime_of_mem h hbmem },
-  { exact factorization.coprime_of_mem h hcmem },
-  { exact ((factorization_prop h).2 b hbmem).2.2 },
+  { exact factorization'.coprime_of_mem h hbmem },
+  { exact factorization'.coprime_of_mem h hcmem },
+  { exact ((factorization'_prop h).2 b hbmem).2.2 },
 end
 
 lemma factors_unique
@@ -989,12 +989,12 @@ lemma step5' -- lemma page 54
   (r : ℤ)
   (hcoprime : is_coprime a.re a.im)
   (hcube : r ^ 3 = a.norm) :
-  ∃ g : multiset ℤ√-3, factorization hcoprime = 3 • g :=
+  ∃ g : multiset ℤ√-3, factorization' hcoprime = 3 • g :=
 begin
   classical,
 
-  obtain ⟨h1, h2⟩ := factorization_prop' hcoprime,
-  set f := factorization hcoprime with hf,
+  obtain ⟨h1, h2⟩ := factorization'_prop' hcoprime,
+  set f := factorization' hcoprime with hf,
   apply multiset.exists_smul_of_dvd_count,
 
   intros x hx,
@@ -1026,7 +1026,7 @@ begin
   have h2x := h2 x hx,
 
   rw associated'_iff_eq h2x.1 (h2 A HA).1,
-  { exact ⟨associated'.norm_eq, factorization.associated'_of_norm_eq hcoprime hx HA⟩ },
+  { exact ⟨associated'.norm_eq, factorization'.associated'_of_norm_eq hcoprime hx HA⟩ },
 
   intro H,
   apply no_conj f,
@@ -1049,7 +1049,7 @@ lemma step5 -- lemma page 54
   ∃ p : ℤ√-3, a = p ^ 3 :=
 begin
   obtain ⟨f, hf⟩ := step5' a r hcoprime hcube,
-  obtain ⟨h1, -⟩ := factorization_prop' hcoprime,
+  obtain ⟨h1, -⟩ := factorization'_prop' hcoprime,
   cases h1,
   { use f.prod,
     rw [h1, hf, multiset.prod_nsmul] },
