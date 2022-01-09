@@ -631,14 +631,7 @@ lemma even_and_odd_factors' (x : ℤ) :
   unique_factorization_monoid.normalized_factors x = multiset.repeat 2 (even_factor_exp x) + odd_factors x :=
 begin
   convert even_and_odd_factors'' x,
-  simp [even_factor_exp],
-  ext a,
-  by_cases ha : a = 2,
-  { simp only [ha, multiset.count_repeat_self, multiset.count_filter_of_pos] },
-  { rw [multiset.count_filter_of_neg (ne.symm ha)],
-    simp only [multiset.count_eq_zero],
-    contrapose! ha,
-    exact multiset.eq_of_mem_repeat ha }
+  simp [even_factor_exp, ←multiset.filter_eq],
 end
 
 lemma even_and_odd_factors (x : ℤ) (hx : x ≠ 0) : associated x (2 ^ (even_factor_exp x) * (odd_factors x).prod) :=
