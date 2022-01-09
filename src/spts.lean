@@ -29,12 +29,12 @@ by rw [zsqrtd.norm_def, zsqrtd.coe_int_re, zsqrtd.coe_int_im, mul_zero, sub_zero
 @[simp, norm_cast]
 lemma zsqrtd.coe_int_dvd_coe_int {d : ℤ} (a b : ℤ) : (a : ℤ√d) ∣ b ↔ a ∣ b :=
 begin
-  split; rintro ⟨d, hd⟩,
+  split; rintro ⟨c, hc⟩,
   { simp only [zsqrtd.ext, add_zero, zsqrtd.coe_int_re, zero_mul, zsqrtd.mul_im, zsqrtd.mul_re,
-      zero_eq_mul, mul_zero, zsqrtd.coe_int_im] at hd,
-    obtain ⟨rfl, (rfl|h2)⟩ := hd;
+      zero_eq_mul, mul_zero, zsqrtd.coe_int_im] at hc,
+    obtain ⟨rfl, (rfl|h2)⟩ := hc;
     exact dvd_mul_right _ _ },
-  { simp only [hd, int.cast_mul, dvd_mul_right] },
+  { simp only [hc, int.cast_mul, dvd_mul_right] },
 end
 
 lemma zsqrt3.norm (z : ℤ√-3) : z.norm = z.re ^ 2 + 3 * z.im ^ 2 :=
