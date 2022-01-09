@@ -326,32 +326,25 @@ lemma prod_map_norm {d : ℤ} {s : multiset ℤ√d} :
   (s.map zsqrtd.norm).prod = zsqrtd.norm s.prod :=
 multiset.prod_hom s zsqrtd.norm_monoid_hom
 
-lemma norm_not_dvd_four_of_odd_prime {p : ℤ} (hp : prime p) (hodd: odd p) :
-  ¬(p ∣ 4) :=
-begin
-  have h0 : (4 : ℤ) = 2 ^ 2,
-  { norm_num },
-  rw h0,
-  apply mt hp.dvd_of_dvd_pow,
-  rw hp.dvd_prime_iff_associated int.prime_two,
-  exact λ h, int.even_iff_not_odd.mp h.symm.dvd hodd,
-end
-
 lemma associated_of_dvd {a p : ℤ}
   (ha : odd_prime_or_four a)
   (hp : odd_prime_or_four p)
   (h: p ∣ a) : associated p a :=
 begin
-  obtain (rfl|ha) := ha;
-  obtain (rfl|hp) := hp,
+  obtain (rfl|⟨ap, aodd⟩) := ha;
+  obtain (rfl|⟨pp, podd⟩) := hp,
   { refl },
-  { exact (norm_not_dvd_four_of_odd_prime hp.1 hp.2 h).elim },
   { exfalso,
-    rw int.odd_iff_not_even at ha,
-    refine ha.2 (dvd_trans _ h),
+    have h0 : (4 : ℤ) = 2 ^ 2,
+    { norm_num },
+    rw h0 at h,
+    refine int.even_iff_not_odd.mp (associated.dvd _) podd,
+    exact ((pp.dvd_prime_iff_associated int.prime_two).mp (pp.dvd_of_dvd_pow h)).symm },
+  { exfalso,
+    rw int.odd_iff_not_even at aodd,
+    refine aodd (dvd_trans _ h),
     norm_num },
-  { rwa prime.dvd_prime_iff_associated hp.1 ha.1 at h }
-
+  { rwa prime.dvd_prime_iff_associated pp ap at h }
 end
 
 lemma dvd_or_dvd {a p x : ℤ}
