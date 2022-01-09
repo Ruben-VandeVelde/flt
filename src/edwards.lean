@@ -352,17 +352,16 @@ lemma dvd_or_dvd {a p x : ℤ}
   (hp : odd_prime_or_four p)
   (hdvd : p ∣ a * x) : p ∣ a ∨ p ∣ x :=
 begin
-  cases hp,
-  { cases ha,
-    { left, rw [ha, hp] },
+  obtain (rfl|⟨pp, podd⟩) := hp,
+  { obtain (rfl|⟨ap, aodd⟩) := ha,
+    { exact or.inl dvd_rfl },
     { right,
       have : (4 : ℤ) = 2 ^ 2,
       { norm_num },
-      rw [hp, this],
-      apply int.prime_two.pow_dvd_of_dvd_mul_left,
-      { rw [←even_iff_two_dvd, ←int.odd_iff_not_even], exact ha.2 },
-      { rwa [hp, this] at hdvd } } },
-  { exact (hp.1.dvd_or_dvd hdvd) }
+      rw this at hdvd ⊢,
+      apply int.prime_two.pow_dvd_of_dvd_mul_left _ _ hdvd,
+      rwa [←even_iff_two_dvd, ←int.odd_iff_not_even] } },
+  { exact (pp.dvd_or_dvd hdvd) }
 end 
 
 lemma exists_associated_mem_of_dvd_prod''
