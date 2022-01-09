@@ -801,12 +801,9 @@ begin
         { exfalso,
           simp only [habsv, mul_one, int.cast_one, mul_neg_eq_neg_mul_symm, int.cast_neg] at hu,
           apply lt_irrefl (0 : ℤ),
-          calc 0 < A.re : _
+          calc 0 ≤ A.re : hA
           ... = -x.re : _
           ... < 0 : _,
-          { apply lt_of_le_of_ne hA,
-            rw ←hu,
-            simp only [zsqrtd.neg_re, ne.def, zero_eq_neg, hxre, not_false_iff] },
           { simp only [←hu, zsqrtd.neg_re] },
           { simp only [neg_neg_iff_pos],
             exact lt_of_le_of_ne hx (ne.symm hxre) } } } },
@@ -823,12 +820,9 @@ begin
         { exfalso,
           simp only [habsv, mul_one, int.cast_one, mul_neg_eq_neg_mul_symm, int.cast_neg] at hu,
           apply lt_irrefl (0 : ℤ),
-          calc 0 < A.re : _
+          calc 0 ≤ A.re : hA
           ... = -x.re : _
           ... < 0 : _,
-          { apply lt_of_le_of_ne hA,
-            rw [←zsqrtd.conj_conj A, ←hu],
-            simp only [hxre, zsqrtd.conj_re, zsqrtd.neg_re, ne.def, not_false_iff, zero_eq_neg] },
           { rw [←zsqrtd.conj_conj A, ←hu],
             simp only [zsqrtd.conj_re, zsqrtd.neg_re] },
           { simp only [neg_neg_iff_pos],
