@@ -1,16 +1,6 @@
-import algebra.big_operators.basic
 import data.int.basic
 import data.int.parity
-import data.nat.gcd
-import data.nat.parity
-import data.pnat.basic
-import algebra.euclidean_domain
-import algebra.gcd_monoid.basic
 import tactic
-import data.nat.modeq
-import data.complex.is_R_or_C
-import data.complex.exponential
-import number_theory.zsqrtd.basic
 import .primes
 import .spts
 import .odd_prime_or_four
