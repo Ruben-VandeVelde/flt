@@ -928,6 +928,5 @@ begin
   obtain ⟨p, hp⟩ := step5 A r hcoprime hcube',
   use [p.re, p.im],
   simp only [zsqrtd.ext, pow_succ', pow_two, zsqrtd.mul_re, zsqrtd.mul_im] at hp,
-  obtain ⟨rfl, rfl⟩ := hp,
-  split; ring,
+  convert hp; ring,
 end
