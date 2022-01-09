@@ -637,11 +637,8 @@ end
 lemma even_and_odd_factors (x : ℤ) (hx : x ≠ 0) : associated x (2 ^ (even_factor_exp x) * (odd_factors x).prod) :=
 begin
   convert (unique_factorization_monoid.normalized_factors_prod hx).symm,
-  simp [even_factor_exp, odd_factors],
-  rw [multiset.pow_count, ←multiset.prod_add],
-  congr,
-  symmetry,
-  exact even_and_odd_factors'' x,
+  simp [even_factor_exp],
+  rw [multiset.pow_count, ←multiset.prod_add, ←even_and_odd_factors'' x]
 end
 
 lemma factors_2_even {z : ℤ} (hz : z ≠ 0) : even_factor_exp (4 * z) = 2 + even_factor_exp z :=
