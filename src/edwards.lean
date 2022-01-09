@@ -371,18 +371,14 @@ lemma exists_associated_mem_of_dvd_prod''
   (hdvd : p ∣ s.prod) :
   ∃ q ∈ s, associated p q :=
 begin
-  revert hs hdvd,
-  refine s.induction_on _ _,
-  { simp [forall_const, forall_prop_of_false, exists_false, multiset.prod_zero, not_false_iff,
-      exists_prop_of_false, multiset.not_mem_zero, ←is_unit_iff_dvd_one, hp.not_unit] },
-  { intros a s ih hs hps,
-    rw [multiset.prod_cons] at hps,
+  induction s using multiset.induction_on with a s ih hs generalizing hs hdvd,
+  { simpa [hp.not_unit, ←is_unit_iff_dvd_one] using hdvd },
+  { rw [multiset.prod_cons] at hdvd,
     have := hs a (multiset.mem_cons_self _ _),
-    have h := dvd_or_dvd this hp hps,
-    cases h with h h,
+    obtain h|h := dvd_or_dvd this hp hdvd,
     { exact ⟨a, multiset.mem_cons_self _ _, associated_of_dvd this hp h⟩ },
-    { obtain ⟨q, hq₁, hq₂⟩ := ih (λ r hr, hs _ (multiset.mem_cons.2 (or.inr hr))) h,
-      exact ⟨q, multiset.mem_cons.2 (or.inr hq₁), hq₂⟩ } }
+    { obtain ⟨q, hq₁, hq₂⟩ := ih (λ r hr, hs _ (multiset.mem_cons_of_mem hr)) h,
+      exact ⟨q, multiset.mem_cons_of_mem hq₁, hq₂⟩ } }
 end
 
 lemma factors_unique_prod' : ∀{f g : multiset ℤ},
