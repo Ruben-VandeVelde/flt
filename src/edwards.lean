@@ -406,7 +406,7 @@ begin
     rw ← multiset.cons_erase hbg,
     apply multiset.rel.cons hb,
     apply ih _ _ _,
-    { exact (λ q hq, hf _ (by simp [hq])) },
+    { exact (λ q hq, hf _ (multiset.mem_cons_of_mem hq)) },
     { exact (λ q (hq : q ∈ g.erase b), hg q (multiset.mem_of_mem_erase hq)) },
     { apply associated.of_mul_left _ hb hp.ne_zero,
       rwa [← multiset.prod_cons, ← multiset.prod_cons, multiset.cons_erase hbg] } },
