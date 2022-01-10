@@ -302,6 +302,35 @@ begin
     exact hcoprime.is_unit_of_dvd' ha hb },
 end
 
+lemma zqrtd.factor_div' (a : ℤ√-3) {x : ℤ} (hodd : odd x) (h : 1 < |x|)
+  (hcoprime : is_coprime a.re a.im) (hfactor : x ∣ a.norm) :
+  ∃ c m : ℤ√-3, a = c + m * x ∧ c.norm < x ^ 2 ∧ c ≠ 0 ∧
+    ∃ y, c.norm = x * y ∧ y.nat_abs < x.nat_abs :=
+begin
+  obtain ⟨c, m, rfl, h2⟩ := zqrtd.factor_div a hodd,
+  refine ⟨c, m, rfl, h2, _, _⟩,
+  { rintro rfl,
+    apply h.ne',
+    rw ←int.is_unit_iff_abs_eq,
+    apply hcoprime.is_unit_of_dvd';
+    simp only [zero_add, mul_comm m, zsqrtd.smul_re, zsqrtd.smul_im, dvd_mul_right] },
+  { obtain ⟨y, hy⟩ : x ∣ c.norm,
+    { set e : ℤ := m.re ^ 2 * x + 2 * m.re * c.re + 3 * m.im ^ 2 * x + 6 * m.im * c.im with he,
+      convert dvd_sub hfactor (dvd_mul_right x e),
+      rw [he, zsqrtd.norm_def, zsqrtd.norm_def],
+      simp only [zsqrtd.coe_int_re, zsqrtd.mul_im, zsqrtd.add_im, zsqrtd.mul_re, zsqrtd.add_re,
+        zsqrtd.coe_int_im],
+      ring },
+    refine ⟨y, hy, _⟩,
+    have h0'' : 0 < x.nat_abs,
+    { zify,
+      rw ←int.abs_eq_nat_abs,
+      exact zero_lt_one.trans h },
+    rw [←mul_lt_mul_left h0'', ←pow_two, ←int.nat_abs_mul, ←hy],
+    zify,
+    rwa [int.nat_abs_pow_two x, int.nat_abs_of_nonneg (zsqrtd.norm_nonneg (by norm_num) c)] },
+end
+
 lemma zsqrtd.exists_coprime_of_gcd_pos {d : ℤ} {a : ℤ√d} (hgcd : 0 < int.gcd a.re a.im) :
   ∃ b : ℤ√d, a = ((int.gcd a.re a.im : ℤ) : ℤ√d) * b ∧ is_coprime b.re b.im :=
 begin
@@ -340,29 +369,8 @@ begin
   { rw ←h,
     refine ⟨⟨1, 0⟩, _⟩,
     norm_num [zsqrtd.norm_def] },
-  have h0'' : 0 < x.nat_abs := int.nat_abs_pos_of_ne_zero h0,
 
-  obtain ⟨c', m, rfl, h2'⟩ := zqrtd.factor_div a hodd,
-
-  have h1 : c' ≠ 0,
-  { rintro rfl,
-    apply h.ne',
-    rw ←int.is_unit_iff_abs_eq,
-    apply hcoprime.is_unit_of_dvd';
-    simp only [zero_add, mul_comm m, zsqrtd.smul_re, zsqrtd.smul_im, dvd_mul_right] },
-
-  obtain ⟨y, hy⟩ : x ∣ c'.norm,
-  { set e : ℤ := m.re ^ 2 * x + 2 * m.re * c'.re + 3 * m.im ^ 2 * x + 6 * m.im * c'.im with he,
-    convert dvd_sub hfactor (dvd_mul_right x e),
-    rw [he, zsqrtd.norm_def, zsqrtd.norm_def],
-    simp only [zsqrtd.coe_int_re, zsqrtd.mul_im, zsqrtd.add_im, zsqrtd.mul_re, zsqrtd.add_re,
-      zsqrtd.coe_int_im],
-    ring },
-
-  have h3 : y.nat_abs < x.nat_abs,
-  { rw [←mul_lt_mul_left h0'', ←pow_two, ←int.nat_abs_mul, ←hy],
-    zify,
-    rwa [int.nat_abs_pow_two x, int.nat_abs_of_nonneg (zsqrtd.norm_nonneg (by norm_num) c')] },
+  obtain ⟨c', m, rfl, h2', h1, ⟨y, hy, h3⟩⟩ := zqrtd.factor_div' a hodd h hcoprime hfactor,
 
   have h4 : c'.norm ≠ 0,
   { rwa [ne.def, zsqrtd.norm_eq_zero_iff (by norm_num) c'] },
