@@ -271,14 +271,12 @@ begin
         = (2 * c) ^ 2 + 3 * (2 * d) ^ 2 : by { rw zsqrtd.norm_def, ring }
     ... < x ^ 2 + 3 * x ^ 2 : add_lt_add _ _
     ... = 4 * x ^ 2 : by ring,
-    { rw [mul_pow, ←int.nat_abs_pow_two c, ←int.nat_abs_pow_two x],
+    { rw [mul_pow, ←int.nat_abs_pow_two c, ←int.nat_abs_pow_two x, ←mul_pow],
       norm_cast,
-      rw [←mul_pow],
       exact nat.pow_lt_pow_of_lt_left hc zero_lt_two },
-    { rw [mul_pow, ←int.nat_abs_pow_two d, ←int.nat_abs_pow_two x],
-      rw mul_lt_mul_left (by norm_num : (0 : ℤ) < 3),
+    { rw [mul_pow, ←int.nat_abs_pow_two d, ←int.nat_abs_pow_two x, ←mul_pow,
+        mul_lt_mul_left (by norm_num : (0 : ℤ) < 3)],
       norm_cast,
-      rw [←mul_pow],
       exact nat.pow_lt_pow_of_lt_left hd zero_lt_two } },
 end
 lemma zsqrtd.coprime_of_dvd_coprime
