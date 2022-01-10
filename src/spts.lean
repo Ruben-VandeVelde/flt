@@ -161,6 +161,17 @@ begin
   { rw [zsqrtd.norm_mul, zsqrtd.norm_conj] },
 end
 
+namespace int
+theorem gcd_pos_iff {i j : ℤ} : 0 < gcd i j ↔ i ≠ 0 ∨ j ≠ 0 :=
+pos_iff_ne_zero.trans $ (not_congr int.gcd_eq_zero_iff).trans not_and_distrib
+end int
+
+lemma zsqrtd.gcd_eq_zero_iff {d : ℤ} (a : ℤ√d) : int.gcd a.re a.im = 0 ↔ a = 0 :=
+by simp only [int.gcd_eq_zero_iff, zsqrtd.ext, eq_self_iff_true, zsqrtd.zero_im, zsqrtd.zero_re]
+
+lemma zsqrtd.gcd_pos_iff {d : ℤ} (a : ℤ√d) : 0 < int.gcd a.re a.im ↔ a ≠ 0 :=
+pos_iff_ne_zero.trans $ not_congr a.gcd_eq_zero_iff
+
 -- Edwards p49 step (4'), contraposed
 lemma factors'
   (a : ℤ√-3)
@@ -172,8 +183,13 @@ lemma factors'
   (hnotform : ∀ (f' : ℤ), f' ∣ g → odd f' → (∃ (p : ℤ√-3), abs f' = p.norm)) :
   ∃ (p : ℤ√-3), abs f = p.norm :=
 begin
-  induction hg : g.nat_abs using nat.strong_induction_on with g'' IH a generalizing a g,
+  induction hg : g.nat_abs using nat.strong_induction_on with g'' IH generalizing a g,
+  subst g'',
   dsimp at IH,
+  have ha : a.norm ≠ 0,
+  { rw [←hfactor, mul_ne_zero_iff, and_iff_left hgpos],
+    rintro rfl,
+    exact int.odd_iff_not_even.mp hodd int.even_zero },
   by_cases H : even (zsqrtd.norm a),
   { obtain ⟨c, hc⟩ := factors2 H,
     obtain ⟨g', rfl⟩ : 4 ∣ g,
@@ -187,18 +203,11 @@ begin
         exact dvd_mul_right _ _ } },
     have hg'pos : g' ≠ 0 := right_ne_zero_of_mul hgpos,
     have hgcdcd : 0 < int.gcd c.re c.im,
-    { rw [pos_iff_ne_zero, ne.def, int.gcd_eq_zero_iff],
-      intro H',
-      obtain rfl : c = 0,
-      { simp only [zsqrtd.ext, eq_self_iff_true, zsqrtd.zero_im, and_self, zsqrtd.zero_re, H'] },
-      rw [zsqrtd.norm_zero, mul_zero] at hc,
-      rw [hc, mul_eq_zero] at hfactor,
-      obtain (rfl|hg) := hfactor,
-      { rw int.odd_iff_not_even at hodd,
-        exact hodd int.even_zero },
-      { exact hgpos hg } },
+    { rw [zsqrtd.gcd_pos_iff, ne.def, ←c.norm_eq_zero_iff (by norm_num)],
+      apply right_ne_zero_of_mul,
+      rwa ←hc },
     refine IH g'.nat_abs _ c g' hg'pos _ _ rfl,
-    { rw [←hg, int.nat_abs_mul],
+    { rw [int.nat_abs_mul],
       apply lt_mul_of_one_lt_left (int.nat_abs_pos_of_ne_zero hg'pos),
       norm_num },
     { rw [←mul_right_inj' (@four_ne_zero ℤ _ _), ←hc, ←hfactor, mul_left_comm] },
@@ -233,7 +242,7 @@ begin
       have : |p.sign * q| = |q|,
       { rw [abs_mul, int.abs_sign pprime.ne_zero, one_mul] },
       refine IH q.nat_abs _ c (p.sign * q) _ _ _ _,
-      { rw [←hg, int.nat_abs_mul],
+      { rw [int.nat_abs_mul],
         apply lt_mul_of_one_lt_left (int.nat_abs_pos_of_ne_zero hqpos),
         rw int.prime_iff_nat_abs_prime at pprime,
         exact pprime.one_lt },
