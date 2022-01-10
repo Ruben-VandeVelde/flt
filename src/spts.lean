@@ -302,6 +302,16 @@ begin
     exact hcoprime.is_unit_of_dvd' ha hb },
 end
 
+lemma zsqrtd.exists_coprime_of_gcd_pos {d : ℤ} {a : ℤ√d} (hgcd : 0 < int.gcd a.re a.im) :
+  ∃ b : ℤ√d, a = ((int.gcd a.re a.im : ℤ) : ℤ√d) * b ∧ is_coprime b.re b.im :=
+begin
+  obtain ⟨re, im, H1, Hre, Him⟩ := int.exists_gcd_one hgcd,
+  rw [mul_comm] at Hre Him,
+  refine ⟨⟨re, im⟩, _, _⟩,
+  { rw [zsqrtd.smul_val, zsqrtd.ext, ←Hre, ←Him], split; refl },
+  { simp only [←int.gcd_eq_one_iff_coprime, H1] }
+end
+
 -- Edwards p50 step (5')
 lemma factors
   (a : ℤ√-3)
@@ -359,20 +369,8 @@ begin
 
   set g := int.gcd c'.re c'.im with hg,
   have hgpos : 0 < g,
-  { rw [hg, pos_iff_ne_zero],
-    contrapose! h4 with H,
-    obtain ⟨H1, H2⟩ := int.gcd_eq_zero_iff.mp H,
-    simp only [neg_mul_eq_neg_mul_symm, eq_self_iff_true, H1, H2, mul_zero, sub_self, neg_zero,
-      zsqrtd.norm] },
-  have hgnezero := int.coe_nat_ne_zero_iff_pos.mpr hgpos,
-  obtain ⟨C', HC', HCDcoprime⟩ :
-    ∃ C' : ℤ√-3, c' = ((g : ℤ) : ℤ√-3) * C' ∧ is_coprime C'.re C'.im,
-  { obtain ⟨re, im, H1, Hre, Him⟩ := int.exists_gcd_one hgpos,
-    rw [←hg, mul_comm] at Hre Him,
-    use ⟨re, im⟩,
-    split,
-    { rw [zsqrtd.smul_val, zsqrtd.ext, Hre, Him], split; refl },
-    { simp only [←int.gcd_eq_one_iff_coprime, H1] } },
+  { rwa [hg, zsqrtd.gcd_pos_iff] },
+  obtain ⟨C', HC', HCDcoprime⟩ := zsqrtd.exists_coprime_of_gcd_pos hgpos,
   have h5 : x * y = g ^ 2 * C'.norm,
   { rw [←hy, HC', zsqrtd.norm_mul, zsqrtd.coe_int_norm, ←pow_two] },
   obtain ⟨z, hz⟩ : (g ^ 2 : ℤ) ∣ y,
@@ -392,15 +390,14 @@ begin
     simpa only [zsqrtd.coe_int_re, is_coprime_zero_right, zsqrtd.coe_int_im, hpprime.not_unit] using this },
 
   have h6 : x * z = C'.norm,
-  { apply int.eq_of_mul_eq_mul_left (pow_ne_zero 2 hgnezero),
-    rw [←h5, hz],
-    ring },
+  { have hgnezero := int.coe_nat_ne_zero_iff_pos.mpr hgpos,
+    apply int.eq_of_mul_eq_mul_left (pow_ne_zero 2 hgnezero),
+    rw [←h5, hz, mul_left_comm] },
 
   have h8 : z ≠ 0,
   { apply right_ne_zero_of_mul,
-    rw h6,
     apply right_ne_zero_of_mul,
-    rwa [←h5, ←hy] },
+    rwa [h6, ←h5, ←hy] },
   refine factors' _ x z hodd h8 h6 _,
   intros w hwdvd hwodd,
   refine IH w.nat_abs _ C' w HCDcoprime hwodd _ rfl,
