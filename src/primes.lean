@@ -33,7 +33,7 @@ begin
   congr,
   apply list.eq_repeat_of_mem,
   intros d hd,
-  rw nat.mem_factors hpos at hd,
+  rw nat.mem_factors hpos.ne' at hd,
   exact h hd.left hd.right,
 end
 
