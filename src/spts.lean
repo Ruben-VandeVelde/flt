@@ -521,19 +521,7 @@ begin
   { apply and.imp _ _ this;
     { intro h,
       rwa [←sq_eq_sq (abs_nonneg (_ : ℤ)) zero_le_one, one_pow, sq_abs] } },
-  have hq' : abs p.im = 1,
-  { apply le_antisymm,
-    { contrapose! hfour with hq',
-      apply ne_of_gt,
-      calc 4 < 3 * 2 ^ 2 : by norm_num
-      ... ≤ 3 * p.im ^ 2 : int.mul_le_mul_of_nonneg_left (sq_le_sq _) (by norm_num)
-      ... ≤ p.re ^ 2 + 3 * p.im ^ 2 : le_add_of_nonneg_left (pow_two_nonneg p.re)
-      ... = p.norm : by { rw [zsqrtd.norm_def], ring },
-      { calc |2|
-            = 1 + 1 : by norm_num
-        ... ≤ |p.im| : by rwa int.add_one_le_iff, } },
-    { rwa [←not_lt, int.eq_zero_iff_abs_lt_one] } },
-  have hq'' : p.im ^ 2 = 1,
+  have hq : p.im ^ 2 = 1,
   { apply le_antisymm,
     { contrapose! hfour with hq',
       apply ne_of_gt,
@@ -544,9 +532,9 @@ begin
       ... = p.norm : by { rw [zsqrtd.norm_def], ring } },
     { rw [←int.sub_one_lt_iff, sub_self],
       exact sq_pos_of_ne_zero _ hq, } },
-  refine ⟨_, hq''⟩,
+  refine ⟨_, hq⟩,
   calc p.re ^ 2
-      = p.re ^ 2 + 3 * p.im ^ 2 - 3 : by rw [hq'', mul_one, add_sub_cancel]
+      = p.re ^ 2 + 3 * p.im ^ 2 - 3 : by rw [hq, mul_one, add_sub_cancel]
   ... = p.norm - 3 : by { rw [zsqrtd.norm_def], ring }
   ... = 1 : by { rw hfour, norm_num },
 end
