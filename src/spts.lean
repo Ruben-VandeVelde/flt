@@ -431,12 +431,12 @@ begin
   contrapose! h,
   cases lt_or_gt_of_ne h with H H,
   { have : a.re = 0,
-    { rwa [←abs_nonpos_iff, ←int.lt_add_one_iff, zero_add] },
+    { rwa [←int.eq_zero_iff_abs_lt_one] },
     simp only [zsqrtd.norm_def, this, zero_mul, zero_sub, neg_mul_eq_neg_mul_symm, neg_neg],
     by_cases hb : a.im = 0,
     { simp only [hb, not_false_iff, zero_ne_one, mul_zero] },
     { have : 1 ≤ abs a.im,
-      { rwa [←abs_nonpos_iff, ←int.lt_add_one_iff, zero_add, not_lt] at hb },
+      { rwa [←int.eq_zero_iff_abs_lt_one, not_lt] at hb },
       have : 1 ≤ a.im ^ 2,
       { rw ←sq_abs,
         exact pow_le_pow_of_le_left zero_le_one this 2 },
@@ -517,28 +517,38 @@ lemma spts.four
   (hq : p.im ≠ 0) :
   abs p.re = 1 ∧ abs p.im = 1 :=
 begin
+  suffices : p.re ^ 2 = 1 ∧ p.im ^ 2 = 1,
+  { apply and.imp _ _ this;
+    { intro h,
+      rwa [←sq_eq_sq (abs_nonneg (_ : ℤ)) zero_le_one, one_pow, sq_abs] } },
   have hq' : abs p.im = 1,
   { apply le_antisymm,
     { contrapose! hfour with hq',
-      have : 2 ≤ abs p.im,
-      { rwa ←int.add_one_le_iff at hq' },
-      have : 2 ^ 2 ≤ (abs p.im) ^ 2 := pow_le_pow_of_le_left zero_le_two this 2,
       apply ne_of_gt,
       calc 4 < 3 * 2 ^ 2 : by norm_num
-      ... ≤ 3 * (abs p.im) ^ 2 : int.mul_le_mul_of_nonneg_left this (by norm_num)
-      ... ≤ abs p.re ^ 2 + 3 * abs p.im ^ 2 : le_add_of_nonneg_left (pow_two_nonneg (abs p.re))
-      ... = p.norm : _,
-      rw [sq_abs, sq_abs, zsqrtd.norm_def],
-      ring },
-    { rwa [←int.sub_one_lt_iff, sub_self, abs_pos] } },
-  refine ⟨(eq_or_eq_neg_of_sq_eq_sq _ _ _).resolve_right _, hq'⟩,
-  { calc |p.re| ^ 2
-        = |p.re| ^ 2 + 3 * |p.im| ^ 2 - 3 : by rw [hq', one_pow, mul_one, add_sub_cancel]
-    ... = p.norm - 3 : by {rw [zsqrtd.norm_def, sq_abs, sq_abs], ring }
-    ... = 1 ^ 2 : by { rw hfour, norm_num } },
-  { apply ne_of_gt,
-    calc -1 < 0 : by norm_num
-    ... ≤ abs p.re : abs_nonneg _ }
+      ... ≤ 3 * p.im ^ 2 : int.mul_le_mul_of_nonneg_left (sq_le_sq _) (by norm_num)
+      ... ≤ p.re ^ 2 + 3 * p.im ^ 2 : le_add_of_nonneg_left (pow_two_nonneg p.re)
+      ... = p.norm : by { rw [zsqrtd.norm_def], ring },
+      { calc |2|
+            = 1 + 1 : by norm_num
+        ... ≤ |p.im| : by rwa int.add_one_le_iff, } },
+    { rwa [←not_lt, int.eq_zero_iff_abs_lt_one] } },
+  have hq'' : p.im ^ 2 = 1,
+  { apply le_antisymm,
+    { contrapose! hfour with hq',
+      apply ne_of_gt,
+      rw ←int.add_one_le_iff at hq',
+      calc 4 < 3 * 2 : by norm_num
+      ... ≤ 3 * p.im ^ 2 : int.mul_le_mul_of_nonneg_left hq' (by norm_num)
+      ... ≤ p.re ^ 2 + 3 * p.im ^ 2 : le_add_of_nonneg_left (pow_two_nonneg p.re)
+      ... = p.norm : by { rw [zsqrtd.norm_def], ring } },
+    { rw [←int.sub_one_lt_iff, sub_self],
+      exact sq_pos_of_ne_zero _ hq, } },
+  refine ⟨_, hq''⟩,
+  calc p.re ^ 2
+      = p.re ^ 2 + 3 * p.im ^ 2 - 3 : by rw [hq'', mul_one, add_sub_cancel]
+  ... = p.norm - 3 : by { rw [zsqrtd.norm_def], ring }
+  ... = 1 : by { rw hfour, norm_num },
 end
 
 lemma spts.four_of_coprime
