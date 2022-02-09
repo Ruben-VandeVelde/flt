@@ -2,9 +2,6 @@ import data.complex.basic
 import analysis.special_functions.pow
 import number_theory.zsqrtd.to_real
 
-lemma zsqrtd.norm_def' {d : ℤ} (n : ℤ√d) : n.norm = n.re * n.re - d * (n.im * n.im) :=
-by rw [zsqrtd.norm_def, mul_assoc]
-
 lemma zsqrtd.coe_int_norm {d : ℤ} (z : ℤ) : (z : ℤ√d).norm = z * z :=
 by rw [zsqrtd.norm_def, zsqrtd.coe_int_re, zsqrtd.coe_int_im, mul_zero, sub_zero]
 

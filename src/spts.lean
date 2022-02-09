@@ -342,7 +342,7 @@ theorem spts.eq_one
 begin
   suffices H : abs a.re = 1,
   { refine ⟨H, _⟩,
-    rw [zsqrtd.norm_def', ←int.nat_abs_mul_self' a.re, ←int.abs_eq_nat_abs, H, one_mul,
+    rw [zsqrtd.norm_def, mul_assoc, ←int.nat_abs_mul_self' a.re, ←int.abs_eq_nat_abs, H, one_mul,
       neg_mul_eq_neg_mul_symm, sub_neg_eq_add, add_right_eq_self, mul_eq_zero,
       mul_self_eq_zero] at h,
     exact h.resolve_left three_ne_zero },
