@@ -298,7 +298,7 @@ begin
   { rwa [hg, zsqrtd.gcd_pos_iff] },
   obtain ⟨C', HC', HCDcoprime⟩ := zsqrtd.exists_coprime_of_gcd_pos hgpos,
   have h5 : x * y = g ^ 2 * C'.norm,
-  { rw [←hy, HC', zsqrtd.norm_mul, zsqrtd.coe_int_norm, ←pow_two] },
+  { rw [←hy, HC', zsqrtd.norm_mul, zsqrtd.norm_int_cast, ←pow_two] },
   obtain ⟨z, hz⟩ : (g ^ 2 : ℤ) ∣ y,
   { have : (g ^ 2 : ℤ) ∣ x * y,
     { rw h5, exact dvd_mul_right _ _ },

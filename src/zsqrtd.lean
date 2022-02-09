@@ -1,9 +1,6 @@
 import number_theory.zsqrtd.basic
 import ring_theory.int.basic
 
-lemma zsqrtd.coe_int_norm {d : ℤ} (z : ℤ) : (z : ℤ√d).norm = z * z :=
-by rw [zsqrtd.norm_def, zsqrtd.coe_int_re, zsqrtd.coe_int_im, mul_zero, sub_zero]
-
 @[simp, norm_cast]
 lemma zsqrtd.coe_int_dvd_coe_int {d : ℤ} (a b : ℤ) : (a : ℤ√d) ∣ b ↔ a ∣ b :=
 begin
