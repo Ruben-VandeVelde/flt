@@ -37,17 +37,6 @@ begin
   { simp only [hc, int.cast_mul, dvd_mul_right] },
 end
 
-lemma zsqrt3.norm (z : ℤ√-3) : z.norm = z.re ^ 2 + 3 * z.im ^ 2 :=
-begin
-  dsimp [zsqrtd.norm],
-  simp only [neg_mul_eq_neg_mul_symm, sub_neg_eq_add, pow_two, mul_assoc],
-end
-lemma zsqrt3.norm' (a b : ℤ) : a ^ 2 + 3 * b ^ 2 = (⟨a, b⟩ : ℤ√-3).norm :=
-begin
-  dsimp [zsqrtd.norm],
-  ring,
-end
-
 -- Edwards p49 step (2')
 lemma factors2
   {a : ℤ√-3}
