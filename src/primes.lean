@@ -165,3 +165,8 @@ begin
   { rw [int.sign_eq_neg_one_of_neg ha, abs_neg, abs_one] },
   { rw [int.sign_eq_one_of_pos ha, abs_one] },
 end
+
+namespace int
+theorem gcd_pos_iff {i j : ℤ} : 0 < gcd i j ↔ i ≠ 0 ∨ j ≠ 0 :=
+pos_iff_ne_zero.trans $ (not_congr int.gcd_eq_zero_iff).trans not_and_distrib
+end int

@@ -9,9 +9,7 @@ import data.nat.modeq
 import ring_theory.int.basic
 import number_theory.zsqrtd.basic
 import .primes
-
-lemma zsqrtd.norm_def' {d : ℤ} (n : ℤ√d) : n.norm = n.re * n.re - d * (n.im * n.im) :=
-by rw [zsqrtd.norm_def, mul_assoc]
+import .zsqrtd
 
 lemma zsqrtd.exists {d : ℤ} (a : ℤ√d) (him : a.im ≠ 0) :
   ∃ (c : ℤ√d), a.norm = c.norm ∧ 0 ≤ c.re ∧ c.im ≠ 0 :=
@@ -21,20 +19,6 @@ begin
     simp only [hre, him, zsqrtd.norm_neg, eq_self_iff_true, zsqrtd.neg_im, zsqrtd.neg_re, and_self,
       neg_nonneg, ne.def, not_false_iff, neg_eq_zero] },
   { use a, simp only [hre.le, him, eq_self_iff_true, and_self, ne.def, not_false_iff] },
-end
-
-lemma zsqrtd.coe_int_norm {d : ℤ} (z : ℤ) : (z : ℤ√d).norm = z * z :=
-by rw [zsqrtd.norm_def, zsqrtd.coe_int_re, zsqrtd.coe_int_im, mul_zero, sub_zero]
-
-@[simp, norm_cast]
-lemma zsqrtd.coe_int_dvd_coe_int {d : ℤ} (a b : ℤ) : (a : ℤ√d) ∣ b ↔ a ∣ b :=
-begin
-  split; rintro ⟨c, hc⟩,
-  { simp only [zsqrtd.ext, add_zero, zsqrtd.coe_int_re, zero_mul, zsqrtd.mul_im, zsqrtd.mul_re,
-      zero_eq_mul, mul_zero, zsqrtd.coe_int_im] at hc,
-    obtain ⟨rfl, (rfl|h2)⟩ := hc;
-    exact dvd_mul_right _ _ },
-  { simp only [hc, int.cast_mul, dvd_mul_right] },
 end
 
 -- Edwards p49 step (2')
@@ -62,18 +46,6 @@ begin
       rw [sub_eq_iff_eq_add] at hv,
       simp only [zsqrtd.norm_def, hv],
       ring } }
-end
-
-lemma zsqrtd.smul_re {d a : ℤ} {b : ℤ√d} : (↑a * b).re = a * b.re := by simp
-lemma zsqrtd.smul_im {d a : ℤ} {b : ℤ√d} : (↑a * b).im = a * b.im := by simp
-
-protected lemma zsqrtd.eq_of_smul_eq_smul_left {d a : ℤ} {b c : ℤ√d}
-  (ha : a ≠ 0) (h : ↑a * b = a * c) : b = c :=
-begin
-  rw zsqrtd.ext at h ⊢,
-  apply and.imp _ _ h;
-  simp only [zsqrtd.smul_re, zsqrtd.smul_im];
-  apply int.eq_of_mul_eq_mul_left ha,
 end
 
 lemma spts.mul_of_dvd'
@@ -149,17 +121,6 @@ begin
   { rw [zsqrtd.norm_mul] },
   { rw [zsqrtd.norm_mul, zsqrtd.norm_conj] },
 end
-
-namespace int
-theorem gcd_pos_iff {i j : ℤ} : 0 < gcd i j ↔ i ≠ 0 ∨ j ≠ 0 :=
-pos_iff_ne_zero.trans $ (not_congr int.gcd_eq_zero_iff).trans not_and_distrib
-end int
-
-lemma zsqrtd.gcd_eq_zero_iff {d : ℤ} (a : ℤ√d) : int.gcd a.re a.im = 0 ↔ a = 0 :=
-by simp only [int.gcd_eq_zero_iff, zsqrtd.ext, eq_self_iff_true, zsqrtd.zero_im, zsqrtd.zero_re]
-
-lemma zsqrtd.gcd_pos_iff {d : ℤ} (a : ℤ√d) : 0 < int.gcd a.re a.im ↔ a ≠ 0 :=
-pos_iff_ne_zero.trans $ not_congr a.gcd_eq_zero_iff
 
 -- Edwards p49 step (4'), contraposed
 lemma factors'
@@ -268,28 +229,6 @@ begin
       norm_cast,
       exact nat.pow_lt_pow_of_lt_left hd zero_lt_two } },
 end
-lemma zsqrtd.coprime_of_dvd_coprime
-  {d : ℤ}
-  {a b : ℤ√d}
-  (hcoprime : is_coprime a.re a.im)
-  (hdvd : b ∣ a) :
-  is_coprime b.re b.im :=
-begin
-  apply is_coprime_of_dvd,
-  { rintro ⟨hre, him⟩,
-    obtain rfl : b = 0,
-    { simp only [zsqrtd.ext, hre, eq_self_iff_true, zsqrtd.zero_im, him, and_self, zsqrtd.zero_re] },
-    rw zero_dvd_iff at hdvd,
-    simpa only [hdvd, zsqrtd.zero_im, zsqrtd.zero_re, not_coprime_zero_zero] using hcoprime },
-  { intros z hz hznezero hzdvdu hzdvdv,
-    apply hz,
-    obtain ⟨ha, hb⟩ : z ∣ a.re ∧ z ∣ a.im,
-    { rw ←zsqrtd.coe_int_dvd_iff,
-      apply dvd_trans _ hdvd,
-      rw zsqrtd.coe_int_dvd_iff,
-      exact ⟨hzdvdu, hzdvdv⟩ },
-    exact hcoprime.is_unit_of_dvd' ha hb },
-end
 
 lemma zqrtd.factor_div' (a : ℤ√-3) {x : ℤ} (hodd : odd x) (h : 1 < |x|)
   (hcoprime : is_coprime a.re a.im) (hfactor : x ∣ a.norm) :
@@ -318,16 +257,6 @@ begin
     rw [←mul_lt_mul_left h0'', ←pow_two, ←int.nat_abs_mul, ←hy],
     zify,
     rwa [int.nat_abs_pow_two x, int.nat_abs_of_nonneg (zsqrtd.norm_nonneg (by norm_num) c)] },
-end
-
-lemma zsqrtd.exists_coprime_of_gcd_pos {d : ℤ} {a : ℤ√d} (hgcd : 0 < int.gcd a.re a.im) :
-  ∃ b : ℤ√d, a = ((int.gcd a.re a.im : ℤ) : ℤ√d) * b ∧ is_coprime b.re b.im :=
-begin
-  obtain ⟨re, im, H1, Hre, Him⟩ := int.exists_gcd_one hgcd,
-  rw [mul_comm] at Hre Him,
-  refine ⟨⟨re, im⟩, _, _⟩,
-  { rw [zsqrtd.smul_val, zsqrtd.ext, ←Hre, ←Him], split; refl },
-  { simp only [←int.gcd_eq_one_iff_coprime, H1] }
 end
 
 -- Edwards p50 step (5')
