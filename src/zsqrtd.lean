@@ -1,6 +1,5 @@
-import data.complex.basic
-import analysis.special_functions.pow
-import number_theory.zsqrtd.to_real
+import number_theory.zsqrtd.basic
+import ring_theory.int.basic
 
 lemma zsqrtd.coe_int_norm {d : ℤ} (z : ℤ) : (z : ℤ√d).norm = z * z :=
 by rw [zsqrtd.norm_def, zsqrtd.coe_int_re, zsqrtd.coe_int_im, mul_zero, sub_zero]
@@ -24,8 +23,8 @@ protected lemma zsqrtd.eq_of_smul_eq_smul_left {d a : ℤ} {b c : ℤ√d}
 begin
   rw zsqrtd.ext at h ⊢,
   apply and.imp _ _ h;
-  simp only [zsqrtd.smul_re, zsqrtd.smul_im];
-  apply int.eq_of_mul_eq_mul_left ha,
+  { simp only [zsqrtd.smul_re, zsqrtd.smul_im],
+    exact int.eq_of_mul_eq_mul_left ha },
 end
 
 lemma zsqrtd.gcd_eq_zero_iff {d : ℤ} (a : ℤ√d) : int.gcd a.re a.im = 0 ↔ a = 0 :=
@@ -64,5 +63,5 @@ begin
   rw [mul_comm] at Hre Him,
   refine ⟨⟨re, im⟩, _, _⟩,
   { rw [zsqrtd.smul_val, zsqrtd.ext, ←Hre, ←Him], split; refl },
-  { simp only [←int.gcd_eq_one_iff_coprime, H1] }
+  { rw [←int.gcd_eq_one_iff_coprime, H1] }
 end
