@@ -279,7 +279,7 @@ begin
     { rw huv,
       cases hgprod; rw [multiset.prod_cons, hgprod],
       { left, refl },
-      { right, simp only [mul_neg_eq_neg_mul_symm] } },
+      { right, simp only [mul_neg] } },
     { rintros pq hpq,
       rw multiset.mem_cons at hpq,
       obtain rfl|ind := hpq,
@@ -760,7 +760,7 @@ begin
   { left,
     simpa only [hv1, hv2, mul_one, int.cast_one] using hu },
   { right,
-    simp only [hv1, hv2, mul_one, int.cast_one, mul_neg_eq_neg_mul_symm, int.cast_neg] at hu,
+    simp only [hv1, hv2, mul_one, int.cast_one, mul_neg, int.cast_neg] at hu,
     simp only [←hu, hx, zsqrtd.conj_neg, zsqrtd.ext, zsqrtd.neg_re, zsqrtd.neg_im, zsqrtd.conj_re,
       zsqrtd.conj_im, neg_neg, neg_zero, eq_self_iff_true, and_self] }
 end
@@ -782,7 +782,7 @@ begin
         { left,
           rw [←hu, habsv, int.cast_one, mul_one] },
         { exfalso,
-          simp only [habsv, mul_one, int.cast_one, mul_neg_eq_neg_mul_symm, int.cast_neg] at hu,
+          simp only [habsv, mul_one, int.cast_one, mul_neg, int.cast_neg] at hu,
           apply lt_irrefl (0 : ℤ),
           calc 0 ≤ A.re : hA
           ... = -x.re : _
@@ -801,7 +801,7 @@ begin
         { right,
           rw [←hu, habsv, int.cast_one, mul_one] },
         { exfalso,
-          simp only [habsv, mul_one, int.cast_one, mul_neg_eq_neg_mul_symm, int.cast_neg] at hu,
+          simp only [habsv, mul_one, int.cast_one, mul_neg, int.cast_neg] at hu,
           apply lt_irrefl (0 : ℤ),
           calc 0 ≤ A.re : hA
           ... = -x.re : _
