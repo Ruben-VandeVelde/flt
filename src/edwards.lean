@@ -20,12 +20,10 @@ begin
   { exact pow_not_prime one_lt_two.ne' hp }
 end
 
-lemma zsqrt3.norm_nat_abs (z : ℤ√-3) : (z.norm.nat_abs : ℤ) = z.norm :=
-int.nat_abs_of_nonneg (zsqrtd.norm_nonneg (by norm_num) z)
-
 lemma zsqrt3.is_unit_iff {z : ℤ√-3} : is_unit z ↔ abs z.re = 1 ∧ z.im = 0 :=
 begin
-  rw [←zsqrtd.norm_eq_one_iff, ←int.coe_nat_inj', int.coe_nat_one, zsqrt3.norm_nat_abs],
+  rw [←zsqrtd.norm_eq_one_iff, ←int.coe_nat_inj', int.coe_nat_one,
+    int.nat_abs_of_nonneg (zsqrtd.norm_nonneg (by norm_num) z)],
   refine ⟨spts.eq_one, λ h, _⟩,
   rw [zsqrtd.norm_def, h.2, mul_zero, sub_zero, ←sq, ←sq_abs, h.1, one_pow]
 end
