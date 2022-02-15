@@ -500,26 +500,6 @@ lemma factors_odd_prime_or_four.unique
 factors_odd_prime_or_four.unique' hf hf' (spts.pos_of_coprime' hcoprime) (factors_2_even' hcoprime)
   hassoc
 
-lemma even_factor_exp.pow (z : ℤ) (n : ℕ) : even_factor_exp (z ^ n) = n * even_factor_exp z :=
-begin
-  simp only [even_factor_exp],
-  rw [unique_factorization_monoid.normalized_factors_pow, multiset.count_nsmul]
-end
-
-lemma odd_factors.pow (z : ℤ) (n : ℕ) : odd_factors (z ^ n) = n • odd_factors z :=
-begin
-  simp only [odd_factors],
-  rw [unique_factorization_monoid.normalized_factors_pow, multiset.filter_nsmul],
-end
-
-lemma factors_odd_prime_or_four.pow
-  (z : ℤ) (n : ℕ) (hz : even (even_factor_exp z)) :
-  factors_odd_prime_or_four (z ^ n) = n • factors_odd_prime_or_four z :=
-begin
-  simp only [factors_odd_prime_or_four, nsmul_add, multiset.nsmul_repeat, even_factor_exp.pow,
-    nat.mul_div_assoc _ hz, odd_factors.pow],
-end
-
 lemma eq_or_eq_conj_of_associated_of_re_zero
   {x A : ℤ√-3}
   (hx : x.re = 0)
