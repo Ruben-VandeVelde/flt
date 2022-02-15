@@ -269,3 +269,22 @@ begin
     apply factors_odd_prime_or_four.nonneg },
   { exact ha.le },
 end
+
+lemma factors_odd_prime_or_four.associated'
+  {a : ℤ}
+  {f : multiset ℤ}
+  (hf : ∀x∈f, odd_prime_or_four x)
+  (ha : 0 < a)
+  (heven : even (even_factor_exp a))
+  (hassoc : associated f.prod a) :
+  multiset.rel associated f (factors_odd_prime_or_four a) :=
+begin
+  apply factors_unique_prod' hf,
+  { intros x hx,
+    simp only [factors_odd_prime_or_four, multiset.mem_add] at hx,
+    apply or.imp _ _ hx,
+    { exact multiset.eq_of_mem_repeat },
+    { simp only [odd_factors, multiset.mem_filter],
+      exact and.imp_left (unique_factorization_monoid.prime_of_normalized_factor _) } },
+  { rwa factors_odd_prime_or_four.prod' ha heven, }
+end
