@@ -437,21 +437,11 @@ lemma factorization'.coprime_of_mem
   {a b : ℤ√-3} (h : is_coprime a.re a.im) (hmem : b ∈ factorization' h) :
   is_coprime b.re b.im :=
 begin
-  obtain ⟨h1, h2⟩ := factorization'_prop h,
+  obtain ⟨h1, -⟩ := factorization'_prop h,
   set f := factorization' h,
-  apply is_coprime_of_dvd,
-  { rintro ⟨-, H⟩,
-    exact (h2 b hmem).2.1 H },
-  { intros z hznu hznz hzr hzi,
-    apply hznu,
-    have : (z : ℤ√-3) ∣ f.prod,
-    { apply dvd_trans _ (multiset.dvd_prod hmem),
-      rw zsqrtd.coe_int_dvd_iff,
-      exact ⟨hzr, hzi⟩ },
-    have : (z : ℤ√-3) ∣ a,
-    { cases h1; simp only [h1, dvd_neg, this] },
-    rw zsqrtd.coe_int_dvd_iff at this,
-    exact is_coprime.is_unit_of_dvd' h this.1 this.2 } ,
+  apply zsqrtd.coprime_of_dvd_coprime h,
+  apply (multiset.dvd_prod hmem).trans,
+  cases h1; simp only [h1, dvd_neg],
 end
 
 lemma no_conj
