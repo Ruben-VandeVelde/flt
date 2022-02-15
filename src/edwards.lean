@@ -489,16 +489,6 @@ begin
     exact unique_factorization_monoid.dvd_of_mem_normalized_factors hfactor }
 end
 
-lemma factors_odd_prime_or_four.associated
-  {a : ℤ√-3}
-  (hcoprime : is_coprime a.re a.im)
-  {f : multiset ℤ}
-  (hf : ∀x∈f, odd_prime_or_four x)
-  (hassoc : associated f.prod a.norm) :
-  multiset.rel associated f (factors_odd_prime_or_four a.norm) :=
-factors_odd_prime_or_four.associated' hf (spts.pos_of_coprime' hcoprime) (factors_2_even' hcoprime)
-  hassoc
-
 lemma factors_odd_prime_or_four.unique
   {a : ℤ√-3}
   (hcoprime : is_coprime a.re a.im)
@@ -507,12 +497,8 @@ lemma factors_odd_prime_or_four.unique
   (hf' : ∀x∈f, (0 : ℤ) ≤ x)
   (hassoc : associated f.prod a.norm) :
   f = (factors_odd_prime_or_four a.norm) :=
-begin
-  rw ←multiset.rel_eq,
-  apply multiset.rel.mono (factors_odd_prime_or_four.associated hcoprime hf hassoc),
-  intros x hx y hy hxy,
-  exact int.eq_of_associated_of_nonneg hxy (hf' x hx) (factors_odd_prime_or_four.nonneg hy)
-end
+factors_odd_prime_or_four.unique' hf hf' (spts.pos_of_coprime' hcoprime) (factors_2_even' hcoprime)
+  hassoc
 
 lemma even_factor_exp.pow (z : ℤ) (n : ℕ) : even_factor_exp (z ^ n) = n * even_factor_exp z :=
 begin
