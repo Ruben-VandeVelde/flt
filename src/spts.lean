@@ -9,7 +9,6 @@ import data.nat.modeq
 import ring_theory.int.basic
 import number_theory.zsqrtd.basic
 import .primes
-import .zsqrtd
 
 lemma zsqrtd.exists {d : ℤ} (a : ℤ√d) (him : a.im ≠ 0) :
   ∃ (c : ℤ√d), a.norm = c.norm ∧ 0 ≤ c.re ∧ c.im ≠ 0 :=

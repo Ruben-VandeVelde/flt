@@ -24,7 +24,7 @@ end
 
 lemma eq_pow
   {n p : ℕ}
-  (hpos : 0 < n)
+  (hpos : n ≠ 0)
   (h : ∀ {d}, nat.prime d → d ∣ n → d = p) :
   n = p ^ n.factors.length :=
 begin
@@ -33,7 +33,7 @@ begin
   congr,
   apply list.eq_repeat_of_mem,
   intros d hd,
-  rw nat.mem_factors hpos.ne' at hd,
+  rw nat.mem_factors hpos at hd,
   exact h hd.left hd.right,
 end
 
