@@ -251,3 +251,21 @@ begin
   { rw multiset.eq_of_mem_repeat ha, norm_num },
   { exact odd_factors.nonneg ha }
 end
+
+lemma factors_odd_prime_or_four.prod'
+  {a : ℤ}
+  (ha : 0 < a)
+  (heven : even (even_factor_exp a)) :
+  (factors_odd_prime_or_four a).prod = a :=
+begin
+  apply int.eq_of_associated_of_nonneg,
+  { have := unique_factorization_monoid.normalized_factors_prod ha.ne',
+    apply associated.trans _ this,
+    obtain ⟨m, hm⟩ := heven,
+    rw [even_and_odd_factors' _, multiset.prod_add, factors_odd_prime_or_four, multiset.prod_add,
+      hm, nat.mul_div_right _ zero_lt_two, multiset.prod_repeat, multiset.prod_repeat, pow_mul],
+    exact associated.refl _ },
+  { apply multiset.prod_nonneg,
+    apply factors_odd_prime_or_four.nonneg },
+  { exact ha.le },
+end

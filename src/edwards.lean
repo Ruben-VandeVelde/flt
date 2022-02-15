@@ -493,18 +493,7 @@ lemma factors_odd_prime_or_four.prod
   {a : ℤ√-3}
   (hcoprime : is_coprime a.re a.im) :
   (factors_odd_prime_or_four a.norm).prod = a.norm :=
-begin
-  apply int.eq_of_associated_of_nonneg,
-  { have := unique_factorization_monoid.normalized_factors_prod (spts.ne_zero_of_coprime' _ hcoprime),
-    apply associated.trans _ this,
-    obtain ⟨m, hm⟩ := factors_2_even' hcoprime,
-    rw [even_and_odd_factors' _, multiset.prod_add, factors_odd_prime_or_four, multiset.prod_add,
-      hm, nat.mul_div_right _ zero_lt_two, multiset.prod_repeat, multiset.prod_repeat, pow_mul],
-    exact associated.refl _ },
-  { apply multiset.prod_nonneg,
-    apply factors_odd_prime_or_four.nonneg },
-  { exact zsqrtd.norm_nonneg (by norm_num) _ },
-end
+factors_odd_prime_or_four.prod' (spts.pos_of_coprime' hcoprime) (factors_2_even' hcoprime)
 
 lemma factors_odd_prime_or_four.associated
   {a : ℤ√-3}
