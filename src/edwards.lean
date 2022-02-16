@@ -5,6 +5,15 @@ import .primes
 import .spts
 import .odd_prime_or_four
 
+lemma zsqrtd.associated_norm_of_associated {d : ℤ} {f g : ℤ√d}
+  (h : associated f g) : associated f.norm g.norm :=
+begin
+  obtain ⟨u, rfl⟩ := h,
+  have := (zsqrtd.is_unit_iff_norm_is_unit ↑u).mp u.is_unit,
+  rw [zsqrtd.norm_mul],
+  exact (associated_mul_unit_right (zsqrtd.norm f) _ this),
+end
+
 lemma odd_prime_or_four.im_ne_zero
   {p : ℤ√-3}
   (h: odd_prime_or_four p.norm)
@@ -463,10 +472,7 @@ begin
   refine multiset.rel.mono _ p,
   rw ←multiset.rel_map,
   apply factors_unique_prod hf hg,
-  have hd : (-3 : ℤ) ≤ 0,
-  { norm_num },
-  obtain ⟨u, hu⟩ := h,
-  rw [←hu, zsqrtd.norm_mul, (zsqrtd.norm_eq_one_iff' hd u).mpr u.is_unit, mul_one],
+  exact zsqrtd.associated_norm_of_associated h,
 end
 lemma factors_2_even'
   {a : ℤ√-3}
