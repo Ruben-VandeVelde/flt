@@ -41,22 +41,6 @@ begin
   { right, exact ⟨hp.abs, odd_abs.mpr ho⟩ }
 end
 
-lemma exists_odd_prime_and_dvd_or_two_pow
-  (n : ℕ) : (∃ k : ℕ, n = 2 ^ k) ∨ ∃ p, nat.prime p ∧ p ∣ n ∧ odd p :=
-begin
-  obtain rfl|hn := eq_or_ne n 0,
-  { exact or.inr ⟨3, nat.prime_three, dvd_zero 3, nat.odd_iff_not_even.mpr (nat.not_even_bit1 1)⟩ },
-  rw or_iff_not_imp_right,
-  intro H,
-  push_neg at H,
-  use n.factors.length,
-  apply eq_pow hn,
-  intros p hprime hdvd,
-  apply hprime.eq_two_or_odd.resolve_right,
-  rw ←nat.odd_iff,
-  exact H p hprime hdvd,
-end
-
 lemma odd_prime_or_four.exists_and_dvd
   {n : ℤ} (n2 : 2 < n) : ∃ p, p ∣ n ∧ odd_prime_or_four p :=
 begin
