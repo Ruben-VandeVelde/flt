@@ -42,13 +42,15 @@ begin
 end
 
 lemma exists_odd_prime_and_dvd_or_two_pow
-  {n : ℕ} (n2 : 2 ≤ n) : (∃ k : ℕ, n = 2 ^ k) ∨ ∃ p, nat.prime p ∧ p ∣ n ∧ odd p :=
+  (n : ℕ) : (∃ k : ℕ, n = 2 ^ k) ∨ ∃ p, nat.prime p ∧ p ∣ n ∧ odd p :=
 begin
+  obtain rfl|hn := eq_or_ne n 0,
+  { exact or.inr ⟨3, nat.prime_three, dvd_zero 3, nat.odd_iff_not_even.mpr (nat.not_even_bit1 1)⟩ },
   rw or_iff_not_imp_right,
   intro H,
   push_neg at H,
   use n.factors.length,
-  apply eq_pow (zero_lt_two.trans_le n2).ne',
+  apply eq_pow hn,
   intros p hprime hdvd,
   apply hprime.eq_two_or_odd.resolve_right,
   rw ←nat.odd_iff,
@@ -60,7 +62,7 @@ lemma odd_prime_or_four.exists_and_dvd
 begin
   lift n to ℕ using (zero_lt_two.trans n2).le,
   norm_cast at n2,
-  obtain ⟨k, h2⟩|⟨p, hp, hdvd, hodd⟩ := exists_odd_prime_and_dvd_or_two_pow n2.le,
+  obtain ⟨k, h2⟩|⟨p, hp, hdvd, hodd⟩ := exists_odd_prime_and_dvd_or_two_pow n,
   { refine ⟨4, _, _⟩,
     { use 2 ^ (k - 2),
       norm_cast,
