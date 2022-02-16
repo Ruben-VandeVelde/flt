@@ -62,20 +62,12 @@ lemma odd_prime_or_four.exists_and_dvd
 begin
   lift n to ℕ using (zero_lt_two.trans n2).le,
   norm_cast at n2,
-  obtain ⟨k, h2⟩|⟨p, hp, hdvd, hodd⟩ := exists_odd_prime_and_dvd_or_two_pow n,
-  { refine ⟨4, _, _⟩,
-    { use 2 ^ (k - 2),
-      norm_cast,
-
-      have h3 : 2 ≤ k,
-      { rw h2 at n2,
-        apply l0 n2 },
-
-      calc n
-          = 2 ^ k : h2
-      ... = 2 ^ 2 * 2 ^ (k - 2) : (pow_mul_pow_sub _ h3).symm
-      ... = 4 * 2 ^ (k - 2) : by norm_num },
-    { left, refl } },
+  obtain ⟨k, rfl⟩|⟨p, hp, hdvd, hodd⟩ := exists_odd_prime_and_dvd_or_two_pow n,
+  { refine ⟨4, ⟨2 ^ (k - 2), _⟩, or.inl rfl⟩,
+    norm_cast,
+    calc 2 ^ k
+        = 2 ^ 2 * 2 ^ (k - 2) : (pow_mul_pow_sub _ $ l0 n2).symm
+    ... = 4 * 2 ^ (k - 2) : by norm_num },
   { rw nat.prime_iff_prime_int at hp,
     rw ←int.odd_coe_nat at hodd,
     exact ⟨p, int.coe_nat_dvd.mpr hdvd, or.inr ⟨hp, hodd⟩⟩ },
