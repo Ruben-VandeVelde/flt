@@ -46,7 +46,7 @@ lemma odd_prime_or_four.exists_and_dvd
 begin
   lift n to ℕ using (zero_lt_two.trans n2).le,
   norm_cast at n2,
-  obtain ⟨k, rfl⟩|⟨p, hp, hdvd, hodd⟩ := exists_odd_prime_and_dvd_or_two_pow n,
+  obtain ⟨k, rfl⟩|⟨p, hp, hdvd, hodd⟩ := n.exists_odd_prime_and_dvd_or_two_pow,
   { refine ⟨4, ⟨2 ^ (k - 2), _⟩, or.inl rfl⟩,
     norm_cast,
     calc 2 ^ k

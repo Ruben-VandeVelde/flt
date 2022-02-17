@@ -46,8 +46,8 @@ begin
     exact zero_le _ }
 end
 
-lemma exists_odd_prime_and_dvd_or_two_pow
-  (n : ℕ) : (∃ k : ℕ, n = 2 ^ k) ∨ ∃ p, nat.prime p ∧ p ∣ n ∧ odd p :=
+lemma nat.exists_odd_prime_and_dvd_or_two_pow (n : ℕ) :
+  (∃ k : ℕ, n = 2 ^ k) ∨ ∃ p, nat.prime p ∧ p ∣ n ∧ odd p :=
 begin
   obtain rfl|hn := eq_or_ne n 0,
   { exact or.inr ⟨3, nat.prime_three, dvd_zero 3, nat.odd_iff_not_even.mpr (nat.not_even_bit1 1)⟩ },
