@@ -147,7 +147,7 @@ begin
   obtain ⟨hp', hq'⟩ := spts.four hp hq,
   refine ⟨p.re * u, _, _, _⟩,
   { rw ←int.is_unit_iff_abs_eq at hp',
-    rwa [zsqrtd.smul_re, zsqrtd.smul_im, is_coprime.mul_unit_left _ _ _ hp'],
+    rwa [zsqrtd.smul_re, zsqrtd.smul_im, is_coprime_mul_unit_left hp'],
     apply zsqrtd.coprime_of_dvd_coprime hcoprime,
     obtain (rfl|rfl) := h2; apply dvd_mul_left },
   { rw (abs_eq $ @zero_le_one ℤ _) at hp' hq',

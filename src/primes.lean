@@ -62,8 +62,8 @@ begin
   exact H p hprime hdvd,
 end
 
-lemma is_coprime.mul_unit_left {R : Type*} [comm_semiring R] (x y z : R)
-  (hu : is_unit x) : is_coprime (x * y) (x * z) ↔ is_coprime y z :=
+lemma is_coprime_mul_unit_left {R : Type*} [comm_semiring R] {x : R} (hu : is_unit x) (y z : R) :
+  is_coprime (x * y) (x * z) ↔ is_coprime y z :=
 ⟨λ ⟨a, b, h⟩, ⟨a * x, b * x, by { rwa [mul_assoc, mul_assoc] }⟩,
   λ ⟨a, b, h⟩,
     let ⟨x', hx⟩ := hu.exists_left_inv in
