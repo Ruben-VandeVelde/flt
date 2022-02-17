@@ -291,7 +291,7 @@ begin
 
   set k := g.factors.length,
   have hg : g = 3 ^ k,
-  { apply eq_pow,
+  { apply nat.prime_pow_of_unique_prime_dvd,
     { apply ne_of_gt,
       apply nat.gcd_pos_of_pos_left,
       rw int.nat_abs_mul,

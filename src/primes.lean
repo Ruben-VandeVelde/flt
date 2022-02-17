@@ -22,7 +22,7 @@ zero_lt_four.ne.symm
 
 end
 
-lemma eq_pow
+lemma nat.prime_pow_of_unique_prime_dvd
   {n p : ℕ}
   (hpos : n ≠ 0)
   (h : ∀ {d}, nat.prime d → d ∣ n → d = p) :
@@ -55,7 +55,7 @@ begin
   intro H,
   push_neg at H,
   use n.factors.length,
-  apply eq_pow hn,
+  apply nat.prime_pow_of_unique_prime_dvd hn,
   intros p hprime hdvd,
   apply hprime.eq_two_or_odd.resolve_right,
   rw ←nat.odd_iff,
