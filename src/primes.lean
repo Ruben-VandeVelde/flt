@@ -48,19 +48,13 @@ end
 
 lemma nat.exists_odd_prime_and_dvd_or_two_pow (n : ℕ) :
   (∃ k : ℕ, n = 2 ^ k) ∨ ∃ p, nat.prime p ∧ p ∣ n ∧ odd p :=
-begin
-  obtain rfl|hn := eq_or_ne n 0,
-  { exact or.inr ⟨3, nat.prime_three, dvd_zero 3, nat.odd_iff_not_even.mpr (nat.not_even_bit1 1)⟩ },
-  rw or_iff_not_imp_right,
-  intro H,
-  push_neg at H,
-  use n.factors.length,
-  apply nat.prime_pow_of_unique_prime_dvd hn,
-  intros p hprime hdvd,
-  apply hprime.eq_two_or_odd.resolve_right,
-  rw ←nat.odd_iff,
-  exact H p hprime hdvd,
-end
+(eq_or_ne n 0).elim
+  (λ hn, (or.inr
+    ⟨3, nat.prime_three, hn.symm ▸ dvd_zero 3, nat.odd_iff_not_even.mpr (nat.not_even_bit1 1)⟩))
+  (λ hn, or_iff_not_imp_right.mpr
+    (λ H, ⟨n.factors.length, nat.prime_pow_of_unique_prime_dvd hn
+      (λ p hprime hdvd, hprime.eq_two_or_odd.resolve_right
+        (λ hodd, H ⟨p, hprime, hdvd, nat.odd_iff.mpr hodd⟩))⟩))
 
 lemma is_coprime_mul_unit_left {R : Type*} [comm_semiring R] {x : R} (hu : is_unit x) (y z : R) :
   is_coprime (x * y) (x * z) ↔ is_coprime y z :=
