@@ -29,12 +29,8 @@ lemma nat.prime_pow_of_unique_prime_dvd
   n = p ^ n.factors.length :=
 begin
   set k := n.factors.length,
-  rw [←nat.prod_factors hpos, ←list.prod_repeat p k],
-  congr,
-  apply list.eq_repeat_of_mem,
-  intros d hd,
-  rw nat.mem_factors hpos at hd,
-  exact h hd.left hd.right,
+  rw [←nat.prod_factors hpos, ←list.prod_repeat p k,
+    list.eq_repeat_of_mem (λ d hd, h (nat.prime_of_mem_factors hd) (nat.dvd_of_mem_factors hd))],
 end
 
 lemma l0 {n : ℕ} (h : 2 < 2 ^ n) : 2 ≤ n :=
