@@ -11,17 +11,6 @@ import ring_theory.prime
 import ring_theory.unique_factorization_domain
 import tactic
 
-section
-variables {α : Type*} [ordered_semiring α] [nontrivial α] {a b c d : α}
-
-@[field_simps] lemma three_ne_zero : (3:α) ≠ 0 :=
-zero_lt_three.ne.symm
-
-@[field_simps] lemma four_ne_zero : (4:α) ≠ 0 :=
-zero_lt_four.ne.symm
-
-end
-
 lemma nat.prime_pow_of_unique_prime_dvd
   {n p : ℕ}
   (hpos : n ≠ 0)
