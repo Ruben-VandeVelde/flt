@@ -49,6 +49,10 @@ lemma is_coprime_mul_unit_left {R : Type*} [comm_semiring R] {x : R} (hu : is_un
     ⟨a * x', b * x', by rwa
       [←mul_assoc (a * x'), mul_assoc a, ←mul_assoc (b * x'), mul_assoc b, hx, mul_one, mul_one]⟩⟩
 
+lemma is_coprime_mul_unit_right {R : Type*} [comm_semiring R] {x : R} (hu : is_unit x) (y z : R) :
+  is_coprime (y * x) (z * x) ↔ is_coprime y z :=
+by rw [mul_comm y, mul_comm z, is_coprime_mul_unit_left hu]
+
 section
 variables {R : Type*} [comm_ring R] {x y z : R}
 lemma coprime_add_self_pow
@@ -97,10 +101,8 @@ begin
   obtain hn|hn := hn.lt_or_lt,
   { simp only [nat.lt_one_iff.mp hn, forall_false_left, not_irreducible_one, pow_zero] },
   intro h,
-  obtain ⟨k, rfl⟩ := nat.exists_eq_succ_of_ne_zero (pos_of_gt hn).ne',
-  rw nat.succ_lt_succ_iff at hn,
-  obtain ⟨k, rfl⟩ := nat.exists_eq_succ_of_ne_zero hn.ne',
-  rw pow_succ at h,
+  obtain ⟨k, rfl⟩ := nat.exists_eq_add_of_lt hn,
+  rw [pow_succ, add_comm] at h,
   exact (or_iff_left_of_imp ((is_unit_pos_pow_iff (nat.succ_pos _)).mp)).mp (of_irreducible_mul h)
 end
 
