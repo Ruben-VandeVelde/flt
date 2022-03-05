@@ -11,17 +11,31 @@ import ring_theory.prime
 import ring_theory.unique_factorization_domain
 import tactic
 
-lemma is_coprime_mul_unit_left {R : Type*} [comm_semiring R] {x : R} (hu : is_unit x) (y z : R) :
-  is_coprime (x * y) (x * z) ↔ is_coprime y z :=
-⟨λ ⟨a, b, h⟩, ⟨a * x, b * x, by { rwa [mul_assoc, mul_assoc] }⟩,
+section
+variables {R : Type*} [comm_semiring R] {x : R} (hu : is_unit x) (y z : R)
+
+lemma is_coprime_mul_unit_left_left : is_coprime (x * y) z ↔ is_coprime y z :=
+⟨λ ⟨a, b, h⟩, ⟨a * x, b, by rwa [mul_assoc]⟩,
   λ ⟨a, b, h⟩,
     let ⟨x', hx⟩ := hu.exists_left_inv in
-    ⟨a * x', b * x', by rwa
-      [←mul_assoc (a * x'), mul_assoc a, ←mul_assoc (b * x'), mul_assoc b, hx, mul_one, mul_one]⟩⟩
+    ⟨a * x', b, by rwa [←mul_assoc (a * x'), mul_assoc a, hx, mul_one]⟩⟩
 
-lemma is_coprime_mul_unit_right {R : Type*} [comm_semiring R] {x : R} (hu : is_unit x) (y z : R) :
-  is_coprime (y * x) (z * x) ↔ is_coprime y z :=
-by rw [mul_comm y, mul_comm z, is_coprime_mul_unit_left hu]
+lemma is_coprime_mul_unit_left_right : is_coprime y (x * z) ↔ is_coprime y z :=
+is_coprime_comm.trans $ (is_coprime_mul_unit_left_left hu z y).trans is_coprime_comm
+
+lemma is_coprime_mul_unit_left : is_coprime (x * y) (x * z) ↔ is_coprime y z :=
+(is_coprime_mul_unit_left_left hu y (x * z)).trans (is_coprime_mul_unit_left_right hu y z)
+
+lemma is_coprime_mul_unit_right_left : is_coprime (y * x) z ↔ is_coprime y z :=
+mul_comm x y ▸ is_coprime_mul_unit_left_left hu y z
+
+lemma is_coprime_mul_unit_right_right : is_coprime y (z * x) ↔ is_coprime y z :=
+mul_comm x z ▸ is_coprime_mul_unit_left_right hu y z
+
+lemma is_coprime_mul_unit_right : is_coprime (y * x) (z * x) ↔ is_coprime y z :=
+(is_coprime_mul_unit_right_left hu y (z * x)).trans (is_coprime_mul_unit_right_right hu y z)
+
+end
 
 section
 variables {R : Type*} [comm_ring R] {x y z : R}
