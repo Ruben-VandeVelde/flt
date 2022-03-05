@@ -1,4 +1,6 @@
-import .primes
+import data.int.parity
+import ring_theory.int.basic
+import ring_theory.prime
 
 def odd_prime_or_four (z : ℤ) : Prop :=
   z = 4 ∨ (prime z ∧ odd z)
@@ -50,8 +52,13 @@ begin
   { refine ⟨4, ⟨2 ^ (k - 2), _⟩, or.inl rfl⟩,
     norm_cast,
     calc 2 ^ k
-        = 2 ^ 2 * 2 ^ (k - 2) : (pow_mul_pow_sub _ $ l0 n2).symm
-    ... = 4 * 2 ^ (k - 2) : by norm_num },
+        = 2 ^ 2 * 2 ^ (k - 2) : (pow_mul_pow_sub _ _).symm
+    ... = 4 * 2 ^ (k - 2) : by norm_num,
+
+    rcases k with (_|_|_),
+    { exfalso, norm_num at n2 },
+    { exfalso, exact lt_irrefl _ n2 },
+    { exact le_add_self } },
   { rw nat.prime_iff_prime_int at hp,
     rw ←int.odd_coe_nat at hodd,
     exact ⟨p, int.coe_nat_dvd.mpr hdvd, or.inr ⟨hp, hodd⟩⟩ },

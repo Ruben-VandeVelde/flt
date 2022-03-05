@@ -11,15 +11,6 @@ import ring_theory.prime
 import ring_theory.unique_factorization_domain
 import tactic
 
-lemma l0 {n : ℕ} (h : 2 < 2 ^ n) : 2 ≤ n :=
-begin
-  rcases n with (_|_|_),
-  { exfalso, norm_num at h },
-  { exfalso, exact lt_irrefl _ h, },
-  { rw le_add_iff_nonneg_left (2 : nat),
-    exact zero_le _ }
-end
-
 lemma is_coprime_mul_unit_left {R : Type*} [comm_semiring R] {x : R} (hu : is_unit x) (y z : R) :
   is_coprime (x * y) (x * z) ↔ is_coprime y z :=
 ⟨λ ⟨a, b, h⟩, ⟨a * x, b * x, by { rwa [mul_assoc, mul_assoc] }⟩,
