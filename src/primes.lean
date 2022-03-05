@@ -11,17 +11,6 @@ import ring_theory.prime
 import ring_theory.unique_factorization_domain
 import tactic
 
-lemma nat.prime_pow_of_unique_prime_dvd
-  {n p : ℕ}
-  (hpos : n ≠ 0)
-  (h : ∀ {d}, nat.prime d → d ∣ n → d = p) :
-  n = p ^ n.factors.length :=
-begin
-  set k := n.factors.length,
-  rw [←nat.prod_factors hpos, ←list.prod_repeat p k,
-    list.eq_repeat_of_mem (λ d hd, h (nat.prime_of_mem_factors hd) (nat.dvd_of_mem_factors hd))],
-end
-
 lemma l0 {n : ℕ} (h : 2 < 2 ^ n) : 2 ≤ n :=
 begin
   rcases n with (_|_|_),
@@ -30,16 +19,6 @@ begin
   { rw le_add_iff_nonneg_left (2 : nat),
     exact zero_le _ }
 end
-
-lemma nat.exists_odd_prime_and_dvd_or_two_pow (n : ℕ) :
-  (∃ k : ℕ, n = 2 ^ k) ∨ ∃ p, nat.prime p ∧ p ∣ n ∧ odd p :=
-(eq_or_ne n 0).elim
-  (λ hn, (or.inr
-    ⟨3, nat.prime_three, hn.symm ▸ dvd_zero 3, nat.odd_iff_not_even.mpr (nat.not_even_bit1 1)⟩))
-  (λ hn, or_iff_not_imp_right.mpr
-    (λ H, ⟨n.factors.length, nat.prime_pow_of_unique_prime_dvd hn
-      (λ p hprime hdvd, hprime.eq_two_or_odd.resolve_right
-        (λ hodd, H ⟨p, hprime, hdvd, nat.odd_iff.mpr hodd⟩))⟩))
 
 lemma is_coprime_mul_unit_left {R : Type*} [comm_semiring R] {x : R} (hu : is_unit x) (y z : R) :
   is_coprime (x * y) (x * z) ↔ is_coprime y z :=

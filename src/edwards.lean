@@ -311,7 +311,7 @@ end
 
 lemma prod_map_norm {d : ℤ} {s : multiset ℤ√d} :
   (s.map zsqrtd.norm).prod = zsqrtd.norm s.prod :=
-multiset.prod_hom s zsqrtd.norm_monoid_hom
+multiset.prod_hom s (zsqrtd.norm_monoid_hom : ℤ√d →* ℤ)
 
 lemma factors_unique_prod : ∀{f g : multiset ℤ√-3},
   (∀x∈f, odd_prime_or_four (zsqrtd.norm x)) →
