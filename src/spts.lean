@@ -183,7 +183,7 @@ begin
       obtain ⟨q, rfl⟩ := pdvd,
       have hqpos : q ≠ 0 := right_ne_zero_of_mul hgpos,
       have : |p.sign * q| = |q|,
-      { rw [abs_mul, int.abs_sign pprime.ne_zero, one_mul] },
+      { rw [abs_mul, int.abs_sign_of_nonzero pprime.ne_zero, one_mul] },
       refine IH q.nat_abs _ c (p.sign * q) _ _ _ _,
       { rw [int.nat_abs_mul],
         apply lt_mul_of_one_lt_left (int.nat_abs_pos_of_ne_zero hqpos),
