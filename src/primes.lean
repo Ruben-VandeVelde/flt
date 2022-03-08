@@ -12,32 +12,6 @@ import ring_theory.unique_factorization_domain
 import tactic
 
 section
-variables {R : Type*} [comm_semiring R] {x : R} (hu : is_unit x) (y z : R)
-
-lemma is_coprime_mul_unit_left_left : is_coprime (x * y) z ↔ is_coprime y z :=
-⟨λ ⟨a, b, h⟩, ⟨a * x, b, by rwa [mul_assoc]⟩,
-  λ ⟨a, b, h⟩,
-    let ⟨x', hx⟩ := hu.exists_left_inv in
-    ⟨a * x', b, by rwa [←mul_assoc (a * x'), mul_assoc a, hx, mul_one]⟩⟩
-
-lemma is_coprime_mul_unit_left_right : is_coprime y (x * z) ↔ is_coprime y z :=
-is_coprime_comm.trans $ (is_coprime_mul_unit_left_left hu z y).trans is_coprime_comm
-
-lemma is_coprime_mul_unit_left : is_coprime (x * y) (x * z) ↔ is_coprime y z :=
-(is_coprime_mul_unit_left_left hu y (x * z)).trans (is_coprime_mul_unit_left_right hu y z)
-
-lemma is_coprime_mul_unit_right_left : is_coprime (y * x) z ↔ is_coprime y z :=
-mul_comm x y ▸ is_coprime_mul_unit_left_left hu y z
-
-lemma is_coprime_mul_unit_right_right : is_coprime y (z * x) ↔ is_coprime y z :=
-mul_comm x z ▸ is_coprime_mul_unit_left_right hu y z
-
-lemma is_coprime_mul_unit_right : is_coprime (y * x) (z * x) ↔ is_coprime y z :=
-(is_coprime_mul_unit_right_left hu y (z * x)).trans (is_coprime_mul_unit_right_right hu y z)
-
-end
-
-section
 variables {R : Type*} [comm_ring R] {x y z : R}
 lemma coprime_add_self_pow
   {n : ℕ}
@@ -76,28 +50,6 @@ begin
       contrapose! hodd with heqtwomul,
       rw [←int.even_iff_not_odd, ←int.nat_abs_even, ←int.even_coe_nat],
       exact ⟨_, heqtwomul⟩ } },
-end
-
-section
-theorem is_unit_of_irreducible_pow {α} [monoid α] {x : α} {n : ℕ} (hn : n ≠ 1) :
-  irreducible (x ^ n) → is_unit x :=
-begin
-  obtain hn|hn := hn.lt_or_lt,
-  { simp only [nat.lt_one_iff.mp hn, forall_false_left, not_irreducible_one, pow_zero] },
-  intro h,
-  obtain ⟨k, rfl⟩ := nat.exists_eq_add_of_lt hn,
-  rw [pow_succ, add_comm] at h,
-  exact (or_iff_left_of_imp (is_unit_pow_succ_iff.mp)).mp (of_irreducible_mul h)
-end
-
-
-variables {α : Type*} {β : Type*} {γ : Type*} {δ : Type*}
-variables [cancel_comm_monoid_with_zero α]
-
-
-lemma pow_not_prime {x : α} {n : ℕ} (hn : n ≠ 1) : ¬ prime (x ^ n) :=
-λ hp, hp.not_unit $ is_unit.pow _ $ is_unit_of_irreducible_pow hn $ hp.irreducible
-
 end
 
 lemma two_not_cube (r : ℕ) : r ^ 3 ≠ 2 :=
