@@ -95,8 +95,3 @@ begin
     apply hdvd1,
     rwa [←int.nat_abs_dvd, ←hk, int.nat_abs_dvd] }
 end
-
-namespace int
-theorem gcd_pos_iff {i j : ℤ} : 0 < gcd i j ↔ i ≠ 0 ∨ j ≠ 0 :=
-pos_iff_ne_zero.trans $ (not_congr int.gcd_eq_zero_iff).trans not_and_distrib
-end int
