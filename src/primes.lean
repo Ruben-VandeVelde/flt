@@ -69,15 +69,35 @@ end
 
 -- todo square neg_square and neg_pow_bit0
 
+section
+variables {R : Type*} [comm_ring R] [is_domain R] [is_principal_ideal_ring R] [gcd_monoid R]
+
+lemma irreducible.coprime_of_not_dvd_of_dvd {p k m : R}
+  (hp : irreducible p) (hdvd1 : ¬(p ∣ m)) (hdvd2 : k ∣ m) : is_coprime p k :=
+(irreducible.coprime_iff_not_dvd hp).mpr $ λ hdvd1', hdvd1 (hdvd1'.trans hdvd2)
+
+lemma irreducible.dvd_of_dvd_mul_left {p k m n : R}
+  (hdvd1 : ¬(p ∣ m))
+  (hdvd2 : k ∣ m)
+  (hp : irreducible p)
+  (h : k ∣ p * n) : k ∣ n :=
+(hp.coprime_of_not_dvd_of_dvd hdvd1 hdvd2).symm.dvd_of_dvd_mul_left h
+
+end
+
 lemma int.dvd_mul_cancel_prime {p : ℕ} {n k : ℤ}
   (hne : k.nat_abs ≠ p)
   (hp : nat.prime p)
   (hk : prime k)
   (h : k ∣ p * n) : k ∣ n :=
 begin
-  apply (prime.dvd_or_dvd hk h).resolve_left,
-  rw int.prime_iff_nat_abs_prime at hk,
-  rwa [int.coe_nat_dvd_right, nat.prime_dvd_prime_iff_eq hk hp]
+  refine irreducible.dvd_of_dvd_mul_left _ dvd_rfl _ h,
+  rw [int.coe_nat_dvd_left, prime_dvd_prime_iff_eq],
+  exact hne.symm,
+  rwa ←nat.prime_iff,
+  rwa [←nat.prime_iff, ←int.prime_iff_nat_abs_prime],
+  apply prime.irreducible,
+  rwa ←nat.prime_iff_prime_int,
 end
 
 lemma int.dvd_mul_cancel_prime' {p k m n : ℤ}
