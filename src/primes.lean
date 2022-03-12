@@ -85,33 +85,9 @@ lemma irreducible.dvd_of_dvd_mul_left {p k m n : R}
 
 end
 
-lemma int.dvd_mul_cancel_prime {p : ℕ} {n k : ℤ}
-  (hne : k.nat_abs ≠ p)
-  (hp : nat.prime p)
-  (hk : prime k)
-  (h : k ∣ p * n) : k ∣ n :=
-begin
-  refine irreducible.dvd_of_dvd_mul_left _ dvd_rfl _ h,
-  rw [int.coe_nat_dvd_left, prime_dvd_prime_iff_eq],
-  exact hne.symm,
-  rwa ←nat.prime_iff,
-  rwa [←nat.prime_iff, ←int.prime_iff_nat_abs_prime],
-  apply prime.irreducible,
-  rwa ←nat.prime_iff_prime_int,
-end
-
 lemma int.dvd_mul_cancel_prime' {p k m n : ℤ}
   (hdvd1 : ¬(p ∣ m))
   (hdvd2 : k ∣ m)
   (hp : prime p)
-  (hk : prime k)
   (h : k ∣ p * n) : k ∣ n :=
-begin
-  rw int.prime_iff_nat_abs_prime at hp,
-  apply int.dvd_mul_cancel_prime _ hp hk,
-  { apply dvd_trans h (mul_dvd_mul_right _ _),
-    rw int.dvd_nat_abs },
-  { rintro hk,
-    apply hdvd1,
-    rwa [←int.nat_abs_dvd, ←hk, int.nat_abs_dvd] }
-end
+irreducible.dvd_of_dvd_mul_left hdvd1 hdvd2 hp.irreducible h
