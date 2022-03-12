@@ -302,8 +302,7 @@ begin
     apply basic _ hdprime; apply dvd_trans hddvdg; rw hg',
     exacts [int.gcd_dvd_left _ _, int.gcd_dvd_right _ _] },
   refine ⟨k, hg, _⟩,
-  by_contra H,
-  push_neg at H,
+  by_contra' H,
   rw ←pow_mul_pow_sub _ H at hg,
   have : ¬is_unit (3 : ℤ),
   { rw int.is_unit_iff_nat_abs_eq, norm_num },
@@ -765,20 +764,14 @@ lemma flt_three
   (hc : c ≠ 0) :
   a ^ 3 + b ^ 3 ≠ c ^ 3 :=
 begin
-  suffices h : ∀ (k : ℕ) (a b c : ℤ),
-    k = (a * b * c).nat_abs →
-    a ≠ 0 → b ≠ 0 → c ≠ 0 → a ^ 3 + b ^ 3 ≠ c ^ 3,
-  { exact h (a * b * c).nat_abs a b c rfl ha hb hc },
-  intro k,
-  refine nat.strong_induction_on k _,
-  intros k' IH x y z hk hxpos hypos hzpos H,
+  induction h : (a * b * c).nat_abs using nat.strong_induction_on with k' IH generalizing a b c,
+  intro H,
   obtain ⟨x'', y'', z'', hxle, hyle, hzle, hcoprime⟩ :=
-    exists_coprime zero_lt_three hxpos hypos hzpos H,
+    exists_coprime zero_lt_three ha hb hc H,
   obtain ⟨x', y', z', hx'pos, hy'pos, hz'pos, hsmaller, hsolution⟩ := descent x'' y'' z'' hcoprime,
-  refine IH (x' * y' * z').nat_abs _ _ _ _ rfl hx'pos hy'pos hz'pos hsolution,
+  refine IH (x' * y' * z').nat_abs _ hx'pos hy'pos hz'pos rfl hsolution,
   apply lt_of_lt_of_le hsmaller,
-  rw hk,
+  rw ←h,
   simp only [int.nat_abs_mul],
-  apply nat.mul_le_mul _ hzle,
-  apply nat.mul_le_mul hxle hyle,
+  exact nat.mul_le_mul (nat.mul_le_mul hxle hyle) hzle,
 end
