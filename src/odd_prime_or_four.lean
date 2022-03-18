@@ -157,8 +157,8 @@ lemma odd_factors.zero : odd_factors 0 = 0 := rfl
 
 lemma odd_factors.not_two_mem (x : ℤ) : (2 : ℤ) ∉ odd_factors x :=
 begin
-  simp only [odd_factors, int.even_bit0, not_true, not_false_iff, int.odd_iff_not_even,
-    and_false, multiset.mem_filter],
+  simp only [odd_factors, even_bit0, not_true, not_false_iff, int.odd_iff_not_even, and_false,
+    multiset.mem_filter],
 end
 
 lemma odd_factors.nonneg {z a : ℤ} (ha : a ∈ odd_factors z) : 0 ≤ a :=

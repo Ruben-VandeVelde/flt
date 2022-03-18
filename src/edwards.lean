@@ -481,7 +481,7 @@ begin
     apply ih _ _ huvcoprime rfl,
     rw [←hn, huvprod, int.nat_abs_mul, lt_mul_iff_one_lt_left (int.nat_abs_pos_of_ne_zero huv)],
     norm_num },
-  { convert nat.even_zero,
+  { convert even_zero,
     simp only [even_factor_exp, multiset.count_eq_zero, hn],
     contrapose! hparity with hfactor,
     exact unique_factorization_monoid.dvd_of_mem_normalized_factors hfactor }

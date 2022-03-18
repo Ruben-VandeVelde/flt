@@ -138,7 +138,7 @@ begin
   have ha : a.norm ≠ 0,
   { rw [←hfactor, mul_ne_zero_iff, and_iff_left hgpos],
     rintro rfl,
-    exact int.odd_iff_not_even.mp hodd int.even_zero },
+    exact int.odd_iff_not_even.mp hodd even_zero },
   by_cases H : even (zsqrtd.norm a),
   { obtain ⟨c, hc⟩ := factors2 H,
     obtain ⟨g', rfl⟩ : 4 ∣ g,
@@ -273,7 +273,7 @@ begin
 
   have h0 : x ≠ 0,
   { rintro rfl,
-    simpa only [int.even_zero, not_true, int.odd_iff_not_even] using hodd },
+    simpa only [even_zero, not_true, int.odd_iff_not_even] using hodd },
   have h0' : 1 ≤ abs x,
   { rwa [←int.sub_one_lt_iff, sub_self, abs_pos] },
   cases h0'.eq_or_lt with h h,

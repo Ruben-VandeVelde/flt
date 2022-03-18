@@ -31,7 +31,7 @@ lemma int.factor_div (a x : ℤ) (hodd : odd x) :
 begin
   have h0' : x ≠ 0,
   { rintro rfl,
-    simpa only [int.even_zero, not_true, int.odd_iff_not_even] using hodd },
+    simpa only [even_zero, not_true, int.odd_iff_not_even] using hodd },
   set c := a % x with hc,
   by_cases H : 2 * c.nat_abs < x.nat_abs,
   { exact ⟨a / x, c, int.mod_add_div' a x, H⟩ },
