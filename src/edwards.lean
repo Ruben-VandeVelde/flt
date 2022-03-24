@@ -568,14 +568,6 @@ begin
     { right, refl } },
 end
 
-lemma associated'_iff_eq
-  {x A : ℤ√-3}
-  (hx : 0 ≤ x.re)
-  (hA : 0 ≤ A.re)
-  (h : x ≠ A.conj) :
-  x = A ↔ associated' x A :=
-by simp only [eq_or_eq_conj_iff_associated'_of_nonneg hx hA, h, or_false]
-
 lemma step5' -- lemma page 54
   (a : ℤ√-3)
   (r : ℤ)
@@ -616,10 +608,10 @@ begin
   intros A HA,
   have h2x := h2 x hx,
 
-  rw associated'_iff_eq h2x.1 (h2 A HA).1,
-  { exact ⟨associated'.norm_eq, factorization'.associated'_of_norm_eq hcoprime hx HA⟩ },
-
-  intro H,
+  refine ⟨congr_arg _, λ h, _⟩,
+  have hassoc := factorization'.associated'_of_norm_eq hcoprime hx HA h,
+  have eq_or_eq_conj := (eq_or_eq_conj_iff_associated'_of_nonneg h2x.1 (h2 A HA).1).mp hassoc,
+  refine eq_or_eq_conj.resolve_right (λ H, _),
   apply no_conj f,
   { intro HH,
     apply h2x.2.1,
