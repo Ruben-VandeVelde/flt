@@ -218,13 +218,12 @@ lemma odd_prime_or_four.factors'
     is_coprime u.re u.im ∧
     u.norm < a.norm :=
 begin
-  obtain h1|h1 := h2.lt_or_lt,
-  { have := spts.pos_of_coprime' hcoprime,
-    rw [←int.add_one_le_iff, zero_add, ←not_lt] at this,
-    exact (this h1).elim },
-  rw [←int.add_one_le_iff, ←mul_two, one_mul] at h1,
-  obtain h2|h2 := h1.eq_or_lt,
-  { exact (spts.not_two _ h2.symm).elim },
+  have h2 : 2 < a.norm,
+  { apply lt_of_le_of_ne _ (spts.not_two _).symm,
+    rw [←one_mul (2 : ℤ), mul_two, int.add_one_le_iff],
+    apply lt_of_le_of_ne _ h2.symm,
+    rw [←int.sub_one_lt_iff, sub_self],
+    exact spts.pos_of_coprime' hcoprime },
   obtain ⟨p, hpdvd, hp⟩ := odd_prime_or_four.exists_and_dvd h2,
   obtain ⟨q', hcd, hc, hd⟩ := odd_prime_or_four.factors a p hcoprime hp hpdvd,
   rw [←abs_dvd, hcd] at hpdvd,
