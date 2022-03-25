@@ -128,7 +128,7 @@ lemma factors'
   (g : ℤ)
   (hodd : odd f)
   (hgpos : g ≠ 0)
-  (hfactor : (f * g) = a.norm)
+  (hfactor : f * g = a.norm)
   (hnotform : ∀ (f' : ℤ), f' ∣ g → odd f' → (∃ (p : ℤ√-3), abs f' = p.norm)) :
   ∃ (p : ℤ√-3), abs f = p.norm :=
 begin
@@ -144,7 +144,7 @@ begin
     obtain ⟨g', rfl⟩ : 4 ∣ g,
     { apply is_coprime.dvd_of_dvd_mul_left,
       { show is_coprime _ f,
-        rw [int.odd_iff_not_even, even_iff_two_dvd, ←prime.coprime_iff_not_dvd int.prime_two] at hodd,
+        rw [int.odd_iff_not_even, even_iff_two_dvd, ←int.prime_two.coprime_iff_not_dvd] at hodd,
         convert hodd.pow_left,
         rw sq,
         norm_num },
@@ -182,22 +182,20 @@ begin
       obtain ⟨c, -, hcd⟩ := spts.mul_of_dvd'' pdvd' pprime',
       obtain ⟨q, rfl⟩ := pdvd,
       have hqpos : q ≠ 0 := right_ne_zero_of_mul hgpos,
-      have : |p.sign * q| = |q|,
-      { rw [abs_mul, int.abs_sign_of_nonzero pprime.ne_zero, one_mul] },
-      refine IH q.nat_abs _ c (p.sign * q) _ _ _ _,
+      have : (p.sign * q).nat_abs = q.nat_abs,
+      { rw [int.nat_abs_mul, int.nat_abs_sign_of_nonzero pprime.ne_zero, one_mul] },
+      refine IH q.nat_abs _ c (p.sign * q) _ _ _ this,
       { rw [int.nat_abs_mul],
         apply lt_mul_of_one_lt_left (int.nat_abs_pos_of_ne_zero hqpos),
         rw int.prime_iff_nat_abs_prime at pprime,
         exact pprime.one_lt },
-      { rwa [←abs_eq_zero, this, abs_eq_zero] },
+      { rwa [←int.nat_abs_eq_zero, this, int.nat_abs_eq_zero] },
       { rw [←mul_right_inj' pprime'.ne_zero, ←hcd, mul_left_comm, ←hfactor, ←HA, ←mul_assoc (|p|),
           mul_comm (|p|), int.sign_mul_abs] },
       { intros f' hf'dvd hf'odd,
         refine hnotform f' _ hf'odd,
-        rw [←dvd_abs, this, dvd_abs] at hf'dvd,
-        exact hf'dvd.mul_left _ },
-      { zify,
-        rw [←int.abs_eq_nat_abs, this, int.abs_eq_nat_abs] } } }
+        rw [←int.dvd_nat_abs, this, int.dvd_nat_abs] at hf'dvd,
+        exact hf'dvd.mul_left _ } } }
 end
 
 lemma zqrtd.factor_div (a : ℤ√-3) {x : ℤ} (hodd : odd x) :
