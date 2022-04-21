@@ -86,6 +86,7 @@ begin
   have : even a.re ↔ even a.im,
   { simpa [zsqrtd.norm_def] with parity_simps using heven },
   apply (iff_iff_and_or_not_and_not.mp this).resolve_left,
+  rw [even_iff_two_dvd, even_iff_two_dvd],
   rintro ⟨hre, him⟩,
   have := hcoprime.is_unit_of_dvd' hre him,
   rw is_unit_iff_dvd_one at this,
@@ -200,7 +201,7 @@ begin
   obtain hp|⟨hpprime, hpodd⟩ := hp,
   { rw hp at hdvd ⊢,
     have heven : even a.norm,
-    { apply dvd_trans _ hdvd,
+    { apply even_iff_two_dvd.mpr (dvd_trans _ hdvd),
       norm_num },
     exact step1'' hcoprime hp hq heven },
   { apply step2 hcoprime hdvd hpprime }
@@ -476,13 +477,14 @@ begin
   { obtain ⟨u, huvcoprime, huvprod⟩ := step1' hcoprime hparity,
     have huv := spts.ne_zero_of_coprime' _ huvcoprime,
     rw [huvprod, factors_2_even huv, nat.even_add],
-    apply iff_of_true (dvd_refl _),
+    apply iff_of_true even_two,
     apply ih _ _ huvcoprime rfl,
     rw [←hn, huvprod, int.nat_abs_mul, lt_mul_iff_one_lt_left (int.nat_abs_pos_of_ne_zero huv)],
     norm_num },
   { convert even_zero,
     simp only [even_factor_exp, multiset.count_eq_zero, hn],
     contrapose! hparity with hfactor,
+    rw even_iff_two_dvd,
     exact unique_factorization_monoid.dvd_of_mem_normalized_factors hfactor }
 end
 

@@ -142,6 +142,7 @@ begin
   { simp [hb, hc] with parity_simps},
   obtain ⟨q, hq⟩ : even (c + b),
   { simp [hb, hc] with parity_simps},
+  rw ←two_mul at hp hq,
   obtain rfl : p + q = c,
   { apply int.eq_of_mul_eq_mul_left two_ne_zero,
     rw [mul_add, ←hp, ←hq],
@@ -258,7 +259,7 @@ begin
 
     have hne2 : d ≠ 2,
     { rintro rfl,
-      change even _ at hdright,
+      rw [int.coe_nat_bit0, int.coe_nat_one, ←even_iff_two_dvd] at hdright,
       simpa [hparity, two_ne_zero] with parity_simps using hdright },
     have : 2 < d := lt_of_le_of_ne (hdprime.two_le) hne2.symm,
     have : 3 < d := lt_of_le_of_ne (this) hne3.symm,
@@ -415,6 +416,7 @@ lemma int.gcd1_coprime13 (u v : ℤ)
   (notdvd_3_3 : ¬3 ∣ u + 3 * v) :
   is_coprime (2 * u) (u + 3 * v) :=
 begin
+  rw even_iff_two_dvd at this,
   apply is_coprime_of_prime_dvd,
   { rintro ⟨-, h2⟩,
     norm_num [h2] at this },
@@ -486,7 +488,8 @@ begin
   have : ¬even (u + 3 * v),
   { simp [huvodd] with parity_simps },
   have notdvd_2_2 : ¬(2 ∣ u - 3 * v),
-  { exact ‹¬even (u - 3 * v)› },
+  { rw ←even_iff_two_dvd,
+    exact ‹¬even (u - 3 * v)› },
   have hddd : ¬(3 ∣ p),
   { intro H,
     have : 3 ∣ p ^ 2 + 3 * q ^ 2,
@@ -549,7 +552,8 @@ begin
     intros k hkprime hkdvdleft hkdvdright,
     apply hkprime.not_unit,
     have hkdvdright' : k ∣ v,
-    { exact int.dvd_mul_cancel_prime' haddodd hkdvdleft int.prime_two hkdvdright },
+    { rw even_iff_two_dvd at haddodd,
+      exact int.dvd_mul_cancel_prime' haddodd hkdvdleft int.prime_two hkdvdright },
 
     apply huvcoprime.is_unit_of_dvd' _ hkdvdright',
     rw [←add_sub_cancel u v],
@@ -562,7 +566,8 @@ begin
     apply hkprime.not_unit,
 
     have hkdvdright' : k ∣ v,
-    { exact int.dvd_mul_cancel_prime' hsubodd hkdvdleft int.prime_two hkdvdright },
+    { rw even_iff_two_dvd at hsubodd,
+      exact int.dvd_mul_cancel_prime' hsubodd hkdvdleft int.prime_two hkdvdright },
 
     apply huvcoprime.is_unit_of_dvd' _ hkdvdright',
     rw [←sub_add_cancel u v],
@@ -573,6 +578,7 @@ begin
       norm_num [h1] at haddodd },
     intros k hkprime hkdvdleft hkdvdright,
     apply hkprime.not_unit,
+    rw even_iff_two_dvd at haddodd,
     apply huvcoprime.is_unit_of_dvd';
       apply int.dvd_mul_cancel_prime' haddodd hkdvdleft int.prime_two,
 
@@ -591,7 +597,7 @@ lemma descent_gcd3_coprime {q s : ℤ}
   is_coprime (3 ^ 2 * 2 * s) (q ^ 2 + 3 * s ^ 2) :=
 begin
   have h2ndvd : ¬(2 ∣ (q ^ 2 + 3 * s ^ 2)),
-  { change ¬(even _),
+  { rw ←even_iff_two_dvd,
     simp [two_ne_zero, hodd'] with parity_simps },
 
   have h3ndvd : ¬(3 ∣ (q ^ 2 + 3 * s ^ 2)),

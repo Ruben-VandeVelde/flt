@@ -76,11 +76,15 @@ begin
     have h0 : (4 : ℤ) = 2 ^ 2,
     { norm_num },
     rw h0 at h,
-    refine int.even_iff_not_odd.mp (associated.dvd _) podd,
+    refine int.even_iff_not_odd.mp _ podd,
+    rw even_iff_two_dvd,
+    apply (associated.dvd _),
     exact ((pp.dvd_prime_iff_associated int.prime_two).mp (pp.dvd_of_dvd_pow h)).symm },
   { exfalso,
     rw int.odd_iff_not_even at aodd,
-    refine aodd (dvd_trans _ h),
+    refine aodd _,
+    rw even_iff_two_dvd,
+    refine (dvd_trans _ h),
     norm_num },
   { rwa prime.dvd_prime_iff_associated pp ap at h }
 end
@@ -258,7 +262,7 @@ begin
   apply int.eq_of_associated_of_nonneg,
   { have := unique_factorization_monoid.normalized_factors_prod ha.ne',
     apply associated.trans _ this,
-    obtain ⟨m, hm⟩ := heven,
+    obtain ⟨m, hm⟩ := even_iff_two_dvd.mp heven,
     rw [even_and_odd_factors' _, multiset.prod_add, factors_odd_prime_or_four, multiset.prod_add,
       hm, nat.mul_div_right _ zero_lt_two, multiset.prod_repeat, multiset.prod_repeat, pow_mul],
     exact associated.refl _ },
@@ -307,5 +311,5 @@ lemma factors_odd_prime_or_four.pow
   factors_odd_prime_or_four (z ^ n) = n • factors_odd_prime_or_four z :=
 begin
   simp only [factors_odd_prime_or_four, nsmul_add, multiset.nsmul_repeat, even_factor_exp.pow,
-    nat.mul_div_assoc _ hz, odd_factors.pow],
+    nat.mul_div_assoc _ (even_iff_two_dvd.mp hz), odd_factors.pow],
 end

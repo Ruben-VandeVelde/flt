@@ -172,7 +172,13 @@ begin
       have : p ∣ a.norm,
       { rw [←hfactor],
         exact pdvd.mul_left _ },
-      have podd : odd p := int.odd_iff_not_even.mpr (λ X, H (dvd_trans X this)),
+      have podd : odd p := int.odd_iff_not_even.mpr (by {
+        intro X,
+        apply H,
+        apply even_iff_two_dvd.mpr,
+        apply dvd_trans _ this,
+        apply even_iff_two_dvd.mp X
+      }),
       obtain ⟨A, HA⟩ := hnotform p pdvd podd,
       have pprime' := pprime.abs,
       rw [HA] at pprime',

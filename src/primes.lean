@@ -48,7 +48,7 @@ begin
         mul_sub, sub_lt_iff_lt_add, two_mul, int.abs_eq_nat_abs, add_lt_add_iff_left],
       apply lt_of_le_of_ne H,
       contrapose! hodd with heqtwomul,
-      rw [←int.even_iff_not_odd, ←int.nat_abs_even, ←int.even_coe_nat],
+      rw [←int.even_iff_not_odd, ←int.nat_abs_even, ←int.even_coe_nat, even_iff_two_dvd],
       exact ⟨_, heqtwomul⟩ } },
 end
 
