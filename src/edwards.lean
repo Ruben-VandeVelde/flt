@@ -207,6 +207,15 @@ begin
   { apply step2 hcoprime hdvd hpprime }
 end
 
+/--
+Given coprime `a : ℤ√-3` with norm not equal to one, there are `u q : ℤ√-3` such that `a = q * u`
+and:
+* 0 ≤ q.re
+* q.im ≠ 0 ∧
+* odd_prime_or_four q.norm
+* is_coprime u.re u.im
+* u.norm < a.norm
+-/
 lemma odd_prime_or_four.factors'
   {a : ℤ√-3}
   (h2 : a.norm ≠ 1)
@@ -569,6 +578,9 @@ begin
     { right, refl } },
 end
 
+/--
+If the norm of coprime `a : ℤ√-3` is a cube, the factors of `a` come in groups of threes.
+-/
 lemma step5' -- lemma page 54
   (a : ℤ√-3)
   (r : ℤ)
@@ -625,6 +637,9 @@ begin
     rwa [H, zsqrtd.conj_conj] },
 end
 
+/--
+If the norm of coprime `a : ℤ√-3` is a cube, `a` is the cube of a `ℤ√-3` as well.
+-/
 lemma step5 -- lemma page 54
   (a : ℤ√-3)
   (r : ℤ)
@@ -641,15 +656,15 @@ begin
     rw [h1, hf, multiset.prod_nsmul, neg_pow_bit1] },
 end
 
+/--
+If `a ^ 2 + 3 * b ^ 2` is a cube with `a` and `b` coprime, then `a` and `b` are of a particular
+form.
+-/
 lemma step6
   (a b r : ℤ)
   (hcoprime : is_coprime a b)
-  (hcube : r ^ 3 = a ^ 2 + 3 * b ^ 2)
-  :
-  ∃ p q,
-    a = p ^ 3 - 9 * p * q ^ 2 ∧
-    b = 3 * p ^ 2 * q - 3 * q ^ 3
-  :=
+  (hcube : r ^ 3 = a ^ 2 + 3 * b ^ 2) :
+  ∃ p q, a = p ^ 3 - 9 * p * q ^ 2 ∧ b = 3 * p ^ 2 * q - 3 * q ^ 3 :=
 begin
   set A : ℤ√-3 := ⟨a, b⟩,
   have hcube' : r ^ 3 = A.norm,

@@ -21,6 +21,9 @@ begin
 end
 
 -- Edwards p49 step (2')
+/--
+If the norm of `a : ℤ√-3` is even, it is four times the norm of a `ℤ√-3`.
+-/
 lemma factors2
   {a : ℤ√-3}
   (heven : even a.norm) :
@@ -257,6 +260,9 @@ begin
 end
 
 -- Edwards p50 step (5')
+/--
+If an odd integer `x` divides the norm of coprime `a : ℤ√-3`, `|x|` is itself the norm of a `ℤ√-3`.
+-/
 lemma factors
   (a : ℤ√-3)
   (x : ℤ)
