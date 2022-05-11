@@ -10,6 +10,15 @@ import ring_theory.int.basic
 import .primes
 import .edwards
 
+/-!
+# Fermat's Last Theorem for the case n = 3
+
+There are no non-zero integers `a`, `b` and `c` such that `a ^ 3 + b ^ 3 = c ^ 3`.
+
+This follows the proof by Euler as presented by H. M. Edwards in
+*Fermat's Last Theorem: A Genetic Introduction to Algebraic Number Theory*, pp. 39-54.
+-/
+
 def flt_solution
   (n : ℕ)
   (a b c : ℤ) :=
