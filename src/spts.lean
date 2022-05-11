@@ -302,7 +302,7 @@ begin
   obtain ⟨C', HC', HCDcoprime⟩ := zsqrtd.exists_coprime_of_gcd_pos hgpos,
   have h5 : x * y = g ^ 2 * C'.norm,
   { rw [←hy, HC', zsqrtd.norm_mul, zsqrtd.norm_int_cast, ←pow_two] },
-  obtain ⟨z, hz⟩ : (g ^ 2 : ℤ) ∣ y,
+  obtain ⟨z, rfl⟩ : (g ^ 2 : ℤ) ∣ y,
   { have : (g ^ 2 : ℤ) ∣ x * y,
     { rw h5, exact dvd_mul_right _ _ },
     apply is_coprime.dvd_of_dvd_mul_left _ this,
@@ -321,7 +321,7 @@ begin
   have h6 : x * z = C'.norm,
   { have hgnezero := int.coe_nat_ne_zero_iff_pos.mpr hgpos,
     apply int.eq_of_mul_eq_mul_left (pow_ne_zero 2 hgnezero),
-    rw [←h5, hz, mul_left_comm] },
+    rw [←h5, mul_left_comm] },
 
   have h8 : z ≠ 0,
   { apply right_ne_zero_of_mul,
@@ -332,7 +332,7 @@ begin
   refine IH w.nat_abs _ C' w HCDcoprime hwodd _ rfl,
   { calc w.nat_abs
         ≤ z.nat_abs : nat.le_of_dvd (int.nat_abs_pos_of_ne_zero h8) (int.nat_abs_dvd_iff_dvd.mpr hwdvd)
-    ... ≤ y.nat_abs : by { rw [hz, int.nat_abs_mul], exact nat.le_mul_of_pos_left (pow_pos hgpos 2) }
+    ... ≤ (↑g ^ 2 * z).nat_abs : by { rw [int.nat_abs_mul], exact nat.le_mul_of_pos_left (pow_pos hgpos 2) }
     ... < x.nat_abs : h3 },
   { rw ←h6,
     exact dvd_mul_of_dvd_right hwdvd x },

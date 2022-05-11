@@ -376,6 +376,11 @@ lemma no_conj
   ¬(p ∈ s ∧ p.conj ∈ s) :=
 begin
   contrapose! hp,
+/-
+  rw zsqrtd.is_unit_iff_norm_is_unit,
+  suffices : p.norm ∣ s.prod.re ∧ p.norm ∣ s.prod.im,
+  { apply is_coprime.is_unit_of_dvd' hcoprime this.1 this.2 },
+-/
   obtain ⟨h1, h2⟩ := hp,
   by_cases him : p.im = 0,
   { obtain ⟨t, rfl⟩ := multiset.exists_cons_of_mem h1,
@@ -397,12 +402,14 @@ begin
       exact h2.resolve_left this },
     obtain ⟨t2, rfl⟩ := multiset.exists_cons_of_mem this,
     rw [multiset.prod_cons, multiset.prod_cons, ←mul_assoc, ←zsqrtd.norm_eq_mul_conj] at hcoprime,
-    rw zsqrtd.is_unit_iff_norm_is_unit,
-    apply is_coprime.is_unit_of_dvd' hcoprime;
-    simp only [add_zero, zsqrtd.coe_int_re, zero_mul, dvd_mul_right, zsqrtd.mul_re, mul_zero,
-      zsqrtd.mul_im, zsqrtd.coe_int_im] },
+  rw zsqrtd.is_unit_iff_norm_is_unit,
+  suffices : p.norm ∣(↑(p.norm) * t2.prod).re ∧ p.norm ∣ (↑(p.norm) * t2.prod).im,
+  { apply is_coprime.is_unit_of_dvd' hcoprime this.1 this.2 },
+  rw ←zsqrtd.coe_int_dvd_iff,
+  exact dvd_mul_right p.norm t2.prod },
 end
 
+-- "conjugate"?
 def associated' (x y : ℤ√-3) : Prop := associated x y ∨  associated x y.conj
 
 @[refl] theorem associated'.refl (x : ℤ√-3) : associated' x x := or.inl (by refl)
