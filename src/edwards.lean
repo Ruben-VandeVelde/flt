@@ -591,9 +591,21 @@ begin
       norm_num },
     rw [←even_factor_exp.pow r 3, hcube],
     exact factors_2_even' hcoprime },
-  rw [←multiset.count_nsmul x.norm, ←factors_odd_prime_or_four.pow _ _ this, hcube, multiset.count,
-    multiset.countp_eq_card_filter, multiset.filter_congr,
-    ←multiset.countp_map zsqrtd.norm f (λ y, x.norm = y), multiset.count],
+  calc multiset.count x f
+      = multiset.card (multiset.filter (eq x) f) :
+        by rw [multiset.count, multiset.countp_eq_card_filter]
+  ... = multiset.card (multiset.filter (λ (a : ℤ√-3), eq x.norm a.norm) f) :
+        congr_arg _ (multiset.filter_congr (λ A HA, _))
+  ... = multiset.countp (eq x.norm) (multiset.map zsqrtd.norm f) :
+        (multiset.countp_map zsqrtd.norm f (eq x.norm)).symm
+  ... = multiset.countp (eq x.norm) (factors_odd_prime_or_four a.norm) : _
+  ... = multiset.count x.norm (factors_odd_prime_or_four a.norm) : by rw multiset.count
+  ... = multiset.count x.norm (factors_odd_prime_or_four (r ^ 3)) : by rw hcube
+  ... = multiset.count x.norm (3 • _) : congr_arg _ $ factors_odd_prime_or_four.pow _ _ this
+  ... = 3 * _ : multiset.count_nsmul x.norm _ _,
+
+  show multiset.countp (eq x.norm) (multiset.map zsqrtd.norm f) =
+    multiset.countp (eq x.norm) (factors_odd_prime_or_four a.norm),
   congr',
   { apply factors_odd_prime_or_four.unique hcoprime,
     { intros x hx,
@@ -606,7 +618,7 @@ begin
     { rw [prod_map_norm],
       cases h1; rw [h1],
       rw zsqrtd.norm_neg } },
-  intros A HA,
+
   have h2x := h2 x hx,
 
   refine ⟨congr_arg _, λ h, _⟩,
