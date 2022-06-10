@@ -371,7 +371,7 @@ theorem spts.eq_one'
   a = 1 ∨ a = -1 :=
 begin
   simp only [zsqrtd.ext, zsqrtd.one_re, zsqrtd.one_im, zsqrtd.neg_im, zsqrtd.neg_re, neg_zero,
-    ←or_and_distrib_right, ←abs_eq (@zero_le_one ℤ _), spts.eq_one h, eq_self_iff_true, and_self],
+    ←or_and_distrib_right, ←abs_eq (zero_le_one' ℤ), spts.eq_one h, eq_self_iff_true, and_self],
 end
 
 lemma spts.ne_zero_of_coprime'
