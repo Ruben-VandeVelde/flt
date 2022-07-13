@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2020 Ruben Van de Velde. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+-/
+
 import algebraic_geometry.EllipticCurve
 import data.int.basic
 import data.int.parity
