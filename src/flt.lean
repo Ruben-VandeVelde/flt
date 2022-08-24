@@ -30,14 +30,14 @@ begin
     refine mul_ne_zero (by norm_num) (pow_ne_zero 2 (mul_ne_zero (mul_ne_zero _ _) _));
     apply pow_ne_zero; assumption_mod_cast },
   let frey : EllipticCurve ℚ :=
-  { a1 := 0,
-    a2 := b ^ p - a ^p,
-    a3 := 0,
-    a4 := - (a ^ p * b ^ p),
-    a6 := 0,
-    disc_unit := units.mk0 _ disc_ne_zero,
-    disc_unit_eq := by {
-      rw [←@int.cast_inj ℚ, int.cast_pow] at H, simp [EllipticCurve.disc_aux, ←H], ring } },
+  { a₁ := 0,
+    a₂ := b ^ p - a ^p,
+    a₃ := 0,
+    a₄ := - (a ^ p * b ^ p),
+    a₆ := 0,
+    Δ := units.mk0 _ disc_ne_zero,
+    Δ_eq := by {
+      rw [←@int.cast_inj ℚ, int.cast_pow] at H, simp [EllipticCurve.Δ_aux, ←H], ring } },
   -- by wiles
   sorry,
 end
