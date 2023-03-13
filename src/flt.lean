@@ -4,11 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 
 import algebraic_geometry.elliptic_curve.weierstrass
-import data.int.basic
-import data.int.parity
-import data.nat.gcd.basic
-import data.pnat.basic
-import tactic
 import number_theory.fermat4
 import .primes
 import .odd_prime_or_four
