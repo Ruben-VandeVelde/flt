@@ -5,11 +5,11 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 import data.int.basic
 import data.int.parity
-import data.nat.gcd
+import data.nat.gcd.big_operators
 import data.pnat.basic
 import ring_theory.coprime.lemmas
 import ring_theory.int.basic
-import ring_theory.euclidean_domain
+import algebra.euclidean_domain.basic
 import ring_theory.noetherian
 import ring_theory.principal_ideal_domain
 import ring_theory.prime
@@ -45,7 +45,9 @@ begin
     { have := self_dvd_abs x,
       rw [int.add_div_of_dvd_right this, add_mul, int.div_mul_cancel this, sub_add_add_cancel, hc,
         int.mod_add_div'] },
-    { zify at ⊢ H,
+    { rw [← int.coe_nat_lt_coe_nat_iff],
+      replace H := int.coe_nat_le_coe_nat_of_le H,
+      rw [int.coe_nat_mul, int.coe_nat_bit0, algebra_map.coe_one] at H ⊢,
       have hcnonneg := int.mod_nonneg a h0',
       have := int.mod_lt a h0',
       rw [int.nat_abs_of_nonneg hcnonneg] at H,

@@ -5,9 +5,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 import data.int.basic
 import data.int.parity
-import data.nat.gcd
+import data.nat.gcd.big_operators
 import data.pnat.basic
-import algebra.euclidean_domain
 import algebra.gcd_monoid.basic
 import tactic
 import data.nat.modeq
@@ -24,12 +23,14 @@ This follows the proof by Euler as presented by H. M. Edwards in
 *Fermat's Last Theorem: A Genetic Introduction to Algebraic Number Theory*, pp. 39-54.
 -/
 
+/-- solutions to Fermat's last theorem for the exponent `3`. -/
 def flt_solution
   (n : ℕ)
   (a b c : ℤ) :=
   a ≠ 0 ∧ b ≠ 0 ∧ c ≠ 0 ∧
   a ^ n + b ^ n = c ^ n
 
+/-- Coprime solutions to Fermat's last theorem for the exponent `3`. -/
 def flt_coprime
   (n : ℕ)
   (a b c : ℤ) :=
@@ -239,7 +240,7 @@ begin
   ... ≤ (a ^ 3 * b ^ 3 * c ^ 3).nat_abs : _,
   { rw [int.nat_abs_mul (2 * p)],
     apply lt_mul_of_one_lt_right (int.nat_abs_pos_of_ne_zero (mul_ne_zero two_ne_zero hp)),
-    zify,
+    rw [← int.coe_nat_lt_coe_nat_iff],
     rw int.nat_abs_of_nonneg (zsqrtd.norm_nonneg (by norm_num) P),
     exact spts.one_lt_of_im_ne_zero ⟨p, q⟩ hq },
   { apply nat.le_of_dvd,
@@ -253,7 +254,7 @@ end
 
 lemma gcd1or3
   (p q : ℤ)
-  (hp : p ≠ 0) (hq : q ≠ 0)
+  (hp : p ≠ 0)
   (hcoprime : is_coprime p q)
   (hparity : even p ↔ ¬even q) :
   int.gcd (2 * p) (p ^ 2 + 3 * q ^ 2) = 1 ∨ int.gcd (2 * p) (p ^ 2 + 3 * q ^ 2) = 3 :=
@@ -288,7 +289,7 @@ begin
       rw nat.prime_dvd_prime_iff_eq nat.prime_two hdprime,
       exact hne2.symm },
     have hp : p = d * H,
-    { rw [←mul_right_inj' (@two_ne_zero ℤ _ _), hP, hH, mul_left_comm] },
+    { rw [←mul_right_inj' (two_ne_zero' ℤ), hP, hH, mul_left_comm] },
 
     apply hcoprime.is_unit_of_dvd',
     { rw hp, exact dvd_mul_right d H },
@@ -333,7 +334,7 @@ begin
   apply is_coprime.is_unit_of_dvd' hcoprime hdvdp,
   { rw ←int.pow_dvd_pow_iff zero_lt_two at hdvdp,
     apply prime.dvd_of_dvd_pow int.prime_three,
-    rw [←mul_dvd_mul_iff_left (@three_ne_zero ℤ _ _), ←pow_two, dvd_add_iff_right hdvdp],
+    rw [←mul_dvd_mul_iff_left (three_ne_zero' ℤ), ←pow_two, dvd_add_iff_right hdvdp],
     refine dvd_trans _ (int.gcd_dvd_right (2 * p) (p ^ 2 + 3 * q ^ 2)),
     rw [←hg', hg, int.coe_nat_mul],
     apply dvd_mul_right }
@@ -341,7 +342,7 @@ end
 
 lemma obscure'
   (p q : ℤ)
-  (hp : p ≠ 0) (hq : q ≠ 0)
+  (hp : p ≠ 0)
   (hcoprime : is_coprime p q)
   (hparity : even p ↔ ¬even q)
   (hcube : ∃ r, p ^ 2 + 3 * q ^ 2 = r ^ 3) :
@@ -467,7 +468,6 @@ end
 
 lemma descent_gcd1 (a b c p q : ℤ)
   (hp : p ≠ 0)
-  (hq : q ≠ 0)
   (hcoprime : is_coprime p q)
   (hodd : even p ↔ ¬even q)
   (hcube : 2 * p * (p ^ 2 + 3 * q ^ 2) = a ^ 3 ∨
@@ -490,7 +490,7 @@ begin
     exact hcube },
   obtain ⟨hcubeleft, hcuberight⟩ := int.eq_pow_of_mul_eq_pow_bit1 hgcd hr,
   -- todo shadowing hq
-  obtain ⟨u, v, hpfactor, hq, huvcoprime, huvodd⟩ := obscure' p q hp hq hcoprime hodd hcuberight,
+  obtain ⟨u, v, hpfactor, hq, huvcoprime, huvodd⟩ := obscure' p q hp hcoprime hodd hcuberight,
   have u_ne_zero : u ≠ 0,
   { rintro rfl,
     rw [zero_mul, zero_mul] at hpfactor,
@@ -696,7 +696,7 @@ begin
 
   -- 5.
   -- todo shadows hq hq
-  obtain ⟨u, v, hq, hs, huvcoprime, huvodd⟩ := obscure' q s hq hspos hcoprime'.symm hodd' hcuberight,
+  obtain ⟨u, v, hq, hs, huvcoprime, huvodd⟩ := obscure' q s hq hcoprime'.symm hodd' hcuberight,
   have hu : u ≠ 0,
   { rintro rfl,
     norm_num at hq },
@@ -770,10 +770,10 @@ begin
       simp [mul_pow, int.nat_abs_mul, int.nat_abs_pow] },
 
   -- 4.
-  cases gcd1or3 p q hp hq hcoprime hodd with hgcd hgcd,
+  cases gcd1or3 p q hp hcoprime hodd with hgcd hgcd,
   -- 5.
   { rw int.gcd_eq_one_iff_coprime at hgcd,
-    apply descent_gcd1 a b c p q hp hq hcoprime hodd hcube h hgcd },
+    apply descent_gcd1 a b c p q hp hcoprime hodd hcube h hgcd },
   { apply descent_gcd3 a b c p q hp hq hcoprime hodd hcube h hgcd },
 end
 

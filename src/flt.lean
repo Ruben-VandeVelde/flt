@@ -3,10 +3,10 @@ Copyright (c) 2020 Ruben Van de Velde. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 
-import algebraic_geometry.EllipticCurve
+import algebraic_geometry.elliptic_curve.weierstrass
 import data.int.basic
 import data.int.parity
-import data.nat.gcd
+import data.nat.gcd.basic
 import data.pnat.basic
 import tactic
 import number_theory.fermat4
@@ -29,15 +29,15 @@ begin
   { dsimp [disc],
     refine mul_ne_zero (by norm_num) (pow_ne_zero 2 (mul_ne_zero (mul_ne_zero _ _) _));
     apply pow_ne_zero; assumption_mod_cast },
-  let frey : EllipticCurve ℚ :=
+  let frey : elliptic_curve ℚ :=
   { a₁ := 0,
     a₂ := b ^ p - a ^p,
     a₃ := 0,
     a₄ := - (a ^ p * b ^ p),
     a₆ := 0,
-    Δ := units.mk0 _ disc_ne_zero,
-    Δ_eq := by {
-      rw [←@int.cast_inj ℚ, int.cast_pow] at H, simp [EllipticCurve.Δ_aux, ←H], ring } },
+    Δ' := units.mk0 _ disc_ne_zero,
+    coe_Δ' := by {
+      rw [←@int.cast_inj ℚ, int.cast_pow] at H, simp [elliptic_curve.Δ', ←H], ring } },
   -- by wiles
   sorry,
 end

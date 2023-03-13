@@ -7,6 +7,7 @@ import data.int.parity
 import ring_theory.int.basic
 import ring_theory.prime
 
+/-- Being equal to `4` or odd. -/
 def odd_prime_or_four (z : ℤ) : Prop :=
   z = 4 ∨ (prime z ∧ odd z)
 
@@ -159,7 +160,7 @@ begin
       rwa [← multiset.prod_cons, ← multiset.prod_cons, multiset.cons_erase hbg] } },
 end
 
-
+/-- The odd factors. -/
 noncomputable def odd_factors (x : ℤ) := multiset.filter odd (unique_factorization_monoid.normalized_factors x)
 
 lemma odd_factors.zero : odd_factors 0 = 0 := rfl
@@ -183,6 +184,7 @@ begin
   rw [unique_factorization_monoid.normalized_factors_pow, multiset.filter_nsmul],
 end
 
+/-- The exponent of `2` in the factorization. -/
 noncomputable def even_factor_exp (x : ℤ) := multiset.count 2 (unique_factorization_monoid.normalized_factors x)
 
 lemma even_factor_exp.def (x : ℤ) : even_factor_exp x = multiset.count 2 (unique_factorization_monoid.normalized_factors x) := rfl
@@ -208,20 +210,22 @@ begin
     intros a ha,
     have hprime : prime a := unique_factorization_monoid.prime_of_normalized_factor a ha,
     have := unique_factorization_monoid.normalize_normalized_factor a ha,
-    rw ←int.coe_nat_abs_eq_normalize at this,
-    rw ←this at hprime,
-    rw ←this,
-    norm_cast,
-    rw [eq_comm, nat.odd_iff],
-    apply nat.prime.eq_two_or_odd,
-    exact nat.prime_iff_prime_int.mpr hprime },
+    rw [← int.abs_eq_normalize, ← int.coe_nat_abs] at this,
+    rw [← this],
+    rw [int.prime_iff_nat_abs_prime] at hprime,
+    rcases nat.prime.eq_two_or_odd' hprime with (h2 | hodd),
+    { simp [h2] },
+    { right,
+      rw [this],
+      exact int.nat_abs_odd.1 hodd } },
   { rw multiset.filter_eq_nil,
     rintros a ha ⟨rfl, hodd⟩,
     norm_num at hodd },
 end
 
 lemma even_and_odd_factors' (x : ℤ) :
-  unique_factorization_monoid.normalized_factors x = multiset.repeat 2 (even_factor_exp x) + odd_factors x :=
+  unique_factorization_monoid.normalized_factors x =
+  multiset.replicate (even_factor_exp x) 2 + odd_factors x :=
 begin
   convert even_and_odd_factors'' x,
   simp [even_factor_exp, ←multiset.filter_eq],
@@ -247,14 +251,15 @@ begin
 end
 
 -- most useful with  (hz : even (even_factor_exp z))
+/-- Odd factors or `4`. -/
 noncomputable def factors_odd_prime_or_four (z : ℤ) : multiset ℤ :=
-multiset.repeat 4 (even_factor_exp z / 2) + odd_factors z
+  multiset.replicate (even_factor_exp z / 2) 4 + odd_factors z
 
 lemma factors_odd_prime_or_four.nonneg {z a : ℤ} (ha : a ∈ factors_odd_prime_or_four z) : 0 ≤ a :=
 begin
   simp only [factors_odd_prime_or_four, multiset.mem_add] at ha,
   cases ha,
-  { rw multiset.eq_of_mem_repeat ha, norm_num },
+  { rw multiset.eq_of_mem_replicate ha, norm_num },
   { exact odd_factors.nonneg ha }
 end
 
@@ -269,7 +274,8 @@ begin
     apply associated.trans _ this,
     obtain ⟨m, hm⟩ := even_iff_two_dvd.mp heven,
     rw [even_and_odd_factors' _, multiset.prod_add, factors_odd_prime_or_four, multiset.prod_add,
-      hm, nat.mul_div_right _ zero_lt_two, multiset.prod_repeat, multiset.prod_repeat, pow_mul],
+      hm, nat.mul_div_right _ zero_lt_two, multiset.prod_replicate, multiset.prod_replicate,
+      pow_mul],
     exact associated.refl _ },
   { apply multiset.prod_nonneg,
     apply factors_odd_prime_or_four.nonneg },
@@ -289,7 +295,7 @@ begin
   { intros x hx,
     simp only [factors_odd_prime_or_four, multiset.mem_add] at hx,
     apply or.imp _ _ hx,
-    { exact multiset.eq_of_mem_repeat },
+    { exact multiset.eq_of_mem_replicate },
     { simp only [odd_factors, multiset.mem_filter],
       exact and.imp_left (unique_factorization_monoid.prime_of_normalized_factor _) } },
   { rwa factors_odd_prime_or_four.prod' ha heven, }
@@ -315,6 +321,6 @@ lemma factors_odd_prime_or_four.pow
   (z : ℤ) (n : ℕ) (hz : even (even_factor_exp z)) :
   factors_odd_prime_or_four (z ^ n) = n • factors_odd_prime_or_four z :=
 begin
-  simp only [factors_odd_prime_or_four, nsmul_add, multiset.nsmul_repeat, even_factor_exp.pow,
+  simp only [factors_odd_prime_or_four, nsmul_add, multiset.nsmul_replicate, even_factor_exp.pow,
     nat.mul_div_assoc _ (even_iff_two_dvd.mp hz), odd_factors.pow],
 end

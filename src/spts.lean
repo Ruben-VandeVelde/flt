@@ -5,14 +5,15 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 import data.int.basic
 import data.int.parity
-import data.nat.gcd
+import data.nat.gcd.big_operators
 import data.pnat.basic
-import algebra.euclidean_domain
+import algebra.euclidean_domain.basic
 import algebra.gcd_monoid.basic
 import tactic
 import data.nat.modeq
 import ring_theory.int.basic
 import number_theory.zsqrtd.basic
+import data.int.order.units
 import .primes
 
 lemma zsqrtd.exists {d : ℤ} (a : ℤ√d) (him : a.im ≠ 0) :
@@ -164,7 +165,7 @@ begin
     { rw [int.nat_abs_mul],
       apply lt_mul_of_one_lt_left (int.nat_abs_pos_of_ne_zero hg'pos),
       norm_num },
-    { rw [←mul_right_inj' (@four_ne_zero ℤ _ _), ←hc, ←hfactor, mul_left_comm] },
+    { rw [←mul_right_inj' (four_ne_zero' ℤ), ←hc, ←hfactor, mul_left_comm] },
     { intros f' hf'dvd hf'odd,
       refine hnotform f' _ hf'odd,
       exact hf'dvd.mul_left _ } },
@@ -254,11 +255,11 @@ begin
     refine ⟨y, hy, _⟩,
     have h0'' : 0 < x.nat_abs,
     { zify,
-      rw ←int.abs_eq_nat_abs,
       exact zero_lt_one.trans h },
     rw [←mul_lt_mul_left h0'', ←pow_two, ←int.nat_abs_mul, ←hy],
     zify,
-    rwa [int.nat_abs_pow_two x, int.nat_abs_of_nonneg (zsqrtd.norm_nonneg (by norm_num) c)] },
+    rwa [← int.coe_nat_abs x, int.nat_abs_pow_two x, ← int.coe_nat_abs,
+      int.nat_abs_of_nonneg (zsqrtd.norm_nonneg (by norm_num) c)] },
 end
 
 -- Edwards p50 step (5')
