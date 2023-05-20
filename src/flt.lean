@@ -8,31 +8,42 @@ import number_theory.fermat4
 import .primes
 import .odd_prime_or_four
 import .euler
+import mod_forms.modularity_conjecture
 
 lemma flt_four
   {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) :
   a ^ 4 + b ^ 4 ≠ c ^ 4 :=
 not_fermat_4 ha hb
 
-lemma flt_primes
-  {p : ℕ} {a b c : ℤ} (h : 5 ≤ p) (hp : p.prime) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) :
-  a ^ p + b ^ p ≠ c ^ p :=
-begin
-  intro H,
+def frey (p : ℕ) (a b : ℤ) (disc_ne_zero : (16 * (a ^ p * b ^ p * (a ^ p + b ^ p)) ^ 2 : ℚ) ≠ 0) :
+  elliptic_curve ℚ :=
+{ a₁ := 0,
+  a₂ := b ^ p - a ^p,
+  a₃ := 0,
+  a₄ := - (a ^ p * b ^ p),
+  a₆ := 0,
+  Δ' := units.mk0 _ disc_ne_zero,
+  coe_Δ' := by { simp [elliptic_curve.Δ'], ring } }
+
+def frey.mk (p : ℕ) {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (H : a ^ p + b ^ p = c ^ p) :
+  elliptic_curve ℚ :=
+frey p a b begin
   let disc : ℚ := 16 * (a ^ p * b ^ p * c ^ p) ^ 2,
   have disc_ne_zero : disc ≠ 0,
   { dsimp [disc],
     refine mul_ne_zero (by norm_num) (pow_ne_zero 2 (mul_ne_zero (mul_ne_zero _ _) _));
     apply pow_ne_zero; assumption_mod_cast },
-  let frey : elliptic_curve ℚ :=
-  { a₁ := 0,
-    a₂ := b ^ p - a ^p,
-    a₃ := 0,
-    a₄ := - (a ^ p * b ^ p),
-    a₆ := 0,
-    Δ' := units.mk0 _ disc_ne_zero,
-    coe_Δ' := by {
-      rw [←@int.cast_inj ℚ, int.cast_pow] at H, simp [elliptic_curve.Δ', ←H], ring } },
+  rw [←@int.cast_inj ℚ, int.cast_add, int.cast_pow, int.cast_pow, int.cast_pow] at H,
+  rwa [H],
+end
+
+lemma flt_primes
+  {p : ℕ} {a b c : ℤ} (h : 5 ≤ p) (hp : p.prime) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) :
+  a ^ p + b ^ p ≠ c ^ p :=
+begin
+  intro H,
+  let frey : elliptic_curve ℚ := frey.mk p ha hb hc H,
+  obtain ⟨n, f, hf, h'⟩ := modularity_conjecture frey,
   -- by wiles
   sorry,
 end
